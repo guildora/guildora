@@ -9,15 +9,19 @@ Work correctly within the Nitro API layer and its current auth, validation, and 
 - adding or updating routes under `apps/hub/server/api`
 - changing request or response contracts
 - introducing new server-side workflow logic
+- documenting the landing OAuth redirect shim in `apps/web/server/api`
 
 ## Relevant Project Areas
 
 - `apps/hub/server/api`
 - `apps/hub/server/utils`
+- `apps/web/server/api`
 - `packages/shared`
 
 ## Rules And Constraints
 
+- operational APIs belong in hub, not landing
+- the web-side `/api/auth/discord` route is a redirect shim only
 - method belongs in the filename suffix
 - validate request bodies with Zod or the shared parsing helpers
 - use `requireSession`, `requireAdminSession`, `requireModeratorSession`, or `requireRole`

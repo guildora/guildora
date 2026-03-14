@@ -1,6 +1,6 @@
 # Permissions Matrix
 
-This matrix is derived from current route middleware and Nitro auth utilities in `apps/hub`.
+This matrix is derived from current route middleware and Nitro auth utilities in `apps/hub`, plus the compatibility auth shim in `apps/web`.
 
 ## Role Vocabulary
 
@@ -18,7 +18,7 @@ This matrix is derived from current route middleware and Nitro auth utilities in
 | --- | --- | --- | --- |
 | web | `/` | none | public |
 | hub | `/` | `auth` + redirect | session |
-| hub | `/login` | none | public |
+| hub | `/login` | none; `auth` layout | public |
 | hub | `/dashboard` | `auth` | session |
 | hub | `/members` | `auth` | session |
 | hub | `/members/:id` | `auth` | session |
@@ -42,9 +42,9 @@ This matrix is derived from current route middleware and Nitro auth utilities in
 | hub | `/admin/dev-role-switcher` | `admin` | admin, superadmin |
 | hub | `/admin/users` | `admin` | admin, superadmin |
 
-## Nitro Routes (Hub)
+## Nitro Routes
 
-All `/api/*` routes are served by `apps/hub/server/api`.
+### Hub Operational API
 
 | Route | Method | Access |
 | --- | --- | --- |
@@ -64,10 +64,10 @@ All `/api/*` routes are served by `apps/hub/server/api`.
 | `/api/apps/:appId/config` | PUT | admin, superadmin |
 | `/api/apps/:appId/activate` | POST | admin, superadmin |
 | `/api/apps/:appId/deactivate` | POST | admin, superadmin |
-| `/api/dev/users` | GET | staff in debug/dev flow |
-| `/api/dev/switch-user` | POST | staff in debug/dev flow |
+| `/api/dev/users` | GET | staff in debug or switched flow |
+| `/api/dev/switch-user` | POST | staff in debug or switched flow |
 | `/api/dev/restore-user` | POST | switched debug session |
-| `/api/cms/session-url` | GET | moderator/admin/superadmin; moderator access depends on `cms_access_settings` |
+| `/api/cms/session-url` | GET | moderator, admin, superadmin; moderator access depends on `cms_access_settings` |
 | `/api/mod/community-roles` | GET | moderator, admin, superadmin |
 | `/api/mod/community-roles` | POST | admin, superadmin |
 | `/api/mod/community-roles/:id` | PUT | admin, superadmin |
@@ -106,8 +106,15 @@ All `/api/*` routes are served by `apps/hub/server/api`.
 | `/api/admin/users/by-community-role/:communityRoleId` | DELETE | admin, superadmin |
 | `/api/admin/dev/reset-mirror` | POST | admin, superadmin |
 
+### Web Compatibility API
+
+| Route | Method | Access |
+| --- | --- | --- |
+| `/api/auth/discord` | GET | public redirect to hub |
+
 ## Important Nuances
 
 - `/cms` page-level middleware only checks login; actual authorization is done by `/api/cms/session-url`.
 - `requireSession` allows any logged-in role, including `temporaer`.
 - Session payload should read `permissionRoles` first and `roles` only as compatibility fallback.
+- Landing does not own real auth; its `/api/auth/discord` route is only a forwarding shim.

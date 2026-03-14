@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "2.0",
-  "description": "Summary of the application-domain schema from packages/shared/src/db/schema.ts.",
+  "version": "2.1",
+  "description": "Summary of the shared application-domain schema from packages/shared/src/db/schema.ts. The public schema is primarily used by hub and bot; CMS-owned tables live separately in payload.",
   "entities": [
     {
       "id": "users",

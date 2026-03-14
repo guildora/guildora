@@ -23,7 +23,7 @@ Work with the repository's current extension seam: stored app manifests, app nav
 - manifests are validated through the shared Zod schema
 - active apps affect navigation and bot hook registration
 - manifest-declared pages and API routes are metadata today, not automatic runtime loading
-- Marketplace submission storage exists, but local marketplace review is not a complete product flow
+- marketplace submission storage exists, but local marketplace review is not a complete product flow
 
 ## Step-By-Step Orientation
 

@@ -23,7 +23,7 @@ Handle Discord synchronization, voice tracking, and bot-bridge interactions with
 
 - the bot bridge is token-protected and internal
 - current role sync logic is split between:
-  - permission-role nickname sync
+  - permission-role and nickname sync
   - self-service allowed Discord role sync
   - admin remove-role operations
 - local snapshots must not be confused with live guild state

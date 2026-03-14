@@ -8,7 +8,8 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 
 - adding or editing pages under `apps/hub/app/pages`
 - creating internal UI components
-- touching layout, sidebar, or profile/admin/moderation pages
+- touching layout, sidebar, or profile, admin, and moderation pages
+- updating the public landing renderer in `apps/web`
 
 ## Relevant Project Areas
 
@@ -18,6 +19,9 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 - `apps/hub/app/layouts`
 - `apps/hub/app/middleware`
 - `apps/hub/app/composables`
+- `apps/web/app/pages`
+- `apps/web/app/components`
+- `apps/web/app/composables`
 
 ## Rules And Constraints
 
@@ -25,6 +29,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 - prefer `apps/hub/app/components/ui/*` over raw controls for new internal forms
 - all new user-facing text must use i18n keys in both `en` and `de`
 - page middleware is a UX aid only; real authorization still belongs on the server
+- keep landing public and separate from hub-only flows
 
 ## Step-By-Step Orientation
 
@@ -32,7 +37,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 2. Read `docs/design-system-retromorphism.md`.
 3. Read `docs/i18n-architecture.md`.
 4. Inspect the relevant existing page and its sibling pages.
-5. Reuse existing composables and internal layout behavior where possible.
+5. Reuse existing composables and layout behavior where possible.
 
 ## Docs References
 
@@ -46,4 +51,4 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 
 - adding hard-coded UI strings
 - creating new internal button styles outside the shared visual system
-- documenting or linking to a non-existent `/docs` page
+- pulling internal workflows into the public landing app

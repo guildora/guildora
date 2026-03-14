@@ -1,10 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "2.1",
-  "description": "Action registry for the current Nitro API surface served by hub. Source of truth remains apps/hub/server/api plus docs/api-contracts.md.",
+  "version": "2.2",
+  "description": "Action registry for the current Nuxt/Nitro surface. Hub owns the operational API; web only provides a compatibility redirect for /api/auth/discord.",
   "actions": [
     { "id": "auth-discord", "name": "Discord OAuth", "method": "GET", "path": "/api/auth/discord", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#auth" },
     { "id": "auth-logout", "name": "Logout", "method": "POST", "path": "/api/auth/logout", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#auth" },
+    { "id": "theme-public", "name": "Get public theme", "method": "GET", "path": "/api/theme", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#frontend-support-and-theme" },
+    { "id": "internal-locale-context", "name": "Get locale context", "method": "GET", "path": "/api/internal/locale-context", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#frontend-support-and-theme" },
+    { "id": "internal-branding", "name": "Get internal branding", "method": "GET", "path": "/api/internal/branding", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#frontend-support-and-theme" },
 
     { "id": "profile-get", "name": "Get profile", "method": "GET", "path": "/api/profile", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
     { "id": "profile-update", "name": "Update own profile", "method": "PUT", "path": "/api/profile", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },

@@ -1,9 +1,9 @@
 # API Contracts
 
-This document summarizes the current Nitro API surface under `apps/hub/server/api`. The HTTP method is encoded in the filename suffix.
+This document summarizes the current HTTP surface owned by the Nuxt apps.
 
-All `/api/*` routes are owned by `apps/hub`.
-`apps/web` (landing) does not host Nitro API endpoints for internal workflows.
+Operational application APIs live under `apps/hub/server/api`.
+`apps/web` only exposes one compatibility Nitro route for OAuth redirect recovery.
 
 Auth shorthand used below:
 
@@ -15,12 +15,25 @@ Auth shorthand used below:
 
 See also [`permissions-matrix.md`](./permissions-matrix.md).
 
+## App Ownership Summary
+
+- `apps/hub` owns the real Discord OAuth callback, logout, internal resources, member APIs, moderator APIs, admin APIs, and CMS SSO bootstrap.
+- `apps/web` owns one compatibility route at `/api/auth/discord` that redirects the request to hub.
+
 ## Auth
+
+### Hub
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | GET | `/api/auth/discord` | public | Discord OAuth start/callback and session creation |
 | POST | `/api/auth/logout` | public | clear the current session |
+
+### Web Compatibility Shim
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/auth/discord` | public | forward misrouted OAuth requests to hub with original query params preserved |
 
 ## Frontend Support and Theme
 
@@ -121,5 +134,6 @@ These routes are intended for development or explicit debug modes.
 
 ## Notes on Current Product Boundaries
 
-- Marketplace pages in the hub app are currently embeds or redirects, not a local feature-complete marketplace product.
-- The schema still contains `app_marketplace_submissions`, and app-submission checks still exist in utilities, but there is no active local submissions API in this app.
+- Marketplace pages in the hub app are currently an iframe shell or redirects, not a local feature-complete marketplace product.
+- The schema still contains `app_marketplace_submissions`, and app-submission checks still exist in utilities, but there is no active local submissions API in hub.
+- Landing is public and intentionally thin; if OAuth requests hit landing by mistake, the web shim forwards them to hub instead of handling auth locally.

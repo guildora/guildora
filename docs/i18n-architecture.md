@@ -30,8 +30,9 @@ Relevant utilities:
 
 - Nuxt i18n strategy: `prefix_except_default`
 - English URLs unprefixed, German prefixed with `/de`
-- Hub applies locale middleware via `apps/hub/app/middleware/locale.global.ts`
-- Landing locale handling is independent in `apps/web`
+- hub applies locale middleware via `apps/hub/app/middleware/locale.global.ts`
+- landing locale handling is independent in `apps/web`
+- landing fetches CMS content with the current locale and `fallback-locale=en`
 
 ## UI Update Rule
 
@@ -74,4 +75,4 @@ Current behavior:
 Current automated checks cover:
 
 - locale-resolution utilities
-- DE/EN locale key parity
+- DE and EN locale key parity

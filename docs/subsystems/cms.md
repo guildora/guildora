@@ -16,6 +16,7 @@
 - DB schema: `payload`
 - locales: `en`, `de` (default `en`, fallback enabled)
 - admin user collection: `users`
+- internal SSO endpoint: `/api/sso`
 
 ## Collections
 
@@ -26,12 +27,12 @@
 - status: `draft` or `published`
 - block-based `layout`
 - public read access
-- write access for CMS moderators/admins
+- write access for CMS moderators and admins
 
 ### `media`
 
 - public read access
-- authenticated create/update/delete
+- authenticated create, update, and delete
 - generated `thumbnail` and `card` sizes
 - localized `alt` field
 
@@ -50,7 +51,7 @@
 - localized footer text
 - localized social-link labels
 - public read access
-- write access for CMS moderators/admins
+- write access for CMS moderators and admins
 
 ## Block Library
 
@@ -73,7 +74,7 @@ Hub creates short-lived signed tokens and opens CMS `/api/sso`.
 CMS then:
 
 - verifies token
-- upserts CMS user tied to internal user id
+- upserts CMS user tied to internal user ID
 - assigns CMS role (`moderator` or `admin`)
 - logs user into Payload and redirects to `/admin`
 
@@ -82,3 +83,4 @@ CMS then:
 - CMS does not own main community tables in `public`
 - CMS access rules are separate from hub permission-role model
 - landing content is fetched by `apps/web` via CMS HTTP API
+- hub iframe embedding does not make CMS part of the hub runtime itself

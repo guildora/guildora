@@ -1,5 +1,5 @@
 {
-  "version": "2.1",
+  "version": "2.2",
   "resources": [
     { "id": "theme-public", "method": "GET", "path": "/api/theme", "description": "Public theme colors for the internal app", "requiredRoles": [], "docsRef": "../../docs/api-contracts.md#frontend-support-and-theme" },
     { "id": "locale-context", "method": "GET", "path": "/api/internal/locale-context", "description": "Effective locale and session presence context", "requiredRoles": [], "docsRef": "../../docs/i18n-architecture.md" },

@@ -7,7 +7,9 @@ This directory is the AI-oriented working layer for the repository.
 - point AI agents to the canonical project documentation in `docs/`
 - encode project-specific working rules and extension patterns
 - keep lightweight machine-readable manifests for routes, entities, actions, and readable resources
-- reflect the split ownership model: `web` (landing) and `hub` (internal + API)
+- reflect the split ownership model:
+  - `web` for public landing and OAuth redirect recovery
+  - `hub` for internal app, auth, and operational APIs
 
 ## Structure
 
@@ -27,7 +29,7 @@ This directory is the AI-oriented working layer for the repository.
 
 ## Maintenance Rule
 
-When routes, permissions, schema fields, or core workflows change, update:
+When routes, permissions, schema fields, core workflows, or app ownership change, update:
 
 - the relevant file in `docs/`
 - the corresponding skill in `skills/`

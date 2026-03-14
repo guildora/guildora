@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Understand how the repository is split across web landing, hub, CMS, bot, and shared package before making cross-cutting changes.
+Understand how the repository is split across public landing, internal hub, CMS, bot, and shared package before making cross-cutting changes.
 
 ## When To Use
 
@@ -20,7 +20,8 @@ Understand how the repository is split across web landing, hub, CMS, bot, and sh
 
 ## Rules And Constraints
 
-- treat the hub app as the operational center for members, moderation, and admin logic
+- treat the hub app as the operational center for members, moderation, admin logic, and the real auth flow
+- treat the web app as public landing plus a compatibility OAuth redirect shim
 - treat the bot as the source of truth for live Discord guild state
 - treat the CMS as the source of truth for public landing-page content
 - do not assume the CMS and app-domain tables share the same schema namespace
@@ -45,6 +46,6 @@ Understand how the repository is split across web landing, hub, CMS, bot, and sh
 
 ## Common Mistakes To Avoid
 
-- treating the CMS as part of the internal member app
-- assuming Marketplace pages are fully local features
+- treating landing as if it owned internal workflows
+- assuming Marketplace pages are fully local product features
 - changing shared domain behavior in one app without checking `packages/shared`

@@ -8,8 +8,8 @@ Apply the repository's real access model correctly across sessions, page middlew
 
 - editing login flows
 - adding or changing access checks
-- working on moderator/admin functionality
-- touching session or role-dependent UI
+- working on moderator or admin functionality
+- touching session- or role-dependent UI
 
 ## Relevant Project Areas
 
@@ -17,6 +17,7 @@ Apply the repository's real access model correctly across sessions, page middlew
 - `apps/hub/app/middleware/*`
 - `apps/hub/server/api/*`
 - `apps/hub/server/utils/cms-access.ts`
+- `apps/web/server/api/auth/discord.get.ts`
 
 ## Rules And Constraints
 
@@ -25,6 +26,7 @@ Apply the repository's real access model correctly across sessions, page middlew
 - `requireSession` allows any logged-in role, including `temporaer`
 - `/cms` page access is finalized by the API, not just page middleware
 - CMS roles are separate from app-domain permission roles
+- landing does not own real auth; it can only forward to hub
 
 ## Step-By-Step Orientation
 

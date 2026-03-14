@@ -14,19 +14,23 @@ Start from repository root `.env.example`.
 
 Key groups:
 
-- hosts/urls:
+- hosts and URLs:
   - `APP_HOST` + `NUXT_PUBLIC_APP_URL` for landing (`web`)
   - `HUB_HOST` + `NUXT_PUBLIC_HUB_URL` for internal app (`hub`)
-  - `CMS_HOST` + `NUXT_PUBLIC_CMS_URL` + `PAYLOAD_PUBLIC_SERVER_URL` for CMS
+  - `CMS_HOST` + `NUXT_PUBLIC_CMS_URL` + `PAYLOAD_PUBLIC_SERVER_URL` for CMS public reachability
+  - `PAYLOAD_INTERNAL_URL` for hub-to-CMS server-side SSO handoff
+  - `NUXT_PUBLIC_MARKETPLACE_EMBED_URL` for the hub marketplace iframe target
 - database: `DATABASE_URL`, optional `DATABASE_SSL`
-- hub auth: `NUXT_SESSION_PASSWORD`, Discord OAuth vars, `SUPERADMIN_DISCORD_ID`
+- hub auth: `NUXT_SESSION_PASSWORD`, Discord OAuth vars, `SUPERADMIN_DISCORD_ID`, optional `NUXT_AUTH_DEV_BYPASS`
 - bot bridge: `BOT_INTERNAL_URL`, `BOT_INTERNAL_TOKEN`, `BOT_INTERNAL_PORT`
 - CMS: `PAYLOAD_SECRET`, `CMS_SSO_SECRET`
 - bot runtime: `DISCORD_BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID`, optional `AFK_VOICE_CHANNEL_ID`
+- optional UI runtime toggles: `NUXT_PUBLIC_DEFAULT_THEME`, `NUXT_PUBLIC_ENABLE_PERFORMANCE_DEBUG`
 
 Important auth rule:
 
-- `NUXT_OAUTH_DISCORD_REDIRECT_URI` must target hub, e.g. `https://hub.example.com/api/auth/discord`.
+- `NUXT_OAUTH_DISCORD_REDIRECT_URI` must target hub, for example `https://hub.example.com/api/auth/discord`.
+- If it is accidentally pointed at landing, landing can only forward the request to hub; it does not complete OAuth itself.
 
 ## Local Development
 
@@ -63,6 +67,16 @@ Default local ports:
 - CMS dev server: `3002`
 - bot internal sync server: configured by `BOT_INTERNAL_PORT`, default `3050`
 
+### Useful focused runs
+
+```bash
+pnpm --filter @newguildplus/web dev
+pnpm --filter @newguildplus/hub dev
+pnpm --filter @newguildplus/hub test
+pnpm --filter @newguildplus/cms dev
+pnpm --filter @newguildplus/bot dev
+```
+
 ### Deploy slash commands when needed
 
 ```bash
@@ -93,20 +107,23 @@ Services:
 
 Operational notes:
 
-- web and hub both depend on CMS availability for content/SSO flows
+- web depends on CMS for landing content and on hub for login handoff
+- hub depends on CMS for embedded SSO and on bot for Discord sync operations
 - CMS stores uploads in `cms_media` volume
-- bot runs on internal network and exposes sync server only to trusted callers
+- bot runs on the internal network and exposes sync server only to trusted callers
 - compose assumes an external `caddy` network for reverse proxying
 
 ## Deployment Considerations
 
-- Run migrations before or during deploy in a controlled step
-- Seed only for initial setup or explicit role reconciliation
-- Keep `BOT_INTERNAL_TOKEN`, `CMS_SSO_SECRET`, `PAYLOAD_SECRET`, and `NUXT_SESSION_PASSWORD` strong and private
-- Ensure bot has privileged intents for members and voice states
+- run migrations before or during deploy in a controlled step
+- seed only for initial setup or explicit role reconciliation
+- keep `BOT_INTERNAL_TOKEN`, `CMS_SSO_SECRET`, `PAYLOAD_SECRET`, and `NUXT_SESSION_PASSWORD` strong and private
+- ensure bot has privileged intents for members and voice states
+- verify `PAYLOAD_INTERNAL_URL` from hub resolves to the CMS service reachable from the server environment
 
 ## Known Operational Caveats
 
-- Landing rendering depends on CMS public URL reachability from `web`
-- CMS SSO depends on both `CMS_SSO_SECRET` and valid CMS base URL in `hub`
+- landing rendering depends on CMS public URL reachability from `web`
+- CMS SSO depends on both `CMS_SSO_SECRET` and a valid CMS base URL in hub runtime config
 - Discord sync endpoints depend on bot internal server availability and authorization
+- landing's auth shim is a fallback only; production OAuth should still point directly to hub

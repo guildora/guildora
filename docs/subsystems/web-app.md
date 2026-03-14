@@ -10,6 +10,7 @@
 - admin workflows
 - Nitro APIs under `/api/*`
 - embedded CMS session bootstrap (`/cms`)
+- marketplace iframe hosting for configured external marketplace URLs
 
 ## Important Directories
 
@@ -25,18 +26,22 @@
 ## Runtime Patterns
 
 - sessions via `nuxt-auth-utils`
+- login page uses the `auth` layout
+- authenticated pages use the default layout as the internal shell
 - middleware handles UX route gating
-- server routes are the authorization boundary
+- server routes are the real authorization boundary
 - internal navigation loads from `/api/apps/navigation`
 - branding loads from `/api/internal/branding`
+- locale routing is enforced by `locale.global` using cookie plus DB context
 
 ## Business Rules
 
 - profile display names are stored centrally on `users`
 - language changes persist before UI locale switch
-- self-assignable Discord roles are limited to admin allowlist
+- self-assignable Discord roles are limited to the admin allowlist
 - moderator access to `/cms` depends on `cms_access_settings`
-- some admin/marketplace pages are intentional redirects
+- some admin and marketplace pages are intentional redirects
+- `/marketplace` renders an iframe only when `NUXT_PUBLIC_MARKETPLACE_EMBED_URL` is configured
 
 ## Note
 

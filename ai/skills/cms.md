@@ -20,13 +20,15 @@ Work correctly with the Payload CMS content model, access rules, and its integra
 - `apps/cms/src/endpoints/cms-sso.ts`
 - `apps/web/app/components/landing/*`
 - `apps/web/app/composables/usePayload.ts`
+- `apps/hub/app/pages/cms/index.vue`
 
 ## Rules And Constraints
 
 - CMS tables live in the `payload` schema
 - public landing content is fetched over HTTP from the CMS, not read directly from the DB by the landing app
 - CMS roles are local to Payload
-- landing layout changes should map cleanly to existing block rendering behavior in the landing app
+- landing layout changes should map cleanly to the existing block renderer and `landing` slug fetch path
+- hub embeds CMS via signed SSO; it does not become the CMS runtime owner
 
 ## Step-By-Step Orientation
 
