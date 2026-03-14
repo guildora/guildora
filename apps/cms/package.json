@@ -1,0 +1,30 @@
+{
+  "name": "@newguildplus/cms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "payload generate:importmap && next build",
+    "start": "next start -p 3002",
+    "payload": "payload",
+    "generate:importmap": "payload generate:importmap"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "@payloadcms/db-postgres": "3.79.0",
+    "@payloadcms/next": "3.79.0",
+    "@payloadcms/richtext-lexical": "3.79.0",
+    "next": "15.4.11",
+    "payload": "3.79.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.8.2"
+  }
+}

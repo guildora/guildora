@@ -1,0 +1,25 @@
+{
+  "name": "newguildplus",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.2",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "predev": "node scripts/check-ports.js",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "turbo run format",
+    "db:generate": "pnpm --filter @newguildplus/shared db:generate",
+    "db:migrate": "pnpm --filter @newguildplus/shared db:migrate",
+    "db:seed": "pnpm --filter @newguildplus/shared db:seed",
+    "bot:deploy-commands": "pnpm --filter @newguildplus/bot deploy:commands"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.2"
+  }
+}

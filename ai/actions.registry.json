@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2.1",
+  "description": "Action registry for the current Nitro API surface served by hub. Source of truth remains apps/hub/server/api plus docs/api-contracts.md.",
+  "actions": [
+    { "id": "auth-discord", "name": "Discord OAuth", "method": "GET", "path": "/api/auth/discord", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#auth" },
+    { "id": "auth-logout", "name": "Logout", "method": "POST", "path": "/api/auth/logout", "requiredRoles": [], "docsRef": "../docs/api-contracts.md#auth" },
+
+    { "id": "profile-get", "name": "Get profile", "method": "GET", "path": "/api/profile", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
+    { "id": "profile-update", "name": "Update own profile", "method": "PUT", "path": "/api/profile", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
+    { "id": "profile-locale-update", "name": "Update locale preference", "method": "PUT", "path": "/api/profile/locale", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
+    { "id": "profile-discord-roles-update", "name": "Update self-service Discord roles", "method": "PUT", "path": "/api/profile/discord-roles", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/workflows/discord-role-management.md" },
+    { "id": "members-list", "name": "List members", "method": "GET", "path": "/api/members", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
+    { "id": "dashboard-stats", "name": "Get dashboard stats", "method": "GET", "path": "/api/dashboard/stats", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#profile-members-and-dashboard" },
+
+    { "id": "apps-list", "name": "List installed apps", "method": "GET", "path": "/api/apps", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#apps-and-navigation" },
+    { "id": "apps-navigation", "name": "Get app navigation", "method": "GET", "path": "/api/apps/navigation", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#apps-and-navigation" },
+    { "id": "apps-config", "name": "Update app config", "method": "PUT", "path": "/api/apps/:appId/config", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "apps-activate", "name": "Activate app", "method": "POST", "path": "/api/apps/:appId/activate", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "apps-deactivate", "name": "Deactivate app", "method": "POST", "path": "/api/apps/:appId/deactivate", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+
+    { "id": "dev-users", "name": "List dev switch users", "method": "GET", "path": "/api/dev/users", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#development-role-switching" },
+    { "id": "dev-switch-user", "name": "Switch dev session user", "method": "POST", "path": "/api/dev/switch-user", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#development-role-switching" },
+    { "id": "dev-restore-user", "name": "Restore dev session user", "method": "POST", "path": "/api/dev/restore-user", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#development-role-switching" },
+
+    { "id": "cms-session-url", "name": "Create CMS SSO URL", "method": "GET", "path": "/api/cms/session-url", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/workflows/cms-sso.md" },
+
+    { "id": "mod-community-roles-list", "name": "List moderation community roles", "method": "GET", "path": "/api/mod/community-roles", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-community-roles-create", "name": "Create moderation community role", "method": "POST", "path": "/api/mod/community-roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-community-roles-update", "name": "Update moderation community role", "method": "PUT", "path": "/api/mod/community-roles/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-community-roles-delete", "name": "Delete moderation community role", "method": "DELETE", "path": "/api/mod/community-roles/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-users-list", "name": "List moderation users", "method": "GET", "path": "/api/mod/users", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-user-profile-update", "name": "Update moderated user profile", "method": "PUT", "path": "/api/mod/users/:id/profile", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-user-community-role", "name": "Update moderated user community role", "method": "PUT", "path": "/api/mod/users/:id/community-role", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-user-sync", "name": "Sync moderated user to Discord", "method": "POST", "path": "/api/mod/users/:id/sync", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#moderator-area" },
+    { "id": "mod-applications-list", "name": "List community applications", "method": "GET", "path": "/api/mod/applications", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/workflows/applications.md" },
+    { "id": "mod-application-approve", "name": "Approve community application", "method": "POST", "path": "/api/mod/applications/:id/approve", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/workflows/applications.md" },
+    { "id": "mod-application-reject", "name": "Reject community application", "method": "POST", "path": "/api/mod/applications/:id/reject", "requiredRoles": ["moderator", "admin", "superadmin"], "docsRef": "../docs/workflows/applications.md" },
+
+    { "id": "admin-theme-get", "name": "Get admin theme", "method": "GET", "path": "/api/admin/theme", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-theme-put", "name": "Update admin theme", "method": "PUT", "path": "/api/admin/theme", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-users-get", "name": "List admin users", "method": "GET", "path": "/api/admin/users", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-apps-get", "name": "List admin apps", "method": "GET", "path": "/api/admin/apps", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-apps-sideload", "name": "Sideload app manifest", "method": "POST", "path": "/api/admin/apps/sideload", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "admin-apps-status", "name": "Update admin app status", "method": "PUT", "path": "/api/admin/apps/:appId/status", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "admin-apps-delete", "name": "Delete installed app", "method": "DELETE", "path": "/api/admin/apps/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "admin-community-settings-get", "name": "Get community settings", "method": "GET", "path": "/api/admin/community-settings", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-community-settings-put", "name": "Update community settings", "method": "PUT", "path": "/api/admin/community-settings", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-cms-access-put", "name": "Update CMS access policy", "method": "PUT", "path": "/api/admin/cms-access", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/cms-sso.md" },
+    { "id": "admin-permissions-get", "name": "Get permission and community role metadata", "method": "GET", "path": "/api/admin/permissions", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/api-contracts.md#admin-theme-community-and-app-management" },
+    { "id": "admin-community-role-create", "name": "Create mapped community role", "method": "POST", "path": "/api/admin/community-roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-community-role-update", "name": "Update mapped community role", "method": "PUT", "path": "/api/admin/community-roles/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-community-role-delete", "name": "Delete mapped community role", "method": "DELETE", "path": "/api/admin/community-roles/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+
+    { "id": "admin-discord-roles-get", "name": "Get Discord role allowlist context", "method": "GET", "path": "/api/admin/discord-roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/discord-role-management.md" },
+    { "id": "admin-discord-roles-put", "name": "Update Discord role allowlist", "method": "PUT", "path": "/api/admin/discord-roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/discord-role-management.md" },
+    { "id": "admin-discord-roles-self-import", "name": "Self import Discord roles", "method": "POST", "path": "/api/admin/discord-roles/self-import", "requiredRoles": ["superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-discord-guild-roles", "name": "List guild roles from bot", "method": "GET", "path": "/api/admin/discord/roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-discord-role-members", "name": "List guild members by role", "method": "GET", "path": "/api/admin/discord/roles/:roleId/members", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-discord-member-get", "name": "Get guild member", "method": "GET", "path": "/api/admin/discord/members/:discordId", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-discord-member-remove-roles", "name": "Remove guild member roles", "method": "POST", "path": "/api/admin/discord/members/:discordId/remove-roles", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-users-import", "name": "Import users from mapped Discord roles", "method": "POST", "path": "/api/admin/users/import", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-users-delete-orphaned", "name": "Delete orphaned mirrored users", "method": "POST", "path": "/api/admin/users/delete-orphaned", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-user-delete", "name": "Delete or reconcile one user", "method": "DELETE", "path": "/api/admin/users/:id", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-user-delete-by-community-role", "name": "Delete or reconcile users by community role", "method": "DELETE", "path": "/api/admin/users/by-community-role/:communityRoleId", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" },
+    { "id": "admin-dev-reset-mirror", "name": "Reset dev mirror state", "method": "POST", "path": "/api/admin/dev/reset-mirror", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/admin-user-mirroring.md" }
+  ]
+}

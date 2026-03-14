@@ -1,0 +1,18 @@
+{
+  "app": {
+    "name": "NewGuildPlus"
+  },
+  "nav": {
+    "login": "Mit Discord anmelden"
+  },
+  "landing": {
+    "cta": "Jetzt beitreten",
+    "fallbackText": "Die Landingpage ist noch nicht veröffentlicht."
+  },
+  "landingBlocks": {
+    "unsupported": "Dieser Block-Typ wird aktuell nicht unterstützt: {type}."
+  },
+  "footer": {
+    "tagline": "Community-Plattform"
+  }
+}

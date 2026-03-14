@@ -1,0 +1,39 @@
+# Node and package managers
+node_modules/
+.pnpm-store/
+.npm/
+
+# Build outputs
+.turbo/
+.output/
+.nuxt/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+.nuxtrc
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+.cursor/
+
+# App specific
+apps/web/.nuxt/
+apps/web/.output/
+apps/cms/.next/
+apps/bot/dist/
+packages/shared/dist/
+
+# Secrets and local scripts
+.script/

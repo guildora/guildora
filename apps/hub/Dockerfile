@@ -1,0 +1,25 @@
+FROM node:22-alpine AS base
+WORKDIR /repo
+RUN corepack enable
+
+FROM base AS deps
+COPY package.json pnpm-workspace.yaml turbo.json ./
+COPY apps/hub/package.json apps/hub/package.json
+COPY packages/shared/package.json packages/shared/package.json
+RUN pnpm install --no-frozen-lockfile
+
+FROM base AS build
+COPY --from=deps /repo/node_modules ./node_modules
+COPY . .
+RUN pnpm --filter @newguildplus/hub build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NITRO_HOST=0.0.0.0
+ENV NITRO_PORT=3003
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=build /repo/apps/hub/.output ./.output
+USER app
+EXPOSE 3003
+CMD ["node", ".output/server/index.mjs"]

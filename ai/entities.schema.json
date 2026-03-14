@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2.0",
+  "description": "Summary of the application-domain schema from packages/shared/src/db/schema.ts.",
+  "entities": [
+    {
+      "id": "users",
+      "table": "users",
+      "fields": ["id", "discordId", "email", "displayName", "avatarUrl", "createdAt", "updatedAt"],
+      "primaryKey": "id",
+      "notes": ["displayName is the serialized profile name string"],
+      "relations": ["profile", "permissionRoles", "communityRole", "discordRoles", "voiceSessions", "profileChangeLogs", "createdApps", "submittedAppSubmissions", "reviewedAppSubmissions"]
+    },
+    {
+      "id": "profiles",
+      "table": "profiles",
+      "fields": ["id", "userId", "absenceStatus", "absenceMessage", "absenceUntil", "customFields", "localePreference", "updatedAt"],
+      "primaryKey": "id",
+      "enums": { "absenceStatus": ["away", "maintenance"] },
+      "notes": ["No bio field exists in the current schema", "customFields stores appearance and application metadata"],
+      "customFieldsKnown": ["applicationStatus", "applicationReviewedAt", "applicationReviewedBy", "appearancePreference", "localePreference (legacy fallback)"]
+    },
+    {
+      "id": "permission_roles",
+      "table": "permission_roles",
+      "fields": ["id", "name", "description", "level"],
+      "primaryKey": "id",
+      "names": ["temporaer", "user", "moderator", "admin", "superadmin"]
+    },
+    {
+      "id": "community_roles",
+      "table": "community_roles",
+      "fields": ["id", "name", "description", "discordRoleId", "permissionRoleId", "sortOrder", "createdAt", "updatedAt"],
+      "primaryKey": "id",
+      "notes": ["Maps one community role to one permission role", "discordRoleId is optional but unique when set"]
+    },
+    {
+      "id": "user_permission_roles",
+      "table": "user_permission_roles",
+      "fields": ["userId", "permissionRoleId", "assignedAt"],
+      "primaryKey": ["userId", "permissionRoleId"]
+    },
+    {
+      "id": "user_community_roles",
+      "table": "user_community_roles",
+      "fields": ["userId", "communityRoleId", "assignedAt"],
+      "primaryKey": "userId",
+      "notes": ["At most one community role per user"]
+    },
+    {
+      "id": "selectable_discord_roles",
+      "table": "selectable_discord_roles",
+      "fields": ["discordRoleId", "roleNameSnapshot", "createdAt", "updatedAt"],
+      "primaryKey": "discordRoleId",
+      "notes": ["Global admin-managed allowlist for self-service Discord roles"]
+    },
+    {
+      "id": "user_discord_roles",
+      "table": "user_discord_roles",
+      "fields": ["userId", "discordRoleId", "roleNameSnapshot", "syncedAt"],
+      "primaryKey": ["userId", "discordRoleId"],
+      "notes": ["Snapshot table, not the live source of truth for Discord guild state"]
+    },
+    {
+      "id": "voice_sessions",
+      "table": "voice_sessions",
+      "fields": ["id", "userId", "channelId", "startedAt", "endedAt", "durationMinutes", "createdAt"],
+      "primaryKey": "id",
+      "notes": ["One open session per user is enforced by a partial unique index"]
+    },
+    {
+      "id": "profile_change_log",
+      "table": "profile_change_log",
+      "fields": ["id", "profileId", "changeType", "previousValue", "newValue", "isGrowth", "isDeparture", "changedBy", "createdAt"],
+      "primaryKey": "id"
+    },
+    {
+      "id": "installed_apps",
+      "table": "installed_apps",
+      "fields": ["id", "appId", "name", "version", "status", "source", "verified", "repositoryUrl", "manifest", "config", "createdBy", "installedAt", "updatedAt"],
+      "primaryKey": "id",
+      "enums": { "status": ["active", "inactive", "error"], "source": ["marketplace", "sideloaded"] }
+    },
+    {
+      "id": "app_marketplace_submissions",
+      "table": "app_marketplace_submissions",
+      "fields": ["id", "appId", "name", "version", "sourceUrl", "manifest", "status", "automatedChecks", "reviewNotes", "submittedByUserId", "reviewedByUserId", "reviewedAt", "createdAt", "updatedAt"],
+      "primaryKey": "id",
+      "enums": { "status": ["pending", "approved", "rejected"] },
+      "notes": ["Retained schema for marketplace submissions; active local product flow is limited"]
+    },
+    {
+      "id": "theme_settings",
+      "table": "theme_settings",
+      "fields": ["id", "colorDominant", "colorSecondary", "colorAccent", "colorAccentContentTone", "colorInfo", "colorInfoContentTone", "colorSuccess", "colorSuccessContentTone", "colorWarning", "colorWarningContentTone", "colorError", "colorErrorContentTone", "logoDataUrl", "logoMimeType", "logoFileName", "sidebarLogoSizePx", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "notes": ["Used as a singleton-like settings table by the hub app"]
+    },
+    {
+      "id": "cms_access_settings",
+      "table": "cms_access_settings",
+      "fields": ["id", "allowModeratorAccess", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "notes": ["Used to decide whether moderators may use the embedded CMS flow"]
+    },
+    {
+      "id": "community_settings",
+      "table": "community_settings",
+      "fields": ["id", "communityName", "defaultLocale", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "notes": ["Current code treats id=1 as the singleton row"]
+    }
+  ]
+}

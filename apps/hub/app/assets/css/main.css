@@ -1,0 +1,639 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-dominant: #141115;
+  --color-surface-0: #141115;
+  --color-surface-1: #141115;
+  --color-surface-2: #201d21;
+  --color-surface-3: #2c2930;
+  --color-surface-4: #39363f;
+  --color-surface-5: #46434e;
+  --color-dominant-200: #29262a;
+  --color-dominant-300: #3d3b3f;
+  --color-dominant-400: #504f53;
+  --color-dominant-neutral: #646367;
+  --color-secondary: #ffffff;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.75);
+  --color-text-tertiary: rgba(255, 255, 255, 0.5);
+  --color-text-disabled: rgba(255, 255, 255, 0.3);
+  --color-accent: #ff206e;
+  --color-accent-light: #ff5c94;
+  --color-accent-dark: #c91a58;
+  --color-accent-muted: #5c2235;
+  --color-accent-subtle: #40232b;
+  --color-accent-border: rgba(255, 255, 255, 0.12);
+  --color-accent-border-active: rgba(255, 255, 255, 0.2);
+  --color-line: rgba(255, 255, 255, 0.18);
+  --color-accent-glow: rgba(255, 32, 110, 0.3);
+  --surface-shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.2);
+  --surface-shadow-md: 0 8px 18px rgba(0, 0, 0, 0.24);
+  --surface-shadow-lg: 0 14px 28px rgba(0, 0, 0, 0.28);
+  --surface-inset-border: inset 0 0 0 1px var(--color-line);
+  --color-btn-outline-border: rgba(255, 255, 255, 0.35);
+  --color-btn-ghost-hover: rgba(255, 255, 255, 0.08);
+  --color-info: #48beff;
+  --color-success: #0cf574;
+  --color-warning: #f18f01;
+  --color-error: #bf211e;
+  --color-base-100: var(--color-surface-1);
+  --color-base-200: var(--color-surface-2);
+  --color-base-300: var(--color-surface-3);
+  --color-base-content: var(--color-text-primary);
+  --color-primary: var(--color-accent);
+  --color-primary-content: var(--color-accent-content);
+  --color-secondary-content: var(--color-text-primary);
+  --color-accent-content: #ffffff;
+  --color-info-content: #001429;
+  --color-success-content: #001429;
+  --color-warning-content: #ffffff;
+  --color-error-content: #ffffff;
+  --color-neutral: var(--color-surface-3);
+}
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-base-100 text-base-content antialiased;
+  margin: 0;
+  font-family: "Nunito", "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Nunito", "Segoe UI", "Helvetica Neue", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+html[data-theme^="retromorphism-"] :is(
+    [class*="bg-base-"][class*="border-line"],
+    [class*="bg-surface-"][class*="border-line"],
+    [class*="bg-base-"][class*="border-base-"],
+    [class*="bg-surface-"][class*="border-base-"],
+    [class*="bg-base-"][class*="border-accent-subtle"],
+    [class*="bg-surface-"][class*="border-accent-subtle"]
+  ):not(.btn):not(button):not(input):not(select):not(textarea) {
+  border-color: transparent !important;
+}
+
+html[data-theme^="retromorphism-"] .bg-line,
+html[data-theme^="retromorphism-"] [class*="bg-base-content/15"] {
+  background-color: var(--color-line) !important;
+}
+
+.glow-accent {}
+
+.neu-raised {
+  box-shadow: var(--surface-shadow-md);
+}
+
+.neu-raised-sm {
+  box-shadow: var(--surface-shadow-sm);
+}
+
+.neu-raised-lg {
+  box-shadow: var(--surface-shadow-lg);
+}
+
+.neu-inset {
+  box-shadow: var(--surface-inset-border);
+}
+
+html[data-theme^="retromorphism-"] .card {
+  border: 0;
+  border-radius: 0;
+  background-color: var(--color-surface-2);
+  box-shadow: var(--surface-shadow-md);
+}
+
+html[data-theme^="retromorphism-"] .stat {
+  border: 0;
+  border-radius: 0;
+  background-color: var(--color-surface-2);
+}
+
+html[data-theme^="retromorphism-"] .modal-box {
+  border: 0;
+  border-radius: 0;
+  background-color: var(--color-surface-3);
+}
+
+html[data-theme^="retromorphism-"] {
+  --radius-box: 0rem;
+  --rounded-box: 0rem;
+}
+
+html[data-theme^="retromorphism-"] .btn {
+  --btn-p: 1rem;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 0 rgba(0, 20, 41, 0.85);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+html[data-theme^="retromorphism-"] .btn:hover {
+  transform: translateY(-1px);
+}
+
+html[data-theme^="retromorphism-"] .btn-sm {
+  --btn-p: 0.75rem;
+  min-height: 2.25rem;
+  padding-inline: 0.75rem;
+}
+
+html[data-theme^="retromorphism-"] .btn-xs {
+  --btn-p: 0.625rem;
+  min-height: 1.9rem;
+  padding-inline: 0.625rem;
+  font-size: 0.75rem;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle {
+  padding-inline: 0;
+  aspect-ratio: 1;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle.btn-sm {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle.btn-xs {
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
+  min-height: 1.9rem;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle > :is(svg, .iconify, .lucide) {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle.btn-sm > :is(svg, .iconify, .lucide) {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+html[data-theme^="retromorphism-"] .btn.btn-circle.btn-xs > :is(svg, .iconify, .lucide) {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+html[data-theme^="retromorphism-"] .form-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+html[data-theme^="retromorphism-"] .form-control .label-text {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.3;
+}
+
+html[data-theme^="retromorphism-"] .btn:focus-visible,
+html[data-theme^="retromorphism-"] .input:focus-visible,
+html[data-theme^="retromorphism-"] .select:focus-visible,
+html[data-theme^="retromorphism-"] .textarea:focus-visible,
+html[data-theme^="retromorphism-"] a:focus-visible {
+  outline: 2px solid var(--color-accent-border-active);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+html[data-theme^="retromorphism-"] .btn-primary {
+  border: 2px solid rgba(0, 20, 41, 0.85);
+  background-color: var(--color-accent);
+  color: var(--color-primary-content);
+}
+
+html[data-theme^="retromorphism-"] .btn-primary:hover {
+  background-color: var(--color-accent-light);
+}
+
+html[data-theme^="retromorphism-"] .btn-secondary {
+  border: 1px solid var(--color-accent-border);
+  background-color: var(--color-surface-3);
+  color: var(--color-text-primary);
+}
+
+html[data-theme^="retromorphism-"] .btn-secondary:hover {
+  background-color: var(--color-surface-4);
+}
+
+html[data-theme^="retromorphism-"] .btn-success {
+  border: 2px solid rgba(0, 20, 41, 0.45);
+  background-color: var(--color-success);
+  color: var(--color-success-content);
+}
+
+html[data-theme^="retromorphism-"] .btn-success:hover {
+  filter: brightness(1.08);
+}
+
+html[data-theme^="retromorphism-"] .btn-warning {
+  border: 2px solid rgba(0, 20, 41, 0.45);
+  background-color: var(--color-warning);
+  color: var(--color-warning-content);
+}
+
+html[data-theme^="retromorphism-"] .btn-warning:hover {
+  filter: brightness(1.08);
+}
+
+html[data-theme^="retromorphism-"] .btn-info {
+  border: 2px solid rgba(0, 20, 41, 0.45);
+  background-color: var(--color-info);
+  color: var(--color-info-content);
+}
+
+html[data-theme^="retromorphism-"] .btn-info:hover {
+  filter: brightness(1.08);
+}
+
+html[data-theme^="retromorphism-"] .btn-outline:not(.btn-primary):not(.btn-error) {
+  border: 1px solid var(--color-btn-outline-border);
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+html[data-theme^="retromorphism-"] .btn-outline:not(.btn-primary):not(.btn-error):hover {
+  background-color: var(--color-btn-ghost-hover);
+}
+
+html[data-theme^="retromorphism-"] .btn-ghost {
+  color: var(--color-text-primary);
+}
+
+html[data-theme^="retromorphism-"] .btn-ghost:hover {
+  background-color: var(--color-btn-ghost-hover);
+}
+
+html[data-theme^="retromorphism-"] .btn-error {
+  border: 2px solid rgba(0, 20, 41, 0.4);
+  background-color: var(--color-error);
+  color: var(--color-error-content);
+}
+
+html[data-theme^="retromorphism-"] .btn-error:hover {
+  filter: brightness(1.08);
+}
+
+html[data-theme^="retromorphism-"] .btn-error.btn-outline {
+  border: 1px solid var(--color-error);
+  background-color: transparent;
+  color: var(--color-error);
+}
+
+html[data-theme^="retromorphism-"] .btn-error.btn-outline:hover {
+  background-color: color-mix(in srgb, var(--color-error) 18%, transparent);
+}
+
+html[data-theme^="retromorphism-"] .btn-success.btn-outline {
+  border: 1px solid var(--color-success);
+  background-color: transparent;
+  color: var(--color-success);
+}
+
+html[data-theme^="retromorphism-"] .btn-success.btn-outline:hover {
+  background-color: color-mix(in srgb, var(--color-success) 18%, transparent);
+}
+
+html[data-theme^="retromorphism-"] .btn-warning.btn-outline {
+  border: 1px solid var(--color-warning);
+  background-color: transparent;
+  color: var(--color-warning);
+}
+
+html[data-theme^="retromorphism-"] .btn-warning.btn-outline:hover {
+  background-color: color-mix(in srgb, var(--color-warning) 18%, transparent);
+}
+
+html[data-theme^="retromorphism-"] .btn-info.btn-outline {
+  border: 1px solid var(--color-info);
+  background-color: transparent;
+  color: var(--color-info);
+}
+
+html[data-theme^="retromorphism-"] .btn-info.btn-outline:hover {
+  background-color: color-mix(in srgb, var(--color-info) 18%, transparent);
+}
+
+html[data-theme^="retromorphism-"] .btn:is(:disabled, [disabled], .btn-disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  filter: saturate(0.8);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none !important;
+}
+
+html[data-theme^="retromorphism-"] .input,
+html[data-theme^="retromorphism-"] .select,
+html[data-theme^="retromorphism-"] .textarea {
+  border: 2px solid var(--color-accent-border);
+  border-radius: 9999px;
+  background-color: var(--color-surface-1);
+  color: var(--color-text-primary);
+  min-height: 3rem;
+  padding-inline: 0.95rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+html[data-theme^="retromorphism-"] .select {
+  padding-inline-end: 2.5rem;
+}
+
+html[data-theme^="retromorphism-"] .textarea {
+  min-height: 7rem;
+  border-radius: 1rem;
+  padding-block: 0.75rem;
+  line-height: 1.4;
+}
+
+html[data-theme^="retromorphism-"] .input::placeholder,
+html[data-theme^="retromorphism-"] .textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+html[data-theme^="retromorphism-"] .input:hover,
+html[data-theme^="retromorphism-"] .select:hover,
+html[data-theme^="retromorphism-"] .textarea:hover {
+  border-color: var(--color-accent-border-active);
+  background-color: var(--color-surface-2);
+}
+
+html[data-theme^="retromorphism-"] .retro-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__control,
+html[data-theme^="retromorphism-"] .retro-checkbox {
+  display: flex;
+  align-items: center;
+  padding-right: 1rem;
+  min-height: 3rem;
+  border: 1px solid var(--color-accent-border);
+  border-radius: 9999px;
+  background: var(--color-surface-1);
+  color: var(--color-text-primary);
+  box-shadow: var(--surface-shadow-sm);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  overflow: hidden;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__control--textarea {
+  align-items: stretch;
+  min-height: 7rem;
+  border-radius: 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__input,
+html[data-theme^="retromorphism-"] .retro-field__select,
+html[data-theme^="retromorphism-"] .retro-field__textarea,
+html[data-theme^="retromorphism-"] .retro-field__file {
+  flex: 1;
+  min-height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  padding: 0.7rem 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__textarea {
+  min-height: 7.2rem;
+  resize: vertical;
+  line-height: 1.35;
+  padding-block: 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__file {
+  font-size: 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__trailing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6rem;
+  color: var(--color-text-secondary);
+  padding-inline: 0.7rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__trailing > :is(svg, .iconify, .lucide, [class^="i-"], [class*=" i-"]) {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__input::placeholder,
+html[data-theme^="retromorphism-"] .retro-field__textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+html[data-theme^="retromorphism-"] .retro-field__input:focus-visible,
+html[data-theme^="retromorphism-"] .retro-field__select:focus-visible,
+html[data-theme^="retromorphism-"] .retro-field__textarea:focus-visible,
+html[data-theme^="retromorphism-"] .retro-field__file:focus-visible,
+html[data-theme^="retromorphism-"] .retro-checkbox:focus-within {
+  outline: 2px solid var(--color-accent-border-active);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+html[data-theme^="retromorphism-"] .retro-field__control:hover,
+html[data-theme^="retromorphism-"] .retro-checkbox:hover {
+  border-color: var(--color-accent-border-active);
+  background: var(--color-surface-2);
+}
+
+html[data-theme^="retromorphism-"] .retro-field__input:disabled,
+html[data-theme^="retromorphism-"] .retro-field__select:disabled,
+html[data-theme^="retromorphism-"] .retro-field__textarea:disabled,
+html[data-theme^="retromorphism-"] .retro-field__file:disabled,
+html[data-theme^="retromorphism-"] .retro-checkbox__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+html[data-theme^="retromorphism-"] .retro-color-input__group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-color-input__picker {
+  width: 2.25rem;
+  height: 2rem;
+  border: 1px solid var(--color-accent-border-active);
+  border-radius: 0.5rem;
+  background: transparent;
+  padding: 0;
+}
+
+html[data-theme^="retromorphism-"] .retro-color-input__text {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html[data-theme^="retromorphism-"] .retro-checkbox {
+  gap: 0;
+  padding: 0.7rem 1rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-checkbox__input {
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--color-accent-border-active);
+  border-radius: 0.25rem;
+  accent-color: var(--color-accent);
+  margin-inline-end: 0.75rem;
+  margin-inline-start: 0;
+}
+
+html[data-theme^="retromorphism-"] .retro-checkbox__label {
+  color: var(--color-text-primary);
+  font-size: 0.94rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--sm .retro-field__control,
+html[data-theme^="retromorphism-"] .retro-field--sm .retro-checkbox {
+  min-height: 2.6rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--sm .retro-field__input,
+html[data-theme^="retromorphism-"] .retro-field--sm .retro-field__select {
+  font-size: 0.92rem;
+  padding-block: 0.45rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--sm .retro-field__label {
+  font-size: 0.67rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--xs .retro-field__control,
+html[data-theme^="retromorphism-"] .retro-field--xs .retro-checkbox {
+  min-height: 2.4rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--xs .retro-field__input,
+html[data-theme^="retromorphism-"] .retro-field--xs .retro-field__select {
+  font-size: 0.88rem;
+  padding-block: 0.35rem;
+}
+
+html[data-theme^="retromorphism-"] .retro-field--xs .retro-field__label {
+  font-size: 0.62rem;
+}
+
+html[data-theme^="retromorphism-"] :is(.shadow-neu-raised-sm, .neu-raised-sm):not(.btn):not(button) {
+  background-color: var(--color-surface-2) !important;
+}
+
+html[data-theme^="retromorphism-"] :is(.shadow-neu-raised, .neu-raised):not(.btn):not(button) {
+  background-color: var(--color-surface-2) !important;
+}
+
+html[data-theme^="retromorphism-"] :is(.shadow-neu-raised-lg, .neu-raised-lg):not(.btn):not(button) {
+  background-color: var(--color-surface-3) !important;
+}
+
+html[data-theme^="retromorphism-"] :is(
+    .rounded-xl,
+    .rounded-2xl,
+    .rounded-3xl,
+    .rounded-r-2xl,
+    .rounded-r-3xl
+  ):not(.btn):not(button):not(input):not(select):not(textarea) {
+  border-radius: 0 !important;
+}
+
+
+.surface-level-1 {
+  background-color: var(--color-surface-1);
+}
+
+.surface-level-2 {
+  background-color: var(--color-surface-2);
+}
+
+.surface-level-3 {
+  background-color: var(--color-surface-3);
+}
+
+.alert.alert-success {
+  color: var(--color-success-content);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.retro-scanlines {
+  position: relative;
+}
+
+.retro-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to bottom, rgba(0, 20, 41, 0.08) 1px, transparent 1px);
+  background-size: 100% 4px;
+  opacity: 0.2;
+}

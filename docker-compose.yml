@@ -1,0 +1,126 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: newguildplus-web:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
+      NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
+      NUXT_PUBLIC_CMS_URL: ${NUXT_PUBLIC_CMS_URL}
+    depends_on:
+      cms:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      caddy: ${APP_HOST}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+    networks:
+      - internal
+      - caddy
+
+  hub:
+    build:
+      context: .
+      dockerfile: apps/hub/Dockerfile
+    image: newguildplus-hub:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_SSL: ${DATABASE_SSL:-true}
+      NUXT_OAUTH_DISCORD_CLIENT_ID: ${NUXT_OAUTH_DISCORD_CLIENT_ID}
+      NUXT_OAUTH_DISCORD_CLIENT_SECRET: ${NUXT_OAUTH_DISCORD_CLIENT_SECRET}
+      NUXT_OAUTH_DISCORD_REDIRECT_URI: ${NUXT_OAUTH_DISCORD_REDIRECT_URI}
+      NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
+      NUXT_PUBLIC_CMS_URL: ${NUXT_PUBLIC_CMS_URL}
+      PAYLOAD_INTERNAL_URL: http://cms:3001
+      NUXT_SESSION_PASSWORD: ${NUXT_SESSION_PASSWORD}
+      NUXT_PUBLIC_DEFAULT_THEME: ${NUXT_PUBLIC_DEFAULT_THEME:-retrofuturism}
+    depends_on:
+      cms:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3003').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      caddy: ${HUB_HOST}
+      caddy.reverse_proxy: "{{upstreams 3003}}"
+    networks:
+      - internal
+      - caddy
+
+  cms:
+    build:
+      context: .
+      dockerfile: apps/cms/Dockerfile
+    image: newguildplus-cms:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL}
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
+      NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
+    volumes:
+      - cms_media:/app/media
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/admin').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      caddy: ${CMS_HOST}
+      caddy.reverse_proxy: "{{upstreams 3001}}"
+    networks:
+      - internal
+      - caddy
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    image: newguildplus-bot:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_SSL: ${DATABASE_SSL:-true}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN}
+      BOT_INTERNAL_PORT: ${BOT_INTERNAL_PORT:-3050}
+    networks:
+      - internal
+
+volumes:
+  cms_media:
+
+networks:
+  internal:
+    driver: bridge
+  caddy:
+    external: true
+    name: ${CADDY_NETWORK:-caddy}

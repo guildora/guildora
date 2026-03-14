@@ -1,0 +1,66 @@
+import { eq } from "drizzle-orm";
+import { users } from "@newguildplus/shared";
+import type { AppSession, AppSessionUser } from "./auth";
+import { getCommunityRoleName, getUserRoles } from "./community";
+import { getDb } from "./db";
+
+const sessionMaxAgeSeconds = 60 * 60 * 24 * 7;
+
+export async function getSessionUserById(userId: string): Promise<AppSessionUser | null> {
+  const db = getDb();
+  const rows = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  const user = rows[0];
+  if (!user) {
+    return null;
+  }
+
+  const [permissionRoles, communityRole] = await Promise.all([
+    getUserRoles(userId),
+    getCommunityRoleName(userId)
+  ]);
+
+  return {
+    id: user.id,
+    discordId: user.discordId,
+    profileName: user.displayName,
+    avatarUrl: user.avatarUrl,
+    permissionRoles,
+    communityRole
+  };
+}
+
+export async function replaceAuthSession(
+  event: Parameters<typeof replaceUserSession>[0],
+  sessionUser: AppSessionUser,
+  originalUserId?: string | null
+) {
+  const sessionData: AppSession = { user: sessionUser };
+  if (originalUserId) {
+    sessionData.originalUserId = originalUserId;
+  }
+
+  await replaceUserSession(
+    event,
+    sessionData,
+    {
+      maxAge: sessionMaxAgeSeconds,
+      cookie: {
+        maxAge: sessionMaxAgeSeconds,
+        sameSite: "lax"
+      }
+    }
+  );
+}
+
+export async function replaceAuthSessionForUserId(
+  event: Parameters<typeof replaceUserSession>[0],
+  userId: string,
+  originalUserId?: string | null
+) {
+  const sessionUser = await getSessionUserById(userId);
+  if (!sessionUser) {
+    throw createError({ statusCode: 404, statusMessage: "User not found." });
+  }
+  await replaceAuthSession(event, sessionUser, originalUserId);
+  return sessionUser;
+}

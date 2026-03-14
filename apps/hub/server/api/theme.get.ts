@@ -1,0 +1,28 @@
+import { desc } from "drizzle-orm";
+import { themeSettings } from "@newguildplus/shared";
+import { getDb } from "../utils/db";
+import { defaultThemeColors, normalizeThemeColors } from "../utils/theme";
+
+export default defineEventHandler(async () => {
+  const db = getDb();
+  const [storedTheme] = await db.select().from(themeSettings).orderBy(desc(themeSettings.updatedAt)).limit(1);
+
+  if (!storedTheme) {
+    return defaultThemeColors;
+  }
+
+  return normalizeThemeColors({
+    colorDominant: storedTheme.colorDominant,
+    colorSecondary: storedTheme.colorSecondary,
+    colorAccent: storedTheme.colorAccent,
+    colorAccentContentTone: storedTheme.colorAccentContentTone,
+    colorInfo: storedTheme.colorInfo,
+    colorInfoContentTone: storedTheme.colorInfoContentTone,
+    colorSuccess: storedTheme.colorSuccess,
+    colorSuccessContentTone: storedTheme.colorSuccessContentTone,
+    colorWarning: storedTheme.colorWarning,
+    colorWarningContentTone: storedTheme.colorWarningContentTone,
+    colorError: storedTheme.colorError,
+    colorErrorContentTone: storedTheme.colorErrorContentTone
+  });
+});

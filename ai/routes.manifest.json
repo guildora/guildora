@@ -1,0 +1,33 @@
+{
+  "version": "2.1",
+  "description": "Frontend route manifest split by app ownership (web landing vs hub internal).",
+  "apiBase": "/api",
+  "pages": [
+    { "app": "web", "path": "/", "purpose": "CMS-backed public landing page", "auth": false, "layout": "default", "docsRef": "../docs/routing-and-navigation.md" },
+
+    { "app": "hub", "path": "/", "purpose": "Hub root redirect to /dashboard", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal", "redirectsTo": "/dashboard" },
+    { "app": "hub", "path": "/login", "purpose": "Discord login entry page", "auth": false, "layout": "default", "docsRef": "../docs/routing-and-navigation.md" },
+    { "app": "hub", "path": "/dashboard", "purpose": "Internal dashboard with voice and profile activity stats", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/members", "purpose": "Member directory with search, role filter, and sorting", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/members/:id", "purpose": "Member profile detail view", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/profile", "purpose": "Profile root redirect to the last visited profile subsection", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/profile/name", "purpose": "Structured profile-name editor with Discord nickname sync feedback", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/profile/roles", "purpose": "Self-service selectable Discord roles", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/profile/design", "purpose": "Appearance and language settings", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/profile/:id", "purpose": "Legacy alias redirect to /members/:id", "auth": false, "redirectsTo": "/members/:id" },
+    { "app": "hub", "path": "/marketplace", "purpose": "Embedded external marketplace shell", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/marketplace/submit", "purpose": "Legacy redirect to marketplace root", "auth": false, "redirectsTo": "/marketplace" },
+    { "app": "hub", "path": "/marketplace/:appId", "purpose": "Legacy redirect to marketplace root", "auth": false, "redirectsTo": "/marketplace" },
+    { "app": "hub", "path": "/cms", "purpose": "Embedded CMS admin session bootstrap", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/mod", "purpose": "Moderator workspace for roles, users, and community applications", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin", "purpose": "Admin root redirect to the last visited admin subsection", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/design", "purpose": "Internal theme and logo editor", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/theme", "purpose": "Legacy redirect to /admin/design", "requiredRoles": ["admin", "superadmin"], "layout": "internal", "redirectsTo": "/admin/design" },
+    { "app": "hub", "path": "/admin/permissions", "purpose": "Permission, community-role, CMS access, and mirror admin tools", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/discord-roles", "purpose": "Discord self-service role allowlist and community settings editor", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/apps", "purpose": "Installed app management and sideloading", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/apps/review", "purpose": "Legacy redirect to /admin/apps", "auth": false, "redirectsTo": "/admin/apps" },
+    { "app": "hub", "path": "/admin/dev-role-switcher", "purpose": "Development role switcher and superadmin self-import tools", "requiredRoles": ["admin", "superadmin"], "layout": "internal" },
+    { "app": "hub", "path": "/admin/users", "purpose": "Legacy redirect to /admin/dev-role-switcher", "requiredRoles": ["admin", "superadmin"], "layout": "internal", "redirectsTo": "/admin/dev-role-switcher" }
+  ]
+}

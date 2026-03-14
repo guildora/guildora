@@ -1,0 +1,90 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { eq } from "drizzle-orm";
+import { createDb } from "./client";
+import { communityRoles, permissionRoles } from "./schema";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+
+const seedPermissionRoles = [
+  { name: "temporaer", description: "Temporary applicant permissions.", level: 0 },
+  { name: "user", description: "Default community user role.", level: 10 },
+  { name: "moderator", description: "Can moderate community content.", level: 50 },
+  { name: "admin", description: "Full administrative permissions.", level: 80 },
+  { name: "superadmin", description: "System owner with full access.", level: 100 }
+] as const;
+
+async function run() {
+  const db = createDb();
+
+  for (const role of seedPermissionRoles) {
+    const existing = await db.select().from(permissionRoles).where(eq(permissionRoles.name, role.name)).limit(1);
+
+    if (existing.length === 0) {
+      await db.insert(permissionRoles).values(role);
+      console.log(`Inserted permission role: ${role.name}`);
+    } else {
+      console.log(`Permission role already exists: ${role.name}`);
+      await db
+        .update(permissionRoles)
+        .set({
+          description: role.description,
+          level: role.level
+        })
+        .where(eq(permissionRoles.name, role.name));
+    }
+  }
+
+  const communityRoleDefaults = [
+    { name: "Bewerber", description: "Neue Bewerber in der Community.", permissionRole: "temporaer", sortOrder: 10 },
+    { name: "Anwaerter", description: "Anwärter während Probephase.", permissionRole: "user", sortOrder: 20 },
+    { name: "Mitglied", description: "Aktive Community-Mitglieder.", permissionRole: "user", sortOrder: 30 }
+  ] as const;
+
+  for (const role of communityRoleDefaults) {
+    const permission = await db
+      .select()
+      .from(permissionRoles)
+      .where(eq(permissionRoles.name, role.permissionRole))
+      .limit(1);
+
+    if (permission.length === 0) {
+      console.log(`Skipped community role "${role.name}" because permission role was not found.`);
+      continue;
+    }
+
+    const existing = await db.select().from(communityRoles).where(eq(communityRoles.name, role.name)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(communityRoles).values({
+        name: role.name,
+        description: role.description,
+        permissionRoleId: permission[0].id,
+        sortOrder: role.sortOrder
+      });
+      console.log(`Inserted community role: ${role.name}`);
+    } else {
+      await db
+        .update(communityRoles)
+        .set({
+          description: role.description,
+          permissionRoleId: permission[0].id,
+          sortOrder: role.sortOrder,
+          updatedAt: new Date()
+        })
+        .where(eq(communityRoles.name, role.name));
+      console.log(`Community role updated: ${role.name}`);
+    }
+  }
+}
+
+run()
+  .then(() => {
+    console.log("Seed completed successfully.");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Seed failed:", error);
+    process.exit(1);
+  });

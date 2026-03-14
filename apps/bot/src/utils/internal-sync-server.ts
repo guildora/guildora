@@ -1,0 +1,463 @@
+import crypto from "node:crypto";
+import { createServer } from "node:http";
+import type { Client } from "discord.js";
+import { botAppHookRegistry } from "./app-hooks";
+import { logger } from "./logger";
+
+type SyncPayload = {
+  discordId?: string;
+  profileName?: string | null;
+  permissionRoles?: string[];
+};
+
+type RemoveRolesPayload = {
+  roleIds?: string[];
+  removeAllManageable?: boolean;
+};
+
+type SyncCommunityRolesPayload = {
+  allowedRoleIds?: string[];
+  selectedRoleIds?: string[];
+};
+
+type BotGuildMemberPayload = {
+  discordId: string;
+  displayName: string;
+  nickname: string | null;
+  avatarUrl: string | null;
+  roleIds: string[];
+};
+
+type SyncUserResult = {
+  nicknameUpdated: boolean;
+  nicknameReason: "not_requested" | "missing_permissions" | "member_not_manageable" | "nickname_too_long" | null;
+  appliedNickname: string | null;
+};
+
+const maxRequestBodyBytes = 64 * 1024;
+
+/** TTL in ms: avoid repeated guild.members.fetch() to prevent Discord Gateway rate limit (opcode 8). */
+const GUILD_MEMBERS_CACHE_TTL_MS = 35_000;
+
+const lastGuildMembersFetchTime = new Map<string, number>();
+
+function readBody(req: import("node:http").IncomingMessage) {
+  return new Promise<string>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let totalBytes = 0;
+    req.on("data", (chunk) => {
+      const buffer = Buffer.from(chunk);
+      totalBytes += chunk.length;
+      if (totalBytes > maxRequestBodyBytes) {
+        reject(new Error("Body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(buffer);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function timingSafeEqualString(left: string, right: string) {
+  const leftBuffer = Buffer.from(left, "utf8");
+  const rightBuffer = Buffer.from(right, "utf8");
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function hasValidAuthorization(headers: import("node:http").IncomingHttpHeaders) {
+  const configuredToken = process.env.BOT_INTERNAL_TOKEN;
+  if (!configuredToken) {
+    return false;
+  }
+  const authorization = headers.authorization;
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return false;
+  }
+  const incomingToken = authorization.slice("Bearer ".length);
+  return timingSafeEqualString(incomingToken, configuredToken);
+}
+
+function json(res: import("node:http").ServerResponse, statusCode: number, payload: unknown) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(payload));
+}
+
+type InternalSyncErrorCode =
+  | "UNAUTHORIZED"
+  | "INVALID_JSON_BODY"
+  | "MISSING_DISCORD_ID"
+  | "MISSING_ROLE_ID"
+  | "MISSING_ROLE_IDS"
+  | "INVALID_SELECTED_ROLE_IDS"
+  | "NON_EDITABLE_ALLOWED_ROLES"
+  | "NOT_FOUND"
+  | "REQUEST_BODY_TOO_LARGE"
+  | "SYNC_FAILED";
+
+function jsonError(
+  res: import("node:http").ServerResponse,
+  statusCode: number,
+  errorCode: InternalSyncErrorCode,
+  error: string,
+  extra: Record<string, unknown> = {}
+) {
+  json(res, statusCode, {
+    ok: false,
+    errorCode,
+    error,
+    ...extra
+  });
+}
+
+function toMemberPayload(member: import("discord.js").GuildMember): BotGuildMemberPayload {
+  return {
+    discordId: member.user.id,
+    displayName: member.displayName || member.user.globalName || member.user.username,
+    nickname: member.nickname,
+    avatarUrl: member.displayAvatarURL({ extension: "png", size: 256 }) || null,
+    roleIds: member.roles.cache.filter((role) => role.id !== member.guild.id).map((role) => role.id)
+  };
+}
+
+function parseRoleIds(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+    .map((entry) => entry.trim());
+}
+
+function isMissingPermissionsError(error: unknown) {
+  const maybe = error as { code?: unknown; status?: unknown };
+  return maybe?.code === 50013 || maybe?.status === 403;
+}
+
+async function getGuild(client: Client, guildId: string) {
+  const guild = await client.guilds.fetch(guildId);
+  await guild.roles.fetch();
+  return guild;
+}
+
+export function startInternalSyncServer(client: Client) {
+  const portValue = process.env.BOT_INTERNAL_PORT || "3050";
+  const port = Number.parseInt(portValue, 10);
+  if (!Number.isFinite(port) || port <= 0) {
+    logger.warn("BOT_INTERNAL_PORT is invalid. Internal sync server is disabled.");
+    return;
+  }
+
+  const guildId = process.env.DISCORD_GUILD_ID;
+  if (!guildId) {
+    logger.warn("DISCORD_GUILD_ID is missing. Internal sync server is disabled.");
+    return;
+  }
+
+  const token = process.env.BOT_INTERNAL_TOKEN;
+  if (!token) {
+    logger.warn("BOT_INTERNAL_TOKEN is not set. Internal sync server is disabled for security.");
+    return;
+  }
+
+  const server = createServer(async (req, res) => {
+    if (!hasValidAuthorization(req.headers)) {
+      jsonError(res, 401, "UNAUTHORIZED", "Unauthorized");
+      return;
+    }
+
+    const method = req.method || "GET";
+    const rawUrl = req.url || "/";
+    const requestUrl = new URL(rawUrl, "http://internal.bot");
+    const pathname = requestUrl.pathname;
+
+    try {
+      if (method === "POST" && pathname === "/internal/sync-user") {
+        const bodyRaw = await readBody(req);
+        let body: SyncPayload = {};
+        if (bodyRaw) {
+          try {
+            body = JSON.parse(bodyRaw) as SyncPayload;
+          } catch {
+            jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body");
+            return;
+          }
+        }
+        if (!body.discordId) {
+          jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discordId");
+          return;
+        }
+
+        const guild = await getGuild(client, guildId);
+        const member = await guild.members.fetch(body.discordId);
+        const syncResult: SyncUserResult = {
+          nicknameUpdated: false,
+          nicknameReason: "not_requested",
+          appliedNickname: member.nickname
+        };
+
+        if (Object.prototype.hasOwnProperty.call(body, "profileName")) {
+          const requestedNickname = body.profileName || null;
+          const nicknameLength = requestedNickname?.length ?? 0;
+          if (!member.manageable) {
+            syncResult.nicknameUpdated = false;
+            syncResult.nicknameReason = "member_not_manageable";
+          } else if (nicknameLength > 32) {
+            syncResult.nicknameUpdated = false;
+            syncResult.nicknameReason = "nickname_too_long";
+          } else {
+            try {
+              await member.setNickname(requestedNickname);
+              syncResult.nicknameUpdated = true;
+              syncResult.nicknameReason = null;
+              syncResult.appliedNickname = requestedNickname;
+            } catch (error) {
+              if (isMissingPermissionsError(error)) {
+                syncResult.nicknameUpdated = false;
+                syncResult.nicknameReason = "missing_permissions";
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+
+        if (Array.isArray(body.permissionRoles) && body.permissionRoles.length > 0) {
+          const manageableRoleNames = ["temporaer", "user", "moderator", "admin"];
+          const roleMap = new Map(guild.roles.cache.map((role) => [role.name.toLowerCase(), role.id]));
+
+          const toRemove = member.roles.cache
+            .filter((role) => manageableRoleNames.includes(role.name.toLowerCase()))
+            .map((role) => role.id);
+          if (toRemove.length > 0) {
+            await member.roles.remove(toRemove);
+          }
+
+          const toAdd = body.permissionRoles
+            .map((roleName) => roleMap.get(roleName.toLowerCase()))
+            .filter((roleId): roleId is string => Boolean(roleId));
+          if (toAdd.length > 0) {
+            await member.roles.add(toAdd);
+          }
+
+          await botAppHookRegistry.emit("onRoleChange", {
+            guildId: guild.id,
+            userId: member.user.id,
+            addedRoleIds: toAdd,
+            removedRoleIds: toRemove
+          });
+        }
+
+        json(res, 200, {
+          ok: true,
+          ...syncResult
+        });
+        return;
+      }
+
+      if (method === "GET" && pathname === "/internal/guild/roles") {
+        const guild = await getGuild(client, guildId);
+        const roles = guild.roles.cache
+          .filter((role) => role.id !== guild.id)
+          .sort((a, b) => b.position - a.position)
+          .map((role) => ({
+            id: role.id,
+            name: role.name,
+            position: role.position,
+            managed: role.managed,
+            editable: role.editable
+          }));
+
+        json(res, 200, { roles });
+        return;
+      }
+
+      const roleMembersMatch = pathname.match(/^\/internal\/guild\/roles\/([^/]+)\/members$/);
+      if (method === "GET" && roleMembersMatch) {
+        const roleId = decodeURIComponent(roleMembersMatch[1] || "");
+        if (!roleId) {
+          jsonError(res, 400, "MISSING_ROLE_ID", "Missing role id");
+          return;
+        }
+
+        const guild = await getGuild(client, guildId);
+        const lastFetch = lastGuildMembersFetchTime.get(guildId) ?? 0;
+        if (Date.now() - lastFetch > GUILD_MEMBERS_CACHE_TTL_MS) {
+          await guild.members.fetch();
+          lastGuildMembersFetchTime.set(guildId, Date.now());
+        }
+        const members = guild.members.cache
+          .filter((member) => member.roles.cache.has(roleId))
+          .map((member) => toMemberPayload(member));
+        json(res, 200, { members });
+        return;
+      }
+
+      const memberMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)$/);
+      if (method === "GET" && memberMatch) {
+        const discordId = decodeURIComponent(memberMatch[1] || "");
+        if (!discordId) {
+          jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id");
+          return;
+        }
+
+        const guild = await getGuild(client, guildId);
+        try {
+          const member = await guild.members.fetch(discordId);
+          json(res, 200, { member: toMemberPayload(member) });
+        } catch {
+          json(res, 200, { member: null });
+        }
+        return;
+      }
+
+      const syncCommunityRolesMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/sync-community-roles$/);
+      if (method === "POST" && syncCommunityRolesMatch) {
+        const discordId = decodeURIComponent(syncCommunityRolesMatch[1] || "");
+        if (!discordId) {
+          jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id");
+          return;
+        }
+
+        const bodyRaw = await readBody(req);
+        let body: SyncCommunityRolesPayload = {};
+        if (bodyRaw) {
+          try {
+            body = JSON.parse(bodyRaw) as SyncCommunityRolesPayload;
+          } catch {
+            jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body");
+            return;
+          }
+        }
+
+        const allowedRoleIds = parseRoleIds(body.allowedRoleIds);
+        const selectedRoleIds = parseRoleIds(body.selectedRoleIds);
+        const allowedSet = new Set(allowedRoleIds);
+        const selectedSet = new Set(selectedRoleIds);
+
+        for (const selectedRoleId of selectedSet) {
+          if (!allowedSet.has(selectedRoleId)) {
+            jsonError(res, 400, "INVALID_SELECTED_ROLE_IDS", "selectedRoleIds must be a subset of allowedRoleIds");
+            return;
+          }
+        }
+
+        const guild = await getGuild(client, guildId);
+        const member = await guild.members.fetch(discordId);
+
+        const invalidAllowedRoleIds = allowedRoleIds.filter((roleId) => {
+          const role = guild.roles.cache.get(roleId);
+          return !role || !role.editable || role.managed || role.id === guild.id;
+        });
+        if (invalidAllowedRoleIds.length > 0) {
+          jsonError(
+            res,
+            400,
+            "NON_EDITABLE_ALLOWED_ROLES",
+            "allowedRoleIds contains non-editable roles",
+            { invalidRoleIds: invalidAllowedRoleIds }
+          );
+          return;
+        }
+
+        const toRemove = member.roles.cache
+          .filter((role) => allowedSet.has(role.id))
+          .filter((role) => !selectedSet.has(role.id))
+          .map((role) => role.id);
+
+        const toAdd = selectedRoleIds
+          .filter((roleId) => !member.roles.cache.has(roleId));
+
+        if (toRemove.length > 0) {
+          await member.roles.remove(toRemove);
+        }
+        if (toAdd.length > 0) {
+          await member.roles.add(toAdd);
+        }
+
+        if (toAdd.length > 0 || toRemove.length > 0) {
+          await botAppHookRegistry.emit("onRoleChange", {
+            guildId: guild.id,
+            userId: member.user.id,
+            addedRoleIds: toAdd,
+            removedRoleIds: toRemove
+          });
+        }
+
+        const refreshedMember = await guild.members.fetch(discordId);
+        json(res, 200, {
+          ok: true,
+          addedRoleIds: toAdd,
+          removedRoleIds: toRemove,
+          currentRoleIds: toMemberPayload(refreshedMember).roleIds
+        });
+        return;
+      }
+
+      const removeRolesMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/remove-roles$/);
+      if (method === "POST" && removeRolesMatch) {
+        const discordId = decodeURIComponent(removeRolesMatch[1] || "");
+        if (!discordId) {
+          jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id");
+          return;
+        }
+
+        const bodyRaw = await readBody(req);
+        let body: RemoveRolesPayload = {};
+        if (bodyRaw) {
+          try {
+            body = JSON.parse(bodyRaw) as RemoveRolesPayload;
+          } catch {
+            jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body");
+            return;
+          }
+        }
+
+        const requestedRoleIds = parseRoleIds(body.roleIds);
+        const removeAllManageable = body.removeAllManageable === true;
+        if (!removeAllManageable && requestedRoleIds.length === 0) {
+          jsonError(res, 400, "MISSING_ROLE_IDS", "Missing roleIds");
+          return;
+        }
+
+        const guild = await getGuild(client, guildId);
+        const member = await guild.members.fetch(discordId);
+        const requestedSet = new Set(requestedRoleIds);
+
+        const removableRoleIds = member.roles.cache
+          .filter((role) => role.id !== guild.id)
+          .filter((role) => role.editable && !role.managed)
+          .filter((role) => removeAllManageable || requestedSet.has(role.id))
+          .map((role) => role.id);
+
+        if (removableRoleIds.length > 0) {
+          await member.roles.remove(removableRoleIds);
+          await botAppHookRegistry.emit("onRoleChange", {
+            guildId: guild.id,
+            userId: member.user.id,
+            addedRoleIds: [],
+            removedRoleIds: removableRoleIds
+          });
+        }
+
+        json(res, 200, { ok: true, removedRoleIds: removableRoleIds });
+        return;
+      }
+
+      jsonError(res, 404, "NOT_FOUND", "Not found");
+    } catch (error) {
+      if (error instanceof Error && error.message === "Body too large") {
+        jsonError(res, 413, "REQUEST_BODY_TOO_LARGE", "Request body too large");
+        return;
+      }
+      logger.error("Internal sync request failed.", error);
+      jsonError(res, 500, "SYNC_FAILED", "Sync failed");
+    }
+  });
+
+  server.listen(port, "0.0.0.0", () => {
+    logger.info(`Internal sync server listening on ${port}.`);
+  });
+}

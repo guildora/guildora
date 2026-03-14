@@ -1,0 +1,12 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@newguildplus/shared": ["../../packages/shared/src/index.ts"],
+      "@newguildplus/shared/*": ["../../packages/shared/src/*"]
+    }
+  }
+}
