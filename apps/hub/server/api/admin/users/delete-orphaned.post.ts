@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import { requireAdminSession } from "../../../utils/auth";
 import { listActiveCommunityRoleMappings } from "../../../utils/community";
 import { fetchDiscordGuildMembersByRoleFromBot } from "../../../utils/botSync";

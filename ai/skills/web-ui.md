@@ -25,7 +25,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 
 ## Rules And Constraints
 
-- internal authenticated UI must follow the RetroMorphism design rules
+- internal authenticated UI must follow the Guildora design system rules
 - prefer `apps/hub/app/components/ui/*` over raw controls for new internal forms
 - all new user-facing text must use i18n keys in both `en` and `de`
 - page middleware is a UX aid only; real authorization still belongs on the server
@@ -34,7 +34,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 ## Step-By-Step Orientation
 
 1. Read `docs/routing-and-navigation.md`.
-2. Read `docs/design-system-retromorphism.md`.
+2. Read `docs/design-system.md`.
 3. Read `docs/i18n-architecture.md`.
 4. Inspect the relevant existing page and its sibling pages.
 5. Reuse existing composables and layout behavior where possible.
@@ -42,7 +42,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 ## Docs References
 
 - `docs/routing-and-navigation.md`
-- `docs/design-system-retromorphism.md`
+- `docs/design-system.md`
 - `docs/i18n-architecture.md`
 - `docs/subsystems/web-app.md`
 - `docs/subsystems/web-landing.md`

@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-  (event: "close" | "logout"): void;
+  (event: "close" | "feedback"): void;
   (event: "toggle-section", sectionId: string): void;
 }>();
 
@@ -138,7 +138,7 @@ onBeforeUnmount(() => {
                 <img
                   v-if="logoDataUrl"
                   :src="logoDataUrl"
-                  alt="Newguild"
+                  alt="Guildora"
                   class="absolute inset-0 h-full w-full object-cover"
                 >
                 <span v-else class="relative z-10">NG+</span>
@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
               <p class="text-sm font-medium">{{ currentUser?.profileName ?? t("internalNav.defaultMember") }}</p>
               <p class="text-xs opacity-65">{{ permissionRoles.join(", ") || t("internalNav.defaultPermissionRole") }}</p>
             </div>
-            <button type="button" class="btn btn-secondary w-full" @click="$emit('logout'); $emit('close')">{{ $t("nav.logout") }}</button>
+            <button type="button" class="btn btn-ghost w-full" @click="$emit('feedback'); $emit('close')">{{ $t("feedback.button") }}</button>
           </div>
         </div>
       </div>
@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
 .mobile-drawer-panel {
   transform: translateX(0);
   transition: transform 0.5s ease-in-out;
-  box-shadow: var(--surface-shadow-lg, 0 14px 28px rgba(0, 0, 0, 0.28));
+  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.08));
 }
 
 .mobile-drawer-enter-from .mobile-drawer-overlay,

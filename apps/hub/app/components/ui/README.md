@@ -1,28 +1,21 @@
-# RetroMorphism UI Templates
+# UI Components
 
-Diese Komponenten sind die Basistemplates fuer die Figma-Designsprache und sollen von neuen Features bevorzugt genutzt werden.
+Base UI wrappers for the Guildora design system. Prefer these over raw form controls in new internal UI work.
 
-- `RetroButton.vue` -> Button Variants (Primary, Secondary, Ghost, Outline, Info, Success, Warning, Error, ErrorOutline) and sizes (`xs`, `sm`, `md`)
-- `RetroInput.vue` -> Input-Feldbasis fuer Formulare mit Text-Label und optionalem Trailing-Slot
-- `RetroSelect.vue` -> Select-Feld im Retro-Form-Stil mit Text-Label und Dropdown-Indikator
-- `RetroTextarea.vue` -> Mehrzeiliges Retro-Eingabefeld mit konsistenter Feld-Shell
-- `RetroCheckbox.vue` -> Checkbox-Feld im Retro-Stil mit Label-Layout
-- `RetroFileInput.vue` -> Datei-Upload-Feld im Retro-Stil
-- `RetroColorInput.vue` -> Kombiniertes Farb-Picker + Hex-Textfeld
-- `RetroTag.vue` -> Tag/Badge Darstellung
-- `RetroDropdown.vue` -> Dropdown Container-Shell
-- `RetroOptionRow.vue` -> Optionen/Select-Zeilen innerhalb Menues
-- `RetroModalTitle.vue` -> Titelblock fuer Modals
+- `UiButton.vue` — Button variants (Primary, Secondary, Ghost, Outline, Info, Success, Warning, Error, ErrorOutline) and sizes (`xs`, `sm`, `md`)
+- `UiInput.vue` — Input field with text label and optional trailing slot
+- `UiSelect.vue` — Select field with text label and dropdown indicator
+- `UiTextarea.vue` — Multiline input with consistent field shell
+- `UiCheckbox.vue` — Checkbox with label layout
+- `UiFileInput.vue` — File upload field
+- `UiColorInput.vue` — Combined color picker + hex text field
+- `UiTag.vue` — Tag/badge display
+- `UiDropdown.vue` — Dropdown container shell
+- `UiOptionRow.vue` — Option/select rows within menus
+- `UiModalTitle.vue` — Title block for modals
 
-Empfehlung fuer internen Bereich:
-- Form-Controls immer ueber diese Komponenten bauen, nicht ueber rohe `input/select/textarea/checkbox/file`.
-- Standard ist ein ruhiges Feld-Layout mit Label oberhalb der Control; kein Badge-Label und keine linke Icon-Spalte.
-- Bei dichten Layouts ueber `size="sm"`/`size="xs"` komprimieren.
+Guidelines:
 
-Figma-Referenzknoten:
-
-- Buttons: `12:10`
-- Input: `34:1152`
-- Drop menu: `39:31`
-- Tag: `34:1311`
-- Base modal title: `50:911`
+- Form controls should always use these components, not raw `input/select/textarea/checkbox/file`
+- Default is a clean field layout with label above the control
+- Use `size="sm"` or `size="xs"` for dense layouts

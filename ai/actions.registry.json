@@ -18,7 +18,7 @@
 
     { "id": "apps-list", "name": "List installed apps", "method": "GET", "path": "/api/apps", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#apps-and-navigation" },
     { "id": "apps-navigation", "name": "Get app navigation", "method": "GET", "path": "/api/apps/navigation", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "docsRef": "../docs/api-contracts.md#apps-and-navigation" },
-    { "id": "apps-config", "name": "Update app config", "method": "PUT", "path": "/api/apps/:appId/config", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
+    { "id": "apps-config", "name": "Update app config", "method": "PUT", "path": "/api/admin/apps/:appId/config", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
     { "id": "apps-activate", "name": "Activate app", "method": "POST", "path": "/api/apps/:appId/activate", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
     { "id": "apps-deactivate", "name": "Deactivate app", "method": "POST", "path": "/api/apps/:appId/deactivate", "requiredRoles": ["admin", "superadmin"], "docsRef": "../docs/workflows/app-lifecycle.md" },
 

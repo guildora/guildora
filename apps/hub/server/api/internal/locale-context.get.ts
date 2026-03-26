@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { profiles } from "@newguildplus/shared";
+import { profiles } from "@guildora/shared";
 import { getDb } from "../../utils/db";
 import {
   normalizeUserLocalePreference,

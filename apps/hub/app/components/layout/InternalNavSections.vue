@@ -59,39 +59,38 @@ const hasMultipleVisibleGroups = (section: InternalNavSection) =>
 
 <template>
   <nav class="space-y-4" :aria-label="$t('internalNav.ariaLabel')">
-    <section v-for="bucket in buckets" :key="bucket.id" class="space-y-1.5">
-      <div class="space-y-1.5">
+    <section v-for="bucket in buckets" :key="bucket.id" class="space-y-0.5">
+      <div class="space-y-0.5">
         <article v-for="section in bucket.sections" :key="section.id">
           <NuxtLink
             v-if="section.isDirect || nonDirectBehavior === 'navigate'"
             :to="section.to"
-            class="btn min-h-11 w-full justify-start gap-3 rounded-full px-3 py-2 text-sm"
-            :class="section.isActive ? 'btn-primary' : 'btn-secondary'"
+            class="sidebar-item"
+            :class="{ 'sidebar-item-active': section.isActive }"
             @click="$emit('navigate')"
           >
-            <Icon v-if="section.iconPath?.includes(':')" :name="section.iconPath" class="h-4 w-4 shrink-0" aria-hidden="true" />
-            <svg v-else class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <Icon v-if="section.iconPath?.includes(':')" :name="section.iconPath" class="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
+            <svg v-else class="h-4 w-4 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path :d="section.iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span class="min-w-0 flex-1 truncate font-medium" :class="nonDirectBehavior === 'expand' ? 'text-center' : ''">{{ section.label }}</span>
-            <span v-if="nonDirectBehavior === 'expand'" class="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span class="min-w-0 flex-1 truncate">{{ section.label }}</span>
           </NuxtLink>
 
           <button
             v-else
             type="button"
-            class="btn min-h-11 w-full justify-start gap-3 rounded-full px-3 py-2 text-left text-sm"
-            :class="section.isActive || isExpanded(section.id) ? 'btn-primary' : 'btn-secondary'"
+            class="sidebar-item w-full text-left"
+            :class="{ 'sidebar-item-active': section.isActive || isExpanded(section.id) }"
             :aria-expanded="isExpanded(section.id)"
             @click="$emit('toggle-section', section.id)"
           >
-            <Icon v-if="section.iconPath?.includes(':')" :name="section.iconPath" class="h-4 w-4 shrink-0" aria-hidden="true" />
-            <svg v-else class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <Icon v-if="section.iconPath?.includes(':')" :name="section.iconPath" class="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
+            <svg v-else class="h-4 w-4 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path :d="section.iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span class="min-w-0 flex-1 truncate font-medium" :class="nonDirectBehavior === 'expand' ? 'text-center' : ''">{{ section.label }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ section.label }}</span>
             <svg
-              class="h-4 w-4 shrink-0 transition-transform"
+              class="h-4 w-4 shrink-0 opacity-40 transition-transform"
               :class="isExpanded(section.id) ? 'rotate-180' : ''"
               viewBox="0 0 24 24"
               fill="none"
@@ -103,26 +102,26 @@ const hasMultipleVisibleGroups = (section: InternalNavSection) =>
 
           <div
             v-if="!section.isDirect && isExpanded(section.id)"
-            class="space-y-2 px-2 pb-1 pt-1"
+            class="space-y-1 pl-3 pb-1 pt-0.5"
           >
-            <section v-for="group in section.groups" :key="group.id" class="space-y-1">
+            <section v-for="group in section.groups" :key="group.id" class="space-y-0.5">
               <h3
                 v-if="group.title && hasMultipleVisibleGroups(section)"
-                class="px-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-base-content/45"
+                class="px-2.5 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-base-content/45"
               >
                 {{ group.title }}
               </h3>
-              <div class="space-y-1">
+              <div class="space-y-0.5">
                 <NuxtLink
                   v-for="item in group.items"
                   :key="item.id"
                   :to="item.to"
-                  class="btn btn-sm min-h-9 w-full justify-start gap-2 rounded-full px-3 py-1.5 text-sm"
-                  :class="item.active ? 'btn-primary' : 'btn-secondary'"
+                  class="sidebar-item text-[0.8125rem]"
+                  :class="{ 'sidebar-item-active': item.active }"
                   @click="$emit('navigate')"
                 >
-                  <Icon v-if="item.iconPath?.includes(':')" :name="item.iconPath" class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <svg v-else-if="item.iconPath" class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <Icon v-if="item.iconPath?.includes(':')" :name="item.iconPath" class="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
+                  <svg v-else-if="item.iconPath" class="h-3.5 w-3.5 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path :d="item.iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                   <span class="min-w-0 truncate">{{ item.label }}</span>

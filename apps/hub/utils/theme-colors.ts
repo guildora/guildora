@@ -17,21 +17,21 @@ export interface ThemeColors {
   colorErrorContentTone: ThemeContentTone;
 }
 
-export const RETROMORPHISM_LIGHT_THEME = "retromorphism-light";
-export const RETROMORPHISM_DARK_THEME = "retromorphism-dark";
+export const GUILDORA_LIGHT_THEME = "guildora-light";
+export const GUILDORA_DARK_THEME = "guildora-dark";
 
 export const defaultThemeColors: ThemeColors = {
-  colorDominant: "#141115",
-  colorSecondary: "#ffffff",
-  colorAccent: "#ff206e",
+  colorDominant: "#0A0A0A",
+  colorSecondary: "#FAFAFA",
+  colorAccent: "#7C3AED",
   colorAccentContentTone: "light",
-  colorInfo: "#48beff",
-  colorInfoContentTone: "dark",
-  colorSuccess: "#0cf574",
-  colorSuccessContentTone: "dark",
-  colorWarning: "#f18f01",
-  colorWarningContentTone: "light",
-  colorError: "#bf211e",
+  colorInfo: "#3B82F6",
+  colorInfoContentTone: "light",
+  colorSuccess: "#22C55E",
+  colorSuccessContentTone: "light",
+  colorWarning: "#F59E0B",
+  colorWarningContentTone: "dark",
+  colorError: "#EF4444",
   colorErrorContentTone: "light"
 } as const;
 
@@ -113,7 +113,7 @@ export function normalizeThemeColors(colors: Partial<ThemeColors> | undefined | 
 }
 
 export function resolveThemeName(mode: ResolvedAppearanceMode): string {
-  return mode === "dark" ? RETROMORPHISM_DARK_THEME : RETROMORPHISM_LIGHT_THEME;
+  return mode === "dark" ? GUILDORA_DARK_THEME : GUILDORA_LIGHT_THEME;
 }
 
 export function buildThemeCssVariables(
@@ -154,8 +154,15 @@ export function buildThemeCssVariables(
   const accentGlow = hexToRgba(accent, mode === "dark" ? 0.32 : 0.24);
 
   const line = hexToRgba(textPrimary, mode === "dark" ? 0.2 : 0.14);
-  const neuShadowDark = mode === "dark" ? hexToRgba("#000000", 0.55) : hexToRgba("#001429", 0.16);
-  const neuShadowLight = mode === "dark" ? hexToRgba("#ffffff", 0.04) : hexToRgba("#ffffff", 0.82);
+  const shadowSm = mode === "dark"
+    ? `0 1px 3px ${hexToRgba("#000000", 0.12)}, 0 1px 2px ${hexToRgba("#000000", 0.08)}`
+    : `0 1px 3px ${hexToRgba("#000000", 0.06)}, 0 1px 2px ${hexToRgba("#000000", 0.04)}`;
+  const shadowMd = mode === "dark"
+    ? `0 4px 16px ${hexToRgba("#000000", 0.12)}`
+    : `0 4px 16px ${hexToRgba("#000000", 0.06)}`;
+  const shadowLg = mode === "dark"
+    ? `0 8px 32px ${hexToRgba("#000000", 0.16)}`
+    : `0 8px 32px ${hexToRgba("#000000", 0.08)}`;
   const btnOutlineBorder = hexToRgba(textPrimary, mode === "dark" ? 0.35 : 0.3);
   const btnGhostHover = hexToRgba(textPrimary, mode === "dark" ? 0.08 : 0.06);
   const accentContent = normalized.colorAccentContentTone === "light" ? white : baseInk;
@@ -190,8 +197,9 @@ export function buildThemeCssVariables(
     "--color-accent-border-active": accentBorderActive,
     "--color-accent-glow": accentGlow,
     "--color-line": line,
-    "--neu-shadow-dark": neuShadowDark,
-    "--neu-shadow-light": neuShadowLight,
+    "--shadow-sm": shadowSm,
+    "--shadow-md": shadowMd,
+    "--shadow-lg": shadowLg,
     "--color-btn-outline-border": btnOutlineBorder,
     "--color-btn-ghost-hover": btnGhostHover,
     "--color-info": normalized.colorInfo,

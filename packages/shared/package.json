@@ -1,5 +1,5 @@
 {
-  "name": "@newguildplus/shared",
+  "name": "@guildora/shared",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./types/roles": {
+      "types": "./src/types/roles.ts",
+      "import": "./src/types/roles.ts",
+      "default": "./src/types/roles.ts"
     }
   },
   "main": "./dist/index.js",
@@ -15,8 +20,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"No lint configured for @newguildplus/shared\"",
-    "format": "echo \"No format script configured for @newguildplus/shared\"",
+    "lint": "echo \"No lint configured for @guildora/shared\"",
+    "format": "echo \"No format script configured for @guildora/shared\"",
     "db:generate": "node scripts/run-drizzle-generate.mjs",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts"

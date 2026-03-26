@@ -148,6 +148,27 @@ async function run() {
     WHERE "ended_at" IS NULL
   `);
 
+  // 0023: Discord invite code in community settings
+  await db.execute(sql`
+    ALTER TABLE "community_settings" ADD COLUMN IF NOT EXISTS "discord_invite_code" text
+  `);
+
+  // 0022: App code bundle column + app_kv table
+  await db.execute(sql`
+    ALTER TABLE "installed_apps" ADD COLUMN IF NOT EXISTS "code_bundle" jsonb DEFAULT '{}' NOT NULL
+  `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "app_kv" (
+      "app_id" text NOT NULL,
+      "key" text NOT NULL,
+      "value" jsonb,
+      CONSTRAINT "app_kv_app_id_key_pk" PRIMARY KEY("app_id","key")
+    )
+  `);
+  await db.execute(sql`
+    CREATE INDEX IF NOT EXISTS "app_kv_app_id_idx" ON "app_kv" ("app_id")
+  `);
+
   await client.end({ timeout: 5 });
 }
 

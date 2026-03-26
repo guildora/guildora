@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { communitySettings } from "@newguildplus/shared";
+import { communitySettings } from "@guildora/shared";
 import { requireAdminSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 import { readBodyWithSchema } from "../../utils/http";
@@ -9,6 +9,7 @@ import { COMMUNITY_SETTINGS_SINGLETON_ID } from "../../utils/community-settings"
 
 const schema = z.object({
   communityName: z.string().trim().max(200).nullable(),
+  discordInviteCode: z.string().trim().max(20).nullable().optional(),
   defaultLocale: z.enum(localePreferences).optional()
 });
 
@@ -24,6 +25,7 @@ export default defineEventHandler(async (event) => {
     .limit(1);
 
   const value = parsed.communityName === "" ? null : parsed.communityName;
+  const discordInviteCode = parsed.discordInviteCode === "" ? null : (parsed.discordInviteCode ?? existing?.discordInviteCode ?? null);
   const defaultLocale = normalizeCommunityDefaultLocale(parsed.defaultLocale ?? existing?.defaultLocale, "en");
 
   if (existing) {
@@ -31,6 +33,7 @@ export default defineEventHandler(async (event) => {
       .update(communitySettings)
       .set({
         communityName: value,
+        discordInviteCode,
         defaultLocale,
         updatedAt: new Date(),
         updatedBy: session.user.id
@@ -40,10 +43,11 @@ export default defineEventHandler(async (event) => {
     await db.insert(communitySettings).values({
       id: COMMUNITY_SETTINGS_SINGLETON_ID,
       communityName: value,
+      discordInviteCode,
       defaultLocale,
       updatedBy: session.user.id
     });
   }
 
-  return { communityName: value, defaultLocale };
+  return { communityName: value, discordInviteCode, defaultLocale };
 });

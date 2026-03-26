@@ -8,7 +8,7 @@ const switching = ref(false);
 const switchError = ref<string | null>(null);
 
 // Cookie explizit mit path=/ setzen, damit die Wahl bei Reload/Tab-Wechsel erhalten bleibt (gleicher Key wie nuxt.config i18n.detectBrowserLanguage.cookieKey)
-const localeCookie = useCookie<"en" | "de">("newguildplus_i18n", {
+const localeCookie = useCookie<"en" | "de">("guildora_i18n", {
   path: "/",
   maxAge: 60 * 60 * 24 * 365,
   sameSite: "lax"
@@ -49,7 +49,7 @@ async function onLocaleChange(event: Event) {
 </script>
 
 <template>
-  <UiRetroSelect
+  <UiSelect
     :key="locale"
     class="w-40"
     size="sm"
@@ -60,6 +60,6 @@ async function onLocaleChange(event: Event) {
   >
     <option value="en">{{ $t("language.english") }}</option>
     <option value="de">{{ $t("language.german") }}</option>
-  </UiRetroSelect>
+  </UiSelect>
   <p v-if="switchError" class="text-xs text-error">{{ $t("language.switchError") }}</p>
 </template>

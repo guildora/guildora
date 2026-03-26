@@ -13,7 +13,7 @@ type SessionUserShape = {
 
 const { t } = useI18n();
 const { user } = useUserSession();
-const lastPath = useCookie<string | null>("newguild_admin_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_admin_last_path", { sameSite: "lax" });
 lastPath.value = "/admin/dev-role-switcher";
 
 const search = ref("");
@@ -116,7 +116,7 @@ onMounted(async () => {
     </div>
 
     <template v-else>
-      <div v-if="isSuperadmin" class="card border border-line bg-base-200 shadow-neu-raised">
+      <div v-if="isSuperadmin" class="card border border-line bg-base-200 shadow-md">
         <div class="card-body space-y-3">
           <h2 class="card-title text-base">{{ t("adminDiscordRoles.superadminTitle") }}</h2>
           <p class="text-sm text-base-content/70">{{ t("adminDiscordRoles.superadminDescription") }}</p>
@@ -136,7 +136,7 @@ onMounted(async () => {
       </div>
 
       <div class="grid gap-4 xl:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-        <div class="card border border-line bg-base-200 shadow-neu-raised">
+        <div class="card border border-line bg-base-200 shadow-md">
           <div class="card-body space-y-4">
             <div>
               <h2 class="card-title text-base">{{ currentUser?.profileName || "-" }}</h2>
@@ -155,10 +155,10 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="card border border-line bg-base-200 shadow-neu-raised">
+        <div class="card border border-line bg-base-200 shadow-md">
           <div class="card-body gap-4">
             <div class="grid w-full gap-2 md:grid-cols-3">
-              <UiRetroInput
+              <UiInput
                 v-model="search"
                 size="sm"
                 :label="t('devRoleSwitcher.searchPlaceholder')"
@@ -166,7 +166,7 @@ onMounted(async () => {
                
                 type="search"
               />
-              <UiRetroSelect
+              <UiSelect
                 v-model="selectedPermissionRole"
                 size="sm"
                 :label="t('devRoleSwitcher.allPermissionRoles')"
@@ -175,8 +175,8 @@ onMounted(async () => {
                 <option v-for="role in permissionRoleOptions" :key="role" :value="role">
                   {{ role === "ALL" ? t("devRoleSwitcher.allPermissionRoles") : role }}
                 </option>
-              </UiRetroSelect>
-              <UiRetroSelect
+              </UiSelect>
+              <UiSelect
                 v-model="selectedCommunityRole"
                 size="sm"
                 :label="t('devRoleSwitcher.allCommunityRoles')"
@@ -185,7 +185,7 @@ onMounted(async () => {
                 <option v-for="role in communityRoleOptions" :key="role" :value="role">
                   {{ role === "ALL" ? t("devRoleSwitcher.allCommunityRoles") : role }}
                 </option>
-              </UiRetroSelect>
+              </UiSelect>
             </div>
 
             <p v-if="error" class="alert alert-error text-sm">{{ error }}</p>

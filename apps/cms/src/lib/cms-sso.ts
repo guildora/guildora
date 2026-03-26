@@ -61,5 +61,5 @@ export function verifyCmsSsoToken(token: string, secret: string): CmsSsoPayload 
 }
 
 export function createSsoUserEmail(userId: string): string {
-  return `ngp-${userId}@sso.newguild.local`;
+  return `guildora-${userId}@sso.guildora.local`;
 }

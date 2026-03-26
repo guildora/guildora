@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { communityRoles, profiles, userCommunityRoles, users } from "@newguildplus/shared";
+import { communityRoles, profiles, userCommunityRoles, users } from "@guildora/shared";
 import { requireModeratorSession } from "../../../utils/auth";
 import { getCommunityApplicationStatus } from "../../../utils/community-applications";
 import { getDb } from "../../../utils/db";

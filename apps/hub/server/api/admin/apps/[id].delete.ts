@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { installedApps } from "@newguildplus/shared";
+import { installedApps } from "@guildora/shared";
 import { refreshAppRegistry } from "../../../utils/apps";
 import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";

@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { cmsAccessSettings, type NewGuildPlusDatabase } from "@newguildplus/shared";
+import { cmsAccessSettings, type GuildoraDatabase } from "@guildora/shared";
 
 export interface CmsAccessConfig {
   allowModeratorAccess: boolean;
@@ -20,7 +20,7 @@ export function hasCmsAccess(permissionRoles: string[], config: CmsAccessConfig)
   return allowed.some((role) => permissionRoles.includes(role));
 }
 
-export async function loadCmsAccessConfig(db: NewGuildPlusDatabase): Promise<CmsAccessConfig> {
+export async function loadCmsAccessConfig(db: GuildoraDatabase): Promise<CmsAccessConfig> {
   const [row] = await db
     .select({
       allowModeratorAccess: cmsAccessSettings.allowModeratorAccess

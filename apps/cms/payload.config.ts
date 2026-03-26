@@ -48,7 +48,10 @@ export default buildConfig({
   globals: [SiteSettings],
   endpoints: [cmsSsoEndpoint],
   admin: {
-    user: "users"
+    user: "users",
+    components: {
+      beforeDashboard: ["./src/components/SeedHint#SeedHint"]
+    }
   },
   db: postgresAdapter({
     pool: {

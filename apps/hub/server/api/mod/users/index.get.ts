@@ -1,4 +1,4 @@
-import { parseProfileName, users } from "@newguildplus/shared";
+import { parseProfileName, users } from "@guildora/shared";
 import { requireModeratorSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
 import { loadUserCommunityRolesMap, loadUserPermissionRolesMap } from "../../../utils/user-directory";

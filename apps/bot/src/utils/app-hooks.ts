@@ -1,48 +1,47 @@
+import type { Client } from "discord.js";
 import { eq } from "drizzle-orm";
-import { installedApps, safeParseAppManifest, type NewGuildPlusAppBotHook } from "@newguildplus/shared";
+import { installedApps, safeParseAppManifest, type GuildoraAppBotHook } from "@guildora/shared";
+import type { BotContext, VoiceActivityPayload, RoleChangePayload, MemberJoinPayload, InteractionPayload } from "@guildora/app-sdk";
 import { getDb } from "./db";
+import { createAppDb } from "./app-db";
+import { createBotClient } from "./bot-client";
 import { logger } from "./logger";
 
+// ─── Hook payload types (aligned with @guildora/app-sdk) ─────────────────
+
 export type BotHookEventMap = {
-  onMemberJoin: {
-    guildId: string;
-    userId: string;
-    username: string;
-    joinedAt: string | null;
-  };
-  onRoleChange: {
-    guildId: string;
-    userId: string;
-    addedRoleIds: string[];
-    removedRoleIds: string[];
-  };
-  onVoiceActivity: {
-    guildId: string;
-    userId: string;
-    oldChannelId: string | null;
-    newChannelId: string | null;
-    eventType: "joined" | "left" | "moved";
-    occurredAt: string;
-  };
-  onInteraction: {
-    guildId: string | null;
-    userId: string;
-    commandName: string;
-    channelId: string | null;
-    occurredAt: string;
-  };
+  onMemberJoin: MemberJoinPayload;
+  onRoleChange: RoleChangePayload;
+  onVoiceActivity: VoiceActivityPayload;
+  onInteraction: InteractionPayload;
 };
 
 type BotHookEventName = keyof BotHookEventMap;
-type BotHookHandler<K extends BotHookEventName> = (payload: BotHookEventMap[K]) => Promise<void> | void;
+type BotHookHandler<K extends BotHookEventName> = (
+  payload: BotHookEventMap[K],
+  ctx: BotContext
+) => Promise<void> | void;
+
+// ─── Registry ────────────────────────────────────────────────────────────────
 
 class BotAppHookRegistry {
-  private handlers = new Map<BotHookEventName, Map<string, BotHookHandler<BotHookEventName>>>();
+  private handlers = new Map<
+    BotHookEventName,
+    Map<string, { handler: BotHookHandler<BotHookEventName>; ctx: BotContext }>
+  >();
 
-  register<K extends BotHookEventName>(appId: string, eventName: K, handler: BotHookHandler<K>) {
-    const scopedHandlers = this.handlers.get(eventName) || new Map<string, BotHookHandler<BotHookEventName>>();
-    scopedHandlers.set(appId, handler as BotHookHandler<BotHookEventName>);
-    this.handlers.set(eventName, scopedHandlers);
+  register<K extends BotHookEventName>(
+    appId: string,
+    eventName: K,
+    handler: BotHookHandler<K>,
+    ctx: BotContext
+  ) {
+    let scopedHandlers = this.handlers.get(eventName);
+    if (!scopedHandlers) {
+      scopedHandlers = new Map();
+      this.handlers.set(eventName, scopedHandlers);
+    }
+    scopedHandlers.set(appId, { handler: handler as BotHookHandler<BotHookEventName>, ctx });
   }
 
   unregister(appId: string, eventName?: BotHookEventName) {
@@ -65,9 +64,9 @@ class BotAppHookRegistry {
       return;
     }
 
-    for (const [appId, handler] of scopedHandlers.entries()) {
+    for (const [appId, { handler, ctx }] of scopedHandlers.entries()) {
       try {
-        await handler(payload);
+        await (handler as BotHookHandler<K>)(payload, ctx);
       } catch (error) {
         // Error-boundary: plugin hooks must never crash the core bot runtime.
         logger.error(`App hook failed [${appId}] on ${eventName}`, error);
@@ -76,18 +75,11 @@ class BotAppHookRegistry {
   }
 }
 
-function registerManifestHook(appId: string, hookName: NewGuildPlusAppBotHook) {
-  botAppHookRegistry.register(appId, hookName, async (payload) => {
-    logger.info(
-      `[app-hook] ${appId} -> ${hookName} ${JSON.stringify({
-        guildId: (payload as { guildId?: string }).guildId || null,
-        userId: (payload as { userId?: string }).userId || null
-      })}`
-    );
-  });
-}
+export const botAppHookRegistry = new BotAppHookRegistry();
 
-export async function loadInstalledAppHooks() {
+// ─── Load all hooks from DB ────────────────────────────────────────────────────
+
+export async function loadInstalledAppHooks(discordClient: Client) {
   const db = getDb();
   const rows = await db.select().from(installedApps).where(eq(installedApps.status, "active"));
   botAppHookRegistry.clearAll();
@@ -99,12 +91,45 @@ export async function loadInstalledAppHooks() {
       continue;
     }
 
-    for (const hookName of parsed.data.botHooks || []) {
-      registerManifestHook(row.appId, hookName);
+    if (!parsed.data.botHooks?.length) continue;
+
+    const codeBundle = (row.codeBundle as Record<string, string>) || {};
+    const code = codeBundle["src/bot/hooks.ts"];
+    if (!code) {
+      logger.warn(`[app-hooks] No hooks bundle found for app '${row.appId}'. Skipping.`);
+      continue;
+    }
+
+    // Evaluate the CJS bundle once per app, then register each declared hook
+    const mod = { exports: {} as Record<string, unknown> };
+    try {
+      // eslint-disable-next-line no-new-func
+      new Function("module", "exports", "require", code)(
+        mod,
+        mod.exports,
+        (id: string) => { throw new Error(`require('${id}') is not available in app hooks.`); }
+      );
+    } catch (err) {
+      logger.error(`[app-hooks] Failed to load hooks bundle for app '${row.appId}'`, err);
+      continue;
+    }
+
+    const config = (row.config as Record<string, unknown>) || {};
+    const ctx: BotContext = {
+      config,
+      db: createAppDb(row.appId),
+      bot: createBotClient(discordClient)
+    };
+
+    for (const hookName of parsed.data.botHooks as GuildoraAppBotHook[]) {
+      const fn = mod.exports[hookName];
+      if (typeof fn !== "function") {
+        logger.warn(`[app-hooks] App '${row.appId}' declares hook '${hookName}' but has no exported function.`);
+        continue;
+      }
+      botAppHookRegistry.register(row.appId, hookName, fn as BotHookHandler<typeof hookName>, ctx);
     }
   }
 
   logger.info(`Loaded bot hooks for ${rows.length} active app(s).`);
 }
-
-export const botAppHookRegistry = new BotAppHookRegistry();

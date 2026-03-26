@@ -162,14 +162,63 @@ export interface Page {
   layout?:
     | (
         | {
+            eyebrowLabel?: string | null;
             heading: string;
             subheading?: string | null;
             backgroundImage?: (number | null) | Media;
             ctaText?: string | null;
             ctaLink?: string | null;
+            ctaExploreLabel?: string | null;
+            ctaGithubLabel?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
+          }
+        | {
+            sectionTitle?: string | null;
+            features?:
+              | {
+                  icon?: string | null;
+                  title: string;
+                  description?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'features';
+          }
+        | {
+            sectionTitle?: string | null;
+            steps?:
+              | {
+                  title: string;
+                  description?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'how-it-works';
+          }
+        | {
+            title: string;
+            description?: string | null;
+            ctaLabel?: string | null;
+            ctaLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'marketplace-teaser';
+          }
+        | {
+            title: string;
+            description?: string | null;
+            buttonLabel?: string | null;
+            buttonLink?: string | null;
+            showInstallSnippet?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'self-host-cta';
           }
         | {
             content?: {
@@ -402,11 +451,64 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              eyebrowLabel?: T;
               heading?: T;
               subheading?: T;
               backgroundImage?: T;
               ctaText?: T;
               ctaLink?: T;
+              ctaExploreLabel?: T;
+              ctaGithubLabel?: T;
+              id?: T;
+              blockName?: T;
+            };
+        features?:
+          | T
+          | {
+              sectionTitle?: T;
+              features?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'how-it-works'?:
+          | T
+          | {
+              sectionTitle?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'marketplace-teaser'?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              ctaLabel?: T;
+              ctaLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'self-host-cta'?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonLink?: T;
+              showInstallSnippet?: T;
               id?: T;
               blockName?: T;
             };

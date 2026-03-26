@@ -19,11 +19,12 @@ type AdminDiscordRolesResponse = {
 
 type CommunitySettingsResponse = {
   communityName: string | null;
+  discordInviteCode: string | null;
   defaultLocale: "en" | "de";
 };
 
 const { t } = useI18n();
-const lastPath = useCookie<string | null>("newguild_admin_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_admin_last_path", { sameSite: "lax" });
 lastPath.value = "/admin/discord-roles";
 
 const { data: communitySettingsData, refresh: refreshCommunitySettings } = await useFetch<CommunitySettingsResponse>(
@@ -31,11 +32,13 @@ const { data: communitySettingsData, refresh: refreshCommunitySettings } = await
   { key: "admin-community-settings" }
 );
 const communityNameInput = ref("");
+const discordInviteCodeInput = ref("");
 const defaultLocaleInput = ref<"en" | "de">("en");
 watch(
   () => communitySettingsData.value,
   (value) => {
     communityNameInput.value = value?.communityName ?? "";
+    discordInviteCodeInput.value = value?.discordInviteCode ?? "";
     defaultLocaleInput.value = value?.defaultLocale === "de" ? "de" : "en";
   },
   { immediate: true }
@@ -46,8 +49,10 @@ const { data, pending, error, refresh } = await useFetch<AdminDiscordRolesRespon
 const savePending = ref(false);
 const communityNameSavePending = ref(false);
 const selectedRoleIds = ref<string[]>([]);
-const actionError = ref("");
-const actionSuccess = ref("");
+const rolesError = ref("");
+const rolesSuccess = ref("");
+const settingsError = ref("");
+const settingsSuccess = ref("");
 
 const editableRoleIdSet = computed(() => {
   const rows = data.value?.guildRoles || [];
@@ -74,9 +79,14 @@ watch(
   { immediate: true }
 );
 
-const clearMessages = () => {
-  actionError.value = "";
-  actionSuccess.value = "";
+const clearRolesMessages = () => {
+  rolesError.value = "";
+  rolesSuccess.value = "";
+};
+
+const clearSettingsMessages = () => {
+  settingsError.value = "";
+  settingsSuccess.value = "";
 };
 
 const mapApiError = (error: unknown, fallbackKey: string) => {
@@ -121,7 +131,7 @@ const toggleRoleSelection = (roleId: string) => {
 };
 
 const saveSelectableRoles = async () => {
-  clearMessages();
+  clearRolesMessages();
   savePending.value = true;
   try {
     const roleIds = selectedRoleIds.value.filter((roleId) => editableRoleIdSet.value.has(roleId));
@@ -132,31 +142,32 @@ const saveSelectableRoles = async () => {
       }
     });
     selectedRoleIds.value = Array.from(new Set(result.selectableRoleIds));
-    actionSuccess.value = t("adminDiscordRoles.saveSuccess");
+    rolesSuccess.value = t("adminDiscordRoles.saveSuccess");
     await refresh();
   } catch (err) {
-    actionError.value = mapApiError(err, "adminDiscordRoles.saveError");
+    rolesError.value = mapApiError(err, "adminDiscordRoles.saveError");
   } finally {
     savePending.value = false;
   }
 };
 
 const saveCommunityName = async () => {
-  clearMessages();
+  clearSettingsMessages();
   communityNameSavePending.value = true;
   try {
     await $fetch("/api/admin/community-settings", {
       method: "PUT",
       body: {
         communityName: communityNameInput.value.trim() || null,
+        discordInviteCode: discordInviteCodeInput.value.trim() || null,
         defaultLocale: defaultLocaleInput.value
       }
     });
-    actionSuccess.value = t("adminDiscordRoles.communitySettingsSaveSuccess");
+    settingsSuccess.value = t("adminDiscordRoles.communitySettingsSaveSuccess");
     await refreshCommunitySettings();
     await clearNuxtData("internal-branding");
   } catch (err) {
-    actionError.value = mapApiError(err, "adminDiscordRoles.saveError");
+    settingsError.value = mapApiError(err, "adminDiscordRoles.saveError");
   } finally {
     communityNameSavePending.value = false;
   }
@@ -170,13 +181,6 @@ const saveCommunityName = async () => {
       <p class="opacity-80">{{ $t("adminDiscordRoles.description") }}</p>
     </header>
 
-    <div v-if="actionError" class="alert alert-error">
-      {{ actionError }}
-    </div>
-    <div v-if="actionSuccess" class="alert alert-success">
-      {{ actionSuccess }}
-    </div>
-
     <div class="card bg-base-200">
       <div class="card-body space-y-3">
         <h2 class="card-title">{{ $t("adminDiscordRoles.communityNameLabel") }}</h2>
@@ -184,22 +188,29 @@ const saveCommunityName = async () => {
           {{ $t("adminDiscordRoles.communityNameDescription") }}
         </p>
         <div class="flex flex-wrap items-start gap-x-2 gap-y-6 md:items-end">
-          <UiRetroInput
+          <UiInput
             v-model="communityNameInput"
             class="w-full max-w-xl"
             :label="$t('adminDiscordRoles.communityNameLabel')"
             :placeholder="$t('adminDiscordRoles.communityNamePlaceholder')"
             :aria-label="$t('adminDiscordRoles.communityNameLabel')"
-           
+
           />
-          <UiRetroSelect
+          <UiInput
+            v-model="discordInviteCodeInput"
+            class="w-full max-w-xs"
+            :label="$t('adminDiscordRoles.discordInviteCodeLabel')"
+            :placeholder="$t('adminDiscordRoles.discordInviteCodePlaceholder')"
+            :aria-label="$t('adminDiscordRoles.discordInviteCodeLabel')"
+          />
+          <UiSelect
             v-model="defaultLocaleInput"
             class="w-full max-w-xs"
             :label="$t('adminDiscordRoles.defaultLocaleLabel')"
           >
             <option value="en">{{ $t("language.english") }}</option>
             <option value="de">{{ $t("language.german") }}</option>
-          </UiRetroSelect>
+          </UiSelect>
           <button
             class="btn btn-primary btn-sm"
             :disabled="communityNameSavePending"
@@ -209,6 +220,9 @@ const saveCommunityName = async () => {
             {{ communityNameSavePending ? $t("common.loading") : $t("common.save") }}
           </button>
         </div>
+        <p class="text-sm opacity-60">{{ $t("adminDiscordRoles.discordInviteCodeDescription") }}</p>
+        <div v-if="settingsError" class="alert alert-error">{{ settingsError }}</div>
+        <div v-if="settingsSuccess" class="alert alert-success">{{ settingsSuccess }}</div>
       </div>
     </div>
 
@@ -249,6 +263,8 @@ const saveCommunityName = async () => {
           </button>
         </div>
         <p class="text-sm opacity-70">{{ $t("adminDiscordRoles.helperText") }}</p>
+        <div v-if="rolesError" class="alert alert-error">{{ rolesError }}</div>
+        <div v-if="rolesSuccess" class="alert alert-success">{{ rolesSuccess }}</div>
       </div>
     </div>
   </section>

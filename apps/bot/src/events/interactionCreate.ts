@@ -26,7 +26,7 @@ async function executeCommand(
 
   await botAppHookRegistry.emit("onInteraction", {
     guildId: interaction.guildId,
-    userId: interaction.user.id,
+    memberId: interaction.user.id,
     commandName: interaction.commandName,
     channelId: interaction.channelId,
     occurredAt: new Date().toISOString()

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { appManifestSchema, installedApps, type AppManifest } from "@newguildplus/shared";
+import { safeParseAppManifest, installedApps, type AppManifest } from "@guildora/shared";
 import { getDb } from "../utils/db";
 
 export interface RuntimeInstalledApp {
@@ -30,7 +30,7 @@ async function loadInstalledApps() {
   const rows = await db.select().from(installedApps).where(eq(installedApps.status, "active"));
   return rows
     .map((row) => {
-      const parsedManifest = appManifestSchema.safeParse(row.manifest || {});
+      const parsedManifest = safeParseAppManifest(row.manifest || {});
       return {
         id: row.id,
         appId: row.appId,

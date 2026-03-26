@@ -1,5 +1,5 @@
 import { asc, eq } from "drizzle-orm";
-import { selectableDiscordRoles, userDiscordRoles } from "@newguildplus/shared";
+import { selectableDiscordRoles, userDiscordRoles } from "@guildora/shared";
 import type { DiscordGuildMember, DiscordGuildRole } from "./botSync";
 import { getDb } from "./db";
 

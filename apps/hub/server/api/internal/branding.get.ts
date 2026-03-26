@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { communitySettings, themeSettings } from "@newguildplus/shared";
+import { communitySettings, themeSettings } from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 

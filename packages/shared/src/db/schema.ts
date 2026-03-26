@@ -13,7 +13,7 @@ import {
   uuid
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
-import type { NewGuildPlusAppManifest } from "../types/app-manifest";
+import type { GuildoraAppManifest } from "../types/app-manifest";
 import type { LocaleCode } from "../types/locale";
 
 export const absenceStatusEnum = pgEnum("absence_status", ["away", "maintenance"]);
@@ -167,9 +167,12 @@ export const installedApps = pgTable("installed_apps", {
   status: appInstallStatusEnum("status").notNull().default("inactive"),
   source: appInstallSourceEnum("source").notNull().default("sideloaded"),
   verified: boolean("verified").notNull().default(false),
+  autoUpdate: boolean("auto_update").notNull().default(false),
   repositoryUrl: text("repository_url"),
-  manifest: jsonb("manifest").$type<NewGuildPlusAppManifest>().notNull(),
+  manifest: jsonb("manifest").$type<GuildoraAppManifest>().notNull(),
   config: jsonb("config").$type<Record<string, unknown>>().notNull().default({}),
+  /** Transpiled CJS code bundles: filePath → CJS source string */
+  codeBundle: jsonb("code_bundle").$type<Record<string, string>>().notNull().default({}),
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
   installedAt: timestamp("installed_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -178,13 +181,26 @@ export const installedApps = pgTable("installed_apps", {
     .$onUpdateFn(() => sql`now()`)
 });
 
+export const appKv = pgTable(
+  "app_kv",
+  {
+    appId: text("app_id").notNull(),
+    key: text("key").notNull(),
+    value: jsonb("value")
+  },
+  (table) => [
+    primaryKey({ columns: [table.appId, table.key] }),
+    index("app_kv_app_id_idx").on(table.appId)
+  ]
+);
+
 export const appMarketplaceSubmissions = pgTable("app_marketplace_submissions", {
   id: uuid("id").primaryKey().defaultRandom(),
   appId: text("app_id").notNull(),
   name: text("name").notNull(),
   version: text("version").notNull(),
   sourceUrl: text("source_url"),
-  manifest: jsonb("manifest").$type<NewGuildPlusAppManifest>().notNull(),
+  manifest: jsonb("manifest").$type<GuildoraAppManifest>().notNull(),
   status: appSubmissionStatusEnum("status").notNull().default("pending"),
   automatedChecks: jsonb("automated_checks").$type<Record<string, unknown>>().notNull().default({}),
   reviewNotes: text("review_notes"),
@@ -236,6 +252,7 @@ export const cmsAccessSettings = pgTable("cms_access_settings", {
 export const communitySettings = pgTable("community_settings", {
   id: serial("id").primaryKey(),
   communityName: text("community_name"),
+  discordInviteCode: text("discord_invite_code"),
   defaultLocale: text("default_locale").$type<LocaleCode>().notNull().default("en"),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()

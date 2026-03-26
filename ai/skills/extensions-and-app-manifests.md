@@ -22,7 +22,8 @@ Work with the repository's current extension seam: stored app manifests, app nav
 
 - manifests are validated through the shared Zod schema
 - active apps affect navigation and bot hook registration
-- manifest-declared pages and API routes are metadata today, not automatic runtime loading
+- sideload install bundles manifest-declared API handlers and bot hooks for runtime execution
+- sideload runtime supports relative in-repo imports for bundled entrypoints, not arbitrary external package resolution
 - marketplace submission storage exists, but local marketplace review is not a complete product flow
 
 ## Step-By-Step Orientation
@@ -40,6 +41,6 @@ Work with the repository's current extension seam: stored app manifests, app nav
 
 ## Common Mistakes To Avoid
 
-- treating manifest metadata as a fully dynamic plugin runtime
+- assuming sideloaded runtime can resolve external package imports at execution time
 - assuming all marketplace concepts are active product features
 - forgetting to refresh the app registry after install-state changes

@@ -6,3 +6,10 @@ export interface CommunityRole {
   permissionRole: PermissionRole;
   discordRoleId?: string | null;
 }
+
+export const roleHierarchy: Record<string, string[]> = {
+  superadmin: ["superadmin", "admin", "moderator", "user"],
+  admin: ["admin", "moderator", "user"],
+  moderator: ["moderator", "user"],
+  user: ["user"]
+};

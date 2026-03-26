@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { coerceProfileNameFromRaw, users } from "@newguildplus/shared";
+import { coerceProfileNameFromRaw, users } from "@guildora/shared";
 import { replaceAuthSessionForUserId } from "../../../utils/auth-session";
 import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot } from "../../../utils/botSync";
 import { requireAdminSession, requireRole } from "../../../utils/auth";

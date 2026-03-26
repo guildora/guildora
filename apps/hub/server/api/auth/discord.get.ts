@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { collectMappedRolesForMember } from "../../utils/admin-mirror";
 import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot } from "../../utils/botSync";
-import { coerceProfileNameFromRaw } from "@newguildplus/shared";
+import { coerceProfileNameFromRaw } from "@guildora/shared";
 import { replaceAuthSessionForUserId } from "../../utils/auth-session";
 import { ensureCommunityUser, ensureUserProfile, getUserByDiscordId, listActiveCommunityRoleMappings, upsertCommunityRoleAssignment } from "../../utils/community";
 import { replaceUserDiscordRolesSnapshotFromMember } from "../../utils/discord-roles";
@@ -35,7 +35,7 @@ type DiscordOauthStatePayload = {
   returnTo: string;
 };
 
-const oauthStateCookieName = "newguild_discord_oauth_state";
+const oauthStateCookieName = "guildora_discord_oauth_state";
 const oauthStateTtlSeconds = 60 * 10;
 
 function encodeOauthState(payload: DiscordOauthStatePayload) {
@@ -258,6 +258,9 @@ export default defineEventHandler(async (event) => {
     const html = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${encodedPath}"><script>window.location.replace(${JSON.stringify(targetPath)});</script></head><body><p>Weiterleitung zu <a href="${encodedPath}">${encodedPath}</a> …</p></body></html>`;
     return send(event, html, "text/html");
   } catch (error) {
+    // Re-throw intentional HTTP errors (403, 400, etc.) so they render proper error pages
+    // instead of redirecting to /login (which causes an infinite loop in dev mode).
+    if (isError(error)) throw error;
     console.error("Discord OAuth failed:", error);
     const msg = error instanceof Error ? error.message : String(error);
     const isDbError =

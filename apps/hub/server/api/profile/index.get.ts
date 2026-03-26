@@ -3,7 +3,7 @@ import {
   parseProfileName,
   users,
   voiceSessions
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import { readAppearancePreferenceFromCustomFields } from "../../../utils/appearance";
 import { normalizeUserLocalePreference, readLegacyLocalePreferenceFromCustomFields, resolveEffectiveLocale } from "../../../utils/locale-preference";
 import { requireSession, requireStaffRole } from "../../utils/auth";

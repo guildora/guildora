@@ -8,9 +8,10 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-const lastPath = useCookie<string | null>("newguild_profile_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_profile_last_path", { sameSite: "lax" });
 lastPath.value = "/profile/design";
 
+const { logout } = useAuth();
 const { fetchProfile, updateProfile } = useProfile();
 const { t } = useI18n();
 const toast = useState<string | null>("profile-toast", () => null);
@@ -96,5 +97,9 @@ const saveDesign = async () => {
         </button>
       </div>
     </form>
+
+    <div class="border-t border-line pt-6">
+      <button class="btn btn-secondary" type="button" @click="logout">{{ $t("nav.logout") }}</button>
+    </div>
   </section>
 </template>

@@ -12,21 +12,21 @@ defineProps<{
   <NuxtLink
     v-if="to && !disabled"
     :to="to"
-    class="btn flex h-11 min-h-11 w-full justify-start gap-3 rounded-full px-3 text-sm font-medium"
-    :class="active ? 'btn-primary' : 'btn-secondary'"
+    class="sidebar-item"
+    :class="{ 'sidebar-item-active': active }"
   >
-    <Icon v-if="iconPath && iconPath.includes(':')" :name="iconPath" class="h-4 w-4 flex-none" aria-hidden="true" />
-    <svg v-else-if="iconPath" class="h-4 w-4 flex-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <Icon v-if="iconPath && iconPath.includes(':')" :name="iconPath" class="h-4 w-4 flex-none opacity-60" aria-hidden="true" />
+    <svg v-else-if="iconPath" class="h-4 w-4 flex-none opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path :d="iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
     <span class="truncate">{{ label }}</span>
   </NuxtLink>
   <div
     v-else
-    class="btn btn-secondary btn-disabled flex h-11 min-h-11 w-full justify-start gap-3 rounded-full px-3 text-sm font-medium opacity-60"
+    class="sidebar-item pointer-events-none opacity-40"
   >
-    <Icon v-if="iconPath && iconPath.includes(':')" :name="iconPath" class="h-4 w-4 flex-none" aria-hidden="true" />
-    <svg v-else-if="iconPath" class="h-4 w-4 flex-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <Icon v-if="iconPath && iconPath.includes(':')" :name="iconPath" class="h-4 w-4 flex-none opacity-60" aria-hidden="true" />
+    <svg v-else-if="iconPath" class="h-4 w-4 flex-none opacity-60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path :d="iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
     <span class="truncate">{{ label }}</span>

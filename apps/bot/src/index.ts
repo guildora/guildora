@@ -14,7 +14,7 @@ import { registerReadyEvent } from "./events/ready";
 import { registerVoiceStateUpdateEvent } from "./events/voiceStateUpdate";
 import { loadInstalledAppHooks } from "./utils/app-hooks";
 import { ensureBaseRoles } from "./utils/community";
-import { startInternalSyncServer } from "./utils/internal-sync-server";
+import { loadAndDeployAppCommands, startInternalSyncServer } from "./utils/internal-sync-server";
 import { logger } from "./utils/logger";
 
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -41,11 +41,15 @@ ensureBaseRoles()
   .then(() => logger.info("Base roles ensured."))
   .catch((error) => logger.error("Role initialization failed.", error));
 
-loadInstalledAppHooks()
+loadInstalledAppHooks(client)
   .then(() => logger.info("App hooks loaded."))
   .catch((error) => logger.error("App hook loading failed.", error));
 
-startInternalSyncServer(client);
+loadAndDeployAppCommands(commands)
+  .then(() => logger.info("App commands loaded and deployed."))
+  .catch((error) => logger.error("App command loading failed.", error));
+
+startInternalSyncServer(client, commands);
 
 client.login(token).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

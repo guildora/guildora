@@ -5,7 +5,7 @@ import {
   profiles,
   userCommunityRoles,
   userPermissionRoles
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import type { getDb } from "./db";
 
 type DbClient = ReturnType<typeof getDb>;

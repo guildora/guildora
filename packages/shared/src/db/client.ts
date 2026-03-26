@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-export type NewGuildPlusDatabase = ReturnType<typeof createDb>;
+export type GuildoraDatabase = ReturnType<typeof createDb>;
 
 export function createDb(connectionString = process.env.DATABASE_URL) {
   if (!connectionString) {

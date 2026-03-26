@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { communityRoles, permissionRoles, userCommunityRoles } from "@newguildplus/shared";
+import { communityRoles, permissionRoles, userCommunityRoles } from "@guildora/shared";
 import { z } from "zod";
 import { getDb } from "./db";
 

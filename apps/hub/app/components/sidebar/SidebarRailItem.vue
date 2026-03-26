@@ -10,8 +10,8 @@ defineProps<{
 <template>
   <NuxtLink
     :to="to"
-    class="btn group h-11 min-h-11 w-11 rounded-full p-0"
-    :class="active ? 'btn-primary' : 'btn-secondary'"
+    class="sidebar-rail-item"
+    :class="{ 'sidebar-rail-item-active': active }"
     :aria-label="label"
     :title="label"
   >

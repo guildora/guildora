@@ -1,6 +1,6 @@
 import { desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Client, Guild } from "discord.js";
-import { users, voiceSessions } from "@newguildplus/shared";
+import { users, voiceSessions } from "@guildora/shared";
 import { getDb } from "./db";
 import {
   closeIfOpen,

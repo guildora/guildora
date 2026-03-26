@@ -6,7 +6,7 @@ import {
   userCommunityRoles,
   users,
   voiceSessions
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import { z } from "zod";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";

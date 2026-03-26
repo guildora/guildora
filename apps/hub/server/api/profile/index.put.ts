@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { parseProfileName, profiles, users } from "@newguildplus/shared";
+import { parseProfileName, profiles, users } from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 import { syncDiscordUserFromWebsite } from "../../utils/botSync";

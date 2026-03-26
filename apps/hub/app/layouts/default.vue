@@ -2,6 +2,7 @@
 import InternalNavSections from "../components/layout/InternalNavSections.vue";
 import MobileNavDrawer from "../components/layout/MobileNavDrawer.vue";
 import MobileNavPill from "../components/layout/MobileNavPill.vue";
+import FeedbackModal from "../components/feedback/FeedbackModal.vue";
 
 interface InternalNavItem {
   id: string;
@@ -33,6 +34,7 @@ interface InternalNavSection {
 const route = useRoute();
 const { user, logout } = useAuth();
 const { t } = useI18n();
+const feedbackModal = ref<{ open: () => void } | null>(null);
 const localePath = useLocalePath();
 const { data } = await useSidebarNavigation();
 const { data: branding } = await useFetch<{ logoDataUrl: string | null; communityName: string | null; sidebarLogoSizePx: number }>("/api/internal/branding", {
@@ -90,6 +92,15 @@ const sections = computed<InternalNavSection[]>(() => {
   return rail.map((entry) => {
     const entryToLocalized = entry.to.startsWith("/") ? localePath(entry.to) : entry.to;
     const entryLabel = resolveNavLabel(entry.label, entry.labelKey);
+    const allGroupItemTos = panelGroups
+      .filter((group) => group.railItemId === entry.id)
+      .flatMap((group) => group.items)
+      .map((item) => item.to.startsWith("/") ? localePath(item.to) : item.to);
+    const matchingTos = allGroupItemTos.filter((to) => isRouteMatch(to, route.path));
+    const activeItemTo = matchingTos.length > 0
+      ? matchingTos.reduce((best, to) => to.length > best.length ? to : best)
+      : null;
+
     const groupsForRail = panelGroups
       .filter((group) => group.railItemId === entry.id)
       .sort((a, b) => a.order - b.order)
@@ -105,7 +116,7 @@ const sections = computed<InternalNavSection[]>(() => {
             labelKey: item.labelKey,
             to: itemToLocalized,
             iconPath: item.iconPath,
-            active: isRouteMatch(itemToLocalized, route.path)
+            active: itemToLocalized === activeItemTo
           };
         })
       }))
@@ -269,20 +280,20 @@ watch(() => route.path, () => {
     ]"
   >
     <aside
-      class="fixed z-30 hidden border border-line/70 bg-base-100/95 shadow-neu-raised lg:flex lg:flex-col"
+      class="fixed z-30 hidden border border-line/70 bg-base-100/95 shadow-md lg:flex lg:flex-col"
       :class="isTinySidebar
         ? 'inset-y-0 left-0 w-14 rounded-none border-y-0 border-l-0 shadow-none'
         : 'inset-y-3 left-3 w-[19.25rem] rounded-3xl'"
     >
       <template v-if="isTinySidebar">
         <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-4" :aria-label="$t('internalNav.ariaLabel')">
-          <div class="flex flex-col items-center gap-2">
+          <div class="flex flex-col items-center gap-1">
             <NuxtLink
               v-for="section in sections"
               :key="section.id"
               :to="section.to"
-              class="btn btn-sm btn-circle"
-              :class="section.isActive ? 'btn-primary' : 'btn-secondary'"
+              class="sidebar-rail-item"
+              :class="{ 'sidebar-rail-item-active': section.isActive }"
               :title="section.label"
               :aria-label="section.label"
             >
@@ -294,35 +305,20 @@ watch(() => route.path, () => {
           </div>
         </nav>
 
-        <div class="mt-auto flex justify-center border-t border-line px-2 py-4">
-          <button
-            class="btn btn-sm btn-circle btn-secondary"
-            type="button"
-            :aria-label="$t('nav.logout')"
-            :title="$t('nav.logout')"
-            @click="logout"
-          >
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M9 7V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M15 12H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              <path d="m7 8-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
       </template>
 
       <template v-else>
         <div class="flex items-center gap-3 border-b border-line px-4 py-2">
           <NuxtLink
             :to="localePath('/dashboard')"
-            class="btn btn-primary btn-sm relative flex shrink-0 items-center justify-center overflow-hidden rounded-full !p-0 text-sm font-bold !shadow-[0_2px_0_rgba(0,20,41,0.85)]"
-            :class="internalLogoDataUrl ? '!border-0 !bg-transparent !shadow-none' : ''"
+            class="relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-sm font-bold text-white"
+            :class="internalLogoDataUrl ? '!bg-transparent' : ''"
             :style="{ width: `${sidebarLogoSizePx}px`, height: `${sidebarLogoSizePx}px`, minWidth: `${sidebarLogoSizePx}px`, minHeight: `${sidebarLogoSizePx}px` }"
           >
             <img
               v-if="internalLogoDataUrl"
               :src="internalLogoDataUrl"
-              alt="Newguild"
+              alt="Guildora"
               class="absolute inset-0 h-full w-full object-cover"
             >
             <span v-else class="relative z-10">NG+</span>
@@ -346,7 +342,7 @@ watch(() => route.path, () => {
             <p class="text-sm font-medium">{{ currentUser?.profileName || $t("internalNav.defaultMember") }}</p>
             <p class="text-xs opacity-65">{{ permissionRoles.join(", ") || $t("internalNav.defaultPermissionRole") }}</p>
           </div>
-          <button class="btn btn-secondary w-full" type="button" @click="logout">{{ $t("nav.logout") }}</button>
+          <button class="btn btn-ghost w-full" type="button" @click="feedbackModal?.open()">{{ $t("feedback.button") }}</button>
         </div>
       </template>
     </aside>
@@ -359,7 +355,7 @@ watch(() => route.path, () => {
       >
         <div
           v-if="!isEmbedFullContentRoute"
-          class="mx-auto max-w-[1700px] rounded-2xl border border-line/60 bg-base-100 p-4 shadow-neu-raised lg:p-6"
+          class="mx-auto max-w-[1700px] rounded-2xl border border-line/60 bg-base-100 p-4 shadow-md lg:p-6"
         >
           <slot />
         </div>
@@ -380,9 +376,11 @@ watch(() => route.path, () => {
       :logo-data-url="internalLogoDataUrl"
       :logo-size-px="mobileLogoSizePx"
       @toggle-section="toggleMobileSection"
-      @logout="logout"
       @close="closeNav"
+      @feedback="feedbackModal?.open()"
     />
+
+    <FeedbackModal ref="feedbackModal" />
 
     <MobileNavPill
       :open="isNavOpen"

@@ -188,7 +188,7 @@ const leaderboardExpanded = ref(false);
         </div>
 
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-1">
-          <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+          <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
             <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.roleTitle") }}</div>
             <div class="stat-value text-lg md:text-xl">{{ profileData?.communityRole || "-" }}</div>
             <div class="stat-desc text-xs">{{ $t("dashboard.permissionsLabel") }}: {{ (profileData?.permissionRoles || []).join(", ") || "-" }}</div>
@@ -210,15 +210,15 @@ const leaderboardExpanded = ref(false);
           </div>
 
           <div class="grid grid-cols-3 gap-3">
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.totalHours") }}</div>
               <div class="stat-value text-lg text-primary md:text-xl">{{ data?.voiceSummary?.totalHours || 0 }}</div>
             </div>
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.sessions") }}</div>
               <div class="stat-value text-lg text-primary md:text-xl">{{ data?.voiceSummary?.sessionCount || 0 }}</div>
             </div>
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.activeMembers") }}</div>
               <div class="stat-value text-lg text-primary md:text-xl">{{ data?.voiceSummary?.activeMembers || 0 }}</div>
             </div>
@@ -239,15 +239,15 @@ const leaderboardExpanded = ref(false);
           <p class="text-sm opacity-70">{{ $t("dashboard.activeProfiles", { count: data?.meta?.profileCount || 0 }) }}</p>
 
           <div class="grid grid-cols-3 gap-3">
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.newPlayers") }}</div>
               <div class="stat-value text-lg text-secondary md:text-xl">{{ data?.profileSummary?.newPlayers || 0 }}</div>
             </div>
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.applicants") }}</div>
               <div class="stat-value text-lg text-secondary md:text-xl">{{ data?.profileSummary?.applicants || 0 }}</div>
             </div>
-            <div class="stat rounded-xl bg-base-100 p-4 shadow-neu-raised-sm">
+            <div class="stat rounded-xl bg-base-100 p-4 shadow-sm">
               <div class="stat-title text-xs md:text-sm">{{ $t("dashboard.members") }}</div>
               <div class="stat-value text-lg text-secondary md:text-xl">{{ data?.profileSummary?.members || 0 }}</div>
             </div>
@@ -283,18 +283,18 @@ const leaderboardExpanded = ref(false);
           </div>
           <div class="flex justify-end gap-2">
             <template v-if="profileSectionExpanded">
-              <UiRetroButton
+              <UiButton
                 v-if="(data?.profileChangeLogs || []).length > 5"
                 variant="ghost"
                 size="sm"
                 @click="visibleChanges = visibleChanges === 5 ? 50 : 5"
               >
                 {{ visibleChanges === 5 ? $t("dashboard.showMore") : $t("dashboard.showLess") }}
-              </UiRetroButton>
+              </UiButton>
             </template>
-            <UiRetroButton variant="ghost" size="sm" @click="profileSectionExpanded = !profileSectionExpanded">
+            <UiButton variant="ghost" size="sm" @click="profileSectionExpanded = !profileSectionExpanded">
               {{ profileSectionExpanded ? $t("dashboard.collapseChanges") : $t("dashboard.expandChanges") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -306,9 +306,9 @@ const leaderboardExpanded = ref(false);
               <h2 class="card-title">{{ $t("dashboard.leaderboardTitle") }}</h2>
               <p class="text-sm opacity-70">{{ $t("dashboard.leaderboardSubtitle") }}</p>
             </div>
-            <UiRetroButton variant="ghost" size="sm" @click="leaderboardExpanded = !leaderboardExpanded">
+            <UiButton variant="ghost" size="sm" @click="leaderboardExpanded = !leaderboardExpanded">
               {{ leaderboardExpanded ? $t("dashboard.collapse") : $t("dashboard.expand") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
           <div v-if="leaderboardExpanded" class="overflow-x-auto">
             <table class="table table-zebra">
@@ -329,14 +329,14 @@ const leaderboardExpanded = ref(false);
             </table>
           </div>
           <div v-if="leaderboardExpanded" class="flex justify-end">
-            <UiRetroButton
+            <UiButton
               v-if="(data?.voiceLeaderboardTop25 || []).length > 10"
               variant="ghost"
               size="sm"
               @click="visibleLeaderboard = visibleLeaderboard === 10 ? 25 : 10"
             >
               {{ visibleLeaderboard === 10 ? $t("dashboard.showMore") : $t("dashboard.showLess") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
         </div>
       </div>

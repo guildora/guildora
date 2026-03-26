@@ -1,5 +1,5 @@
 {
-  "name": "@newguildplus/cms",
+  "name": "@guildora/cms",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,8 @@
     "build": "payload generate:importmap && next build",
     "start": "next start -p 3002",
     "payload": "payload",
-    "generate:importmap": "payload generate:importmap"
+    "generate:importmap": "payload generate:importmap",
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
@@ -25,6 +26,7 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "tsx": "^4.0.0",
     "typescript": "^5.8.2"
   }
 }

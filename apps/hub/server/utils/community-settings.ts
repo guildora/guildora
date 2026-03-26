@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { communitySettings } from "@newguildplus/shared";
-import type { CommunityDefaultLocale } from "@newguildplus/shared";
+import { communitySettings } from "@guildora/shared";
+import type { CommunityDefaultLocale } from "@guildora/shared";
 import type { getDb } from "./db";
 import { normalizeCommunityDefaultLocale } from "../../utils/locale-preference";
 

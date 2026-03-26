@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { communityRoles, userCommunityRoles } from "@newguildplus/shared";
+import { communityRoles, userCommunityRoles } from "@guildora/shared";
 import { z } from "zod";
 import { requireModeratorSession } from "../../../../utils/auth";
 import { assignCommunityRole, getUserById, getUserRoles } from "../../../../utils/community";

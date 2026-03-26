@@ -11,7 +11,7 @@ FROM base AS build
 COPY --from=deps /repo/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm --filter @newguildplus/cms build
+RUN pnpm --filter @guildora/cms build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

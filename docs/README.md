@@ -1,48 +1,19 @@
-# NewGuildPlus Documentation
+# Guildora – Documentation
 
-This directory is the canonical project documentation for developers and AI agents.
+All documentation has been moved to the central docs repository.
 
-## Reading Order
+**https://github.com/guildora/docs/tree/main/internals/guildora/**
 
-1. [`project-overview.md`](./project-overview.md)
-2. [`architecture.md`](./architecture.md)
-3. [`routing-and-navigation.md`](./routing-and-navigation.md)
-4. [`domain-model.md`](./domain-model.md)
-5. [`api-contracts.md`](./api-contracts.md)
-6. [`permissions-matrix.md`](./permissions-matrix.md)
-7. [`development-workflow.md`](./development-workflow.md)
-8. [`setup-build-deploy.md`](./setup-build-deploy.md)
+## Key References
 
-## Core References
+- Architecture: https://github.com/guildora/docs/blob/main/internals/guildora/architecture.md
+- Domain model: https://github.com/guildora/docs/blob/main/internals/guildora/domain-model.md
+- API contracts: https://github.com/guildora/docs/blob/main/internals/guildora/api-contracts.md
+- Permissions matrix: https://github.com/guildora/docs/blob/main/internals/guildora/permissions-matrix.md
+- Routing: https://github.com/guildora/docs/blob/main/internals/guildora/routing-and-navigation.md
+- Development workflow: https://github.com/guildora/docs/blob/main/internals/guildora/development-workflow.md
+- i18n architecture: https://github.com/guildora/docs/blob/main/internals/guildora/i18n-architecture.md
+- Workflows: https://github.com/guildora/docs/blob/main/internals/guildora/workflows/
+- Subsystems: https://github.com/guildora/docs/blob/main/internals/guildora/subsystems/
 
-- Product scope and terminology: [`project-overview.md`](./project-overview.md)
-- Runtime topology and integrations: [`architecture.md`](./architecture.md)
-- Routes, layouts, middleware, and internal navigation: [`routing-and-navigation.md`](./routing-and-navigation.md)
-- Shared database schema and relationships: [`domain-model.md`](./domain-model.md)
-- Nitro route contracts: [`api-contracts.md`](./api-contracts.md)
-- Effective access rules per route: [`permissions-matrix.md`](./permissions-matrix.md)
-- Localization rules: [`i18n-architecture.md`](./i18n-architecture.md)
-- Internal UI design rules: [`design-system-retromorphism.md`](./design-system-retromorphism.md)
-
-## Subsystems
-
-- Hub app: [`subsystems/web-app.md`](./subsystems/web-app.md)
-- Web landing: [`subsystems/web-landing.md`](./subsystems/web-landing.md)
-- CMS: [`subsystems/cms.md`](./subsystems/cms.md)
-- Discord bot: [`subsystems/bot.md`](./subsystems/bot.md)
-- Shared package: [`subsystems/shared-package.md`](./subsystems/shared-package.md)
-
-## Workflows
-
-- Community applications: [`workflows/applications.md`](./workflows/applications.md)
-- Discord role management: [`workflows/discord-role-management.md`](./workflows/discord-role-management.md)
-- Admin user mirroring: [`workflows/admin-user-mirroring.md`](./workflows/admin-user-mirroring.md)
-- CMS SSO: [`workflows/cms-sso.md`](./workflows/cms-sso.md)
-- App lifecycle: [`workflows/app-lifecycle.md`](./workflows/app-lifecycle.md)
-- Marketplace submissions: [`workflows/marketplace-submissions.md`](./workflows/marketplace-submissions.md)
-
-## Maintenance Rules
-
-- Update this directory when routes, tables, roles, or core workflows change.
-- Prefer linking to existing documents instead of duplicating explanations.
-- Mark legacy or inactive behavior explicitly instead of silently deleting history.
+Local MCP access (Claude Code): `guildora-docs` server → `read_file("/internals/guildora/README.md")`

@@ -70,16 +70,26 @@ export const appManifestPageSchema = z.object({
   id: z.string().min(1).max(80),
   path: z.string().min(1).max(255),
   title: z.string().min(1).max(120),
-  requiredRoles: roleListSchema
+  requiredRoles: roleListSchema,
+  /** Relative path to the Vue SFC source file, e.g. "src/pages/index.vue" */
+  component: z.string().min(1).max(255).optional()
 });
 
 export const appManifestApiRouteSchema = z.object({
   method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
   path: z.string().min(1).max(255),
-  handler: z.string().min(1).max(255)
+  handler: z.string().min(1).max(255),
+  requiredRoles: roleListSchema
 });
 
 export const appManifestBotHookSchema = z.enum(["onRoleChange", "onMemberJoin", "onVoiceActivity", "onInteraction"]);
+
+export const appManifestBotCommandSchema = z.object({
+  name: z.string().regex(/^[-_a-z0-9]{1,32}$/, "Command name must be 1–32 lowercase letters, digits, dashes or underscores."),
+  description: z.string().min(1).max(100),
+  nameLocalizations: z.record(z.string()).optional(),
+  descriptionLocalizations: z.record(z.string()).optional()
+});
 
 export const appManifestConfigFieldSchema = z.object({
   key: z.string().min(1).max(80),
@@ -105,6 +115,7 @@ export const appManifestSchema = z.object({
   pages: z.array(appManifestPageSchema).default([]),
   apiRoutes: z.array(appManifestApiRouteSchema).default([]),
   botHooks: z.array(appManifestBotHookSchema).default([]),
+  botCommands: z.array(appManifestBotCommandSchema).default([]),
   configFields: z.array(appManifestConfigFieldSchema).default([]),
   requiredEnv: z.array(z.string().min(1).max(120)).default([]),
   installNotes: z.string().max(5000).optional(),
@@ -124,10 +135,11 @@ export const appManifestSchema = z.object({
 });
 
 export type AppManifest = z.infer<typeof appManifestSchema>;
-export type NewGuildPlusAppManifest = AppManifest;
-export type NewGuildPlusAppRailNavigationItem = z.infer<typeof appManifestNavigationRailItemSchema>;
-export type NewGuildPlusAppPanelNavigationGroup = z.infer<typeof appManifestNavigationPanelGroupSchema>;
-export type NewGuildPlusAppBotHook = z.infer<typeof appManifestBotHookSchema>;
+export type GuildoraAppManifest = AppManifest;
+export type GuildoraAppRailNavigationItem = z.infer<typeof appManifestNavigationRailItemSchema>;
+export type GuildoraAppPanelNavigationGroup = z.infer<typeof appManifestNavigationPanelGroupSchema>;
+export type GuildoraAppBotHook = z.infer<typeof appManifestBotHookSchema>;
+export type GuildoraAppBotCommand = z.infer<typeof appManifestBotCommandSchema>;
 
 function normalizeManifest(manifest: AppManifest): AppManifest {
   if (manifest.navigation.rail.length === 0 && manifest.navigation.railEntry) {

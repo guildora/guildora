@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { themeSettings } from "@newguildplus/shared";
+import { themeSettings } from "@guildora/shared";
 import { requireAdminSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 import { readBodyWithSchema } from "../../utils/http";

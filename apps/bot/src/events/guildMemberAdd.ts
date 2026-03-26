@@ -7,7 +7,7 @@ export function registerGuildMemberAddEvent(client: Client) {
     try {
       await botAppHookRegistry.emit("onMemberJoin", {
         guildId: member.guild.id,
-        userId: member.user.id,
+        memberId: member.user.id,
         username: member.user.username,
         joinedAt: member.joinedAt ? member.joinedAt.toISOString() : null
       });

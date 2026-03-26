@@ -7,7 +7,7 @@ import {
   userCommunityRoles,
   userPermissionRoles,
   users
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import type { DiscordGuildMember, DiscordGuildRole } from "./botSync";
 import { ensureCommunityUser, ensureUserProfile, type ActiveCommunityRoleMapping, upsertCommunityRoleAssignment } from "./community";
 import { getDb } from "./db";

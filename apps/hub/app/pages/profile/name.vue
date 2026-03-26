@@ -5,7 +5,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-const lastPath = useCookie<string | null>("newguild_profile_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_profile_last_path", { sameSite: "lax" });
 lastPath.value = "/profile/name";
 
 const { fetchProfile, updateProfile } = useProfile();

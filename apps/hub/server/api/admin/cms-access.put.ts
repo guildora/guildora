@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { cmsAccessSettings } from "@newguildplus/shared";
+import { cmsAccessSettings } from "@guildora/shared";
 import { z } from "zod";
 import { requireAdminSession } from "../../utils/auth";
 import { loadCmsAccessConfig } from "../../utils/cms-access";

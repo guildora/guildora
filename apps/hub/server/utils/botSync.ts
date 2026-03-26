@@ -146,6 +146,12 @@ export async function removeDiscordRolesFromBot(discordId: string, payload: Remo
   });
 }
 
+export async function refreshBotCommands(): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+  await requestBotInternal<{ ok: boolean }>("/internal/sync-commands", { method: "POST" });
+}
+
 export async function syncDiscordCommunityRolesFromBot(discordId: string, payload: SyncCommunityRolesPayload) {
   const encodedDiscordId = encodeURIComponent(discordId);
   return requestBotInternal<{ ok: boolean; addedRoleIds: string[]; removedRoleIds: string[]; currentRoleIds: string[] }>(

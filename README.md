@@ -1,6 +1,6 @@
-# NewGuildPlus
+# Guildora
 
-NewGuildPlus is a monorepo for a Discord-centered community platform. It combines:
+Guildora is a monorepo for a Discord-centered community platform. It combines:
 
 - a Nuxt 4 landing application (`apps/web`)
 - a Nuxt 4 internal hub application for members, moderation, admin, auth, and APIs (`apps/hub`)
@@ -30,6 +30,7 @@ Useful workspace scripts:
 - `pnpm db:migrate`
 - `pnpm db:seed`
 - `pnpm bot:deploy-commands`
+- `pnpm --filter @guildora/cms seed` — CMS mit Community-Inhalten befüllen
 
 ## Documentation Map
 
@@ -40,3 +41,7 @@ Useful workspace scripts:
 - Domain model: [`docs/domain-model.md`](./docs/domain-model.md)
 - API contracts: [`docs/api-contracts.md`](./docs/api-contracts.md)
 - AI working context: [`ai/README.md`](./ai/README.md)
+
+## License
+
+[PolyForm Noncommercial 1.0.0](LICENSE) — free for non-commercial use (self-hosting, modification, and forking allowed; commercial use prohibited)

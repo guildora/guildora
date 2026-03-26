@@ -1,9 +1,13 @@
 {
   "app": {
-    "name": "NewGuildPlus"
+    "name": "Guildora"
+  },
+  "community": {
+    "fallbackName": "Deine Community"
   },
   "nav": {
-    "login": "Mit Discord anmelden"
+    "login": "Mit Discord anmelden",
+    "joinDiscord": "Discord beitreten"
   },
   "landing": {
     "cta": "Jetzt beitreten",

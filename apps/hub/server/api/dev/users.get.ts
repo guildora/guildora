@@ -1,4 +1,4 @@
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { assertDevRoleSwitcherAccess } from "../../utils/dev-role-switcher";
 import { getDb } from "../../utils/db";

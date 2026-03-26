@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { buildThemeHtmlStyle, type ThemeContentTone } from "../../../utils/theme-colors";
+import { buildThemeHtmlStyle, defaultThemeColors, type ThemeColors, type ThemeContentTone } from "../../../utils/theme-colors";
 
 definePageMeta({
   middleware: ["admin"],
 });
 
-const lastPath = useCookie<string | null>("newguild_admin_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_admin_last_path", { sameSite: "lax" });
 lastPath.value = "/admin/design";
 
 const { t } = useI18n();
@@ -39,20 +39,7 @@ const SIDEBAR_LOGO_SIZES = [40, 48, 60, 72] as const;
 const maxLogoBytes = 1024 * 1024;
 const allowedLogoMimeTypes = new Set(["image/png", "image/webp", "image/svg+xml", "image/jpeg"]);
 
-const form = reactive({
-  colorDominant: "#141115",
-  colorSecondary: "#ffffff",
-  colorAccent: "#ff206e",
-  colorAccentContentTone: "light" as ThemeContentTone,
-  colorInfo: "#48beff",
-  colorInfoContentTone: "dark" as ThemeContentTone,
-  colorSuccess: "#0cf574",
-  colorSuccessContentTone: "dark" as ThemeContentTone,
-  colorWarning: "#f18f01",
-  colorWarningContentTone: "light" as ThemeContentTone,
-  colorError: "#bf211e",
-  colorErrorContentTone: "light" as ThemeContentTone
-});
+const form = reactive<ThemeColors>({ ...defaultThemeColors });
 
 const loading = ref(true);
 const saving = ref(false);
@@ -85,24 +72,13 @@ const applyFormTheme = () => {
 };
 
 const restoreDefaults = () => {
-  form.colorDominant = "#141115";
-  form.colorSecondary = "#ffffff";
-  form.colorAccent = "#ff206e";
-  form.colorAccentContentTone = "light";
-  form.colorInfo = "#48beff";
-  form.colorInfoContentTone = "dark";
-  form.colorSuccess = "#0cf574";
-  form.colorSuccessContentTone = "dark";
-  form.colorWarning = "#f18f01";
-  form.colorWarningContentTone = "light";
-  form.colorError = "#bf211e";
-  form.colorErrorContentTone = "light";
+  assignThemeToForm(defaultThemeColors);
   applyFormTheme();
   paletteSaveSuccess.value = "";
   paletteSaveError.value = "";
 };
 
-const assignThemeToForm = (data: AdminThemeResponse) => {
+const assignThemeToForm = (data: ThemeColors) => {
   form.colorDominant = data.colorDominant;
   form.colorSecondary = data.colorSecondary;
   form.colorAccent = data.colorAccent;
@@ -328,7 +304,7 @@ onMounted(async () => {
           <h2 class="card-title">{{ $t("adminTheme.logoTitle") }}</h2>
           <p class="text-sm opacity-80">{{ $t("adminTheme.logoRecommendations") }}</p>
 
-          <UiRetroSelect
+          <UiSelect
             v-model.number="sidebarLogoSizePx"
             class="w-full max-w-sm"
             :label="$t('adminTheme.sidebarLogoSizeLabel')"
@@ -337,7 +313,7 @@ onMounted(async () => {
             <option v-for="size in SIDEBAR_LOGO_SIZES" :key="size" :value="size">
               {{ size }} px
             </option>
-          </UiRetroSelect>
+          </UiSelect>
 
           <div class="flex items-center gap-4 rounded-2xl bg-base-100 p-4 shadow-neu-inset">
             <div
@@ -346,7 +322,7 @@ onMounted(async () => {
               <img
                 v-if="logoPreview"
                 :src="logoPreview.dataUrl"
-                alt="Newguild"
+                alt="Guildora"
                 class="h-full w-full object-cover"
               >
               <span v-else>NG</span>
@@ -361,7 +337,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <UiRetroFileInput
+          <UiFileInput
             :key="logoInputResetKey"
             :label="$t('adminTheme.logoUploadLabel')"
             accept=".svg,image/png,image/webp,image/jpeg"
@@ -370,17 +346,17 @@ onMounted(async () => {
           />
 
           <div class="flex flex-wrap justify-end gap-2">
-            <UiRetroButton
+            <UiButton
               variant="ghost"
               type="button"
               :disabled="!logoPreview"
               @click="onRemoveLogo"
             >
               {{ $t("adminTheme.logoRemove") }}
-            </UiRetroButton>
-            <UiRetroButton class="glow-accent" type="button" :disabled="saving" @click="saveLogo">
+            </UiButton>
+            <UiButton class="" type="button" :disabled="saving" @click="saveLogo">
               {{ saving ? $t("common.loading") : $t("common.save") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
 
           <div v-if="logoSaveSuccess" class="alert alert-success">
@@ -399,80 +375,80 @@ onMounted(async () => {
         <div class="card-body space-y-4">
           <h2 class="card-title">{{ $t("adminTheme.paletteTitle") }}</h2>
 
-          <UiRetroColorInput v-model="form.colorDominant" :label="$t('adminTheme.dominantLabel')" />
+          <UiColorInput v-model="form.colorDominant" :label="$t('adminTheme.dominantLabel')" />
 
-          <UiRetroColorInput v-model="form.colorSecondary" :label="$t('adminTheme.secondaryLabel')" />
+          <UiColorInput v-model="form.colorSecondary" :label="$t('adminTheme.secondaryLabel')" />
 
           <label class="form-control">
-            <UiRetroColorInput v-model="form.colorAccent" :label="$t('adminTheme.accentLabel')" />
+            <UiColorInput v-model="form.colorAccent" :label="$t('adminTheme.accentLabel')" />
             <div class="mt-2 rounded-xl border border-base-content/10 bg-base-300/30 p-3">
               <div class="flex flex-col gap-2">
                 <span class="label-text block">{{ $t("adminTheme.textToneLabel") }}</span>
-                <UiRetroSelect v-model="form.colorAccentContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
+                <UiSelect v-model="form.colorAccentContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
                   <option value="light">{{ $t("adminTheme.textToneLight") }}</option>
                   <option value="dark">{{ $t("adminTheme.textToneDark") }}</option>
-                </UiRetroSelect>
+                </UiSelect>
               </div>
             </div>
           </label>
 
           <label class="form-control">
-            <UiRetroColorInput v-model="form.colorInfo" :label="$t('adminTheme.infoLabel')" />
+            <UiColorInput v-model="form.colorInfo" :label="$t('adminTheme.infoLabel')" />
             <div class="mt-2 rounded-xl border border-base-content/10 bg-base-300/30 p-3">
               <div class="flex flex-col gap-2">
                 <span class="label-text block">{{ $t("adminTheme.textToneLabel") }}</span>
-                <UiRetroSelect v-model="form.colorInfoContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
+                <UiSelect v-model="form.colorInfoContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
                   <option value="light">{{ $t("adminTheme.textToneLight") }}</option>
                   <option value="dark">{{ $t("adminTheme.textToneDark") }}</option>
-                </UiRetroSelect>
+                </UiSelect>
               </div>
             </div>
           </label>
 
           <label class="form-control">
-            <UiRetroColorInput v-model="form.colorSuccess" :label="$t('adminTheme.successLabel')" />
+            <UiColorInput v-model="form.colorSuccess" :label="$t('adminTheme.successLabel')" />
             <div class="mt-2 rounded-xl border border-base-content/10 bg-base-300/30 p-3">
               <div class="flex flex-col gap-2">
                 <span class="label-text block">{{ $t("adminTheme.textToneLabel") }}</span>
-                <UiRetroSelect v-model="form.colorSuccessContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
+                <UiSelect v-model="form.colorSuccessContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
                   <option value="light">{{ $t("adminTheme.textToneLight") }}</option>
                   <option value="dark">{{ $t("adminTheme.textToneDark") }}</option>
-                </UiRetroSelect>
+                </UiSelect>
               </div>
             </div>
           </label>
 
           <label class="form-control">
-            <UiRetroColorInput v-model="form.colorWarning" :label="$t('adminTheme.warningLabel')" />
+            <UiColorInput v-model="form.colorWarning" :label="$t('adminTheme.warningLabel')" />
             <div class="mt-2 rounded-xl border border-base-content/10 bg-base-300/30 p-3">
               <div class="flex flex-col gap-2">
                 <span class="label-text block">{{ $t("adminTheme.textToneLabel") }}</span>
-                <UiRetroSelect v-model="form.colorWarningContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
+                <UiSelect v-model="form.colorWarningContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
                   <option value="light">{{ $t("adminTheme.textToneLight") }}</option>
                   <option value="dark">{{ $t("adminTheme.textToneDark") }}</option>
-                </UiRetroSelect>
+                </UiSelect>
               </div>
             </div>
           </label>
 
           <label class="form-control">
-            <UiRetroColorInput v-model="form.colorError" :label="$t('adminTheme.errorLabel')" />
+            <UiColorInput v-model="form.colorError" :label="$t('adminTheme.errorLabel')" />
             <div class="mt-2 rounded-xl border border-base-content/10 bg-base-300/30 p-3">
               <div class="flex flex-col gap-2">
                 <span class="label-text block">{{ $t("adminTheme.textToneLabel") }}</span>
-                <UiRetroSelect v-model="form.colorErrorContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
+                <UiSelect v-model="form.colorErrorContentTone" class="w-full max-w-sm" :label="$t('adminTheme.textToneLabel')">
                   <option value="light">{{ $t("adminTheme.textToneLight") }}</option>
                   <option value="dark">{{ $t("adminTheme.textToneDark") }}</option>
-                </UiRetroSelect>
+                </UiSelect>
               </div>
             </div>
           </label>
 
           <div class="flex flex-wrap justify-end gap-2">
-            <UiRetroButton variant="ghost" type="button" @click="restoreDefaults">{{ $t("adminTheme.reset") }}</UiRetroButton>
-            <UiRetroButton class="glow-accent" type="button" :disabled="saving" @click="savePalette">
+            <UiButton variant="ghost" type="button" @click="restoreDefaults">{{ $t("adminTheme.reset") }}</UiButton>
+            <UiButton class="" type="button" :disabled="saving" @click="savePalette">
               {{ saving ? $t("common.loading") : $t("common.save") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
 
           <div v-if="paletteSaveSuccess" class="alert alert-success">
@@ -497,17 +473,17 @@ onMounted(async () => {
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
-            <article class="rounded-2xl bg-base-100 p-4 shadow-neu-raised-sm" :style="darkPreviewStyle" data-theme="retromorphism-dark">
+            <article class="rounded-2xl bg-base-100 p-4 shadow-sm" :style="darkPreviewStyle" data-theme="guildora-dark">
               <h3 class="text-lg font-semibold">{{ $t("adminTheme.previewDark") }}</h3>
               <p class="mt-1 text-sm opacity-80">{{ $t("adminTheme.previewCardTitle") }}</p>
               <div class="mt-3 flex flex-wrap gap-2">
-                <UiRetroButton class="glow-accent" size="sm" type="button">{{ $t("adminTheme.previewPrimary") }}</UiRetroButton>
-                <UiRetroButton variant="secondary" size="sm" type="button">{{ $t("adminTheme.previewSecondary") }}</UiRetroButton>
-                <UiRetroButton variant="ghost" size="sm" type="button">{{ $t("adminTheme.previewGhost") }}</UiRetroButton>
-                <UiRetroButton variant="outline" size="sm" type="button">{{ $t("adminTheme.previewOutline") }}</UiRetroButton>
-                <UiRetroButton variant="success" size="sm" type="button">{{ $t("adminTheme.statusSuccess") }}</UiRetroButton>
-                <UiRetroButton variant="warning" size="sm" type="button">{{ $t("adminTheme.statusWarning") }}</UiRetroButton>
-                <UiRetroButton variant="error" size="sm" type="button">{{ $t("adminTheme.statusError") }}</UiRetroButton>
+                <UiButton class="" size="sm" type="button">{{ $t("adminTheme.previewPrimary") }}</UiButton>
+                <UiButton variant="secondary" size="sm" type="button">{{ $t("adminTheme.previewSecondary") }}</UiButton>
+                <UiButton variant="ghost" size="sm" type="button">{{ $t("adminTheme.previewGhost") }}</UiButton>
+                <UiButton variant="outline" size="sm" type="button">{{ $t("adminTheme.previewOutline") }}</UiButton>
+                <UiButton variant="success" size="sm" type="button">{{ $t("adminTheme.statusSuccess") }}</UiButton>
+                <UiButton variant="warning" size="sm" type="button">{{ $t("adminTheme.statusWarning") }}</UiButton>
+                <UiButton variant="error" size="sm" type="button">{{ $t("adminTheme.statusError") }}</UiButton>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
                 <span class="badge badge-info">{{ $t("adminTheme.statusInfo") }}</span>
@@ -517,17 +493,17 @@ onMounted(async () => {
               </div>
             </article>
 
-            <article class="rounded-2xl bg-base-100 p-4 shadow-neu-raised-sm" :style="lightPreviewStyle" data-theme="retromorphism-light">
+            <article class="rounded-2xl bg-base-100 p-4 shadow-sm" :style="lightPreviewStyle" data-theme="guildora-light">
               <h3 class="text-lg font-semibold">{{ $t("adminTheme.previewLight") }}</h3>
               <p class="mt-1 text-sm opacity-80">{{ $t("adminTheme.previewCardTitle") }}</p>
               <div class="mt-3 flex flex-wrap gap-2">
-                <UiRetroButton class="glow-accent" size="sm" type="button">{{ $t("adminTheme.previewPrimary") }}</UiRetroButton>
-                <UiRetroButton variant="secondary" size="sm" type="button">{{ $t("adminTheme.previewSecondary") }}</UiRetroButton>
-                <UiRetroButton variant="ghost" size="sm" type="button">{{ $t("adminTheme.previewGhost") }}</UiRetroButton>
-                <UiRetroButton variant="outline" size="sm" type="button">{{ $t("adminTheme.previewOutline") }}</UiRetroButton>
-                <UiRetroButton variant="success" size="sm" type="button">{{ $t("adminTheme.statusSuccess") }}</UiRetroButton>
-                <UiRetroButton variant="warning" size="sm" type="button">{{ $t("adminTheme.statusWarning") }}</UiRetroButton>
-                <UiRetroButton variant="error" size="sm" type="button">{{ $t("adminTheme.statusError") }}</UiRetroButton>
+                <UiButton class="" size="sm" type="button">{{ $t("adminTheme.previewPrimary") }}</UiButton>
+                <UiButton variant="secondary" size="sm" type="button">{{ $t("adminTheme.previewSecondary") }}</UiButton>
+                <UiButton variant="ghost" size="sm" type="button">{{ $t("adminTheme.previewGhost") }}</UiButton>
+                <UiButton variant="outline" size="sm" type="button">{{ $t("adminTheme.previewOutline") }}</UiButton>
+                <UiButton variant="success" size="sm" type="button">{{ $t("adminTheme.statusSuccess") }}</UiButton>
+                <UiButton variant="warning" size="sm" type="button">{{ $t("adminTheme.statusWarning") }}</UiButton>
+                <UiButton variant="error" size="sm" type="button">{{ $t("adminTheme.statusError") }}</UiButton>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
                 <span class="badge badge-info">{{ $t("adminTheme.statusInfo") }}</span>

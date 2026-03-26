@@ -36,18 +36,26 @@ const notConfiguredDetails = computed(() => {
 
   return allowedNotConfiguredMessages.includes(candidate) ? candidate : "";
 });
+
+const iframeLoaded = ref(false);
+
+const onIframeLoad = () => {
+  iframeLoaded.value = true;
+};
+
+const handleRefresh = () => {
+  iframeLoaded.value = false;
+  refresh();
+};
 </script>
 
 <template>
   <section class="flex h-full min-h-0 flex-col">
     <div
-      v-if="pending || isForbidden || isNotConfigured || !hasEmbedUrl"
-      class="mx-auto w-full max-w-[1700px] rounded-2xl border border-line/60 bg-base-100 p-4 shadow-neu-raised lg:p-6"
+      v-if="isForbidden || isNotConfigured || (!pending && !hasEmbedUrl)"
+      class="mx-auto w-full max-w-[1700px] rounded-2xl border border-line/60 bg-base-100 p-4 shadow-md lg:p-6"
     >
-      <div v-if="pending" class="flex min-h-[240px] items-center justify-center">
-        <span class="loading loading-spinner loading-md" />
-      </div>
-      <div v-else-if="isForbidden" class="alert alert-warning">{{ $t("cmsPage.forbidden") }}</div>
+      <div v-if="isForbidden" class="alert alert-warning">{{ $t("cmsPage.forbidden") }}</div>
       <div v-else-if="isNotConfigured" class="alert alert-info">
         <div>
           <p>{{ $t("cmsPage.notConfigured") }}</p>
@@ -60,12 +68,23 @@ const notConfiguredDetails = computed(() => {
       v-else
       class="relative min-h-0 h-full w-full flex-1 overflow-hidden"
     >
+      <Transition name="iframe-fade">
+        <div
+          v-if="pending || !iframeLoaded"
+          class="absolute inset-0 z-10 bg-base-100 flex flex-col items-center justify-center gap-4"
+        >
+          <span class="loading loading-spinner loading-lg text-primary" />
+          <p class="text-sm text-base-content/50 tracking-wide">{{ $t("cmsPage.loading") }}</p>
+        </div>
+      </Transition>
       <iframe
+        v-if="!pending && hasEmbedUrl"
         :src="embedUrl"
         :title="t('cmsPage.iframeTitle')"
         class="block h-full w-full"
         loading="lazy"
         referrerpolicy="no-referrer"
+        @load="onIframeLoad"
       />
       <div class="pointer-events-none absolute bottom-3 right-3">
         <button
@@ -73,7 +92,7 @@ const notConfiguredDetails = computed(() => {
           type="button"
           :aria-label="t('cmsPage.refreshSession')"
           :title="t('cmsPage.refreshSession')"
-          @click="refresh()"
+          @click="handleRefresh"
         >
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -89,3 +108,8 @@ const notConfiguredDetails = computed(() => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.iframe-fade-leave-active { transition: opacity 0.3s ease; }
+.iframe-fade-leave-to { opacity: 0; }
+</style>

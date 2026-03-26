@@ -16,6 +16,7 @@ coverage/
 # Logs
 *.log
 logs/
+cache/
 
 # Environment files
 .env
@@ -27,6 +28,7 @@ logs/
 .idea/
 .vscode/
 .cursor/
+.claude/
 
 # App specific
 apps/web/.nuxt/

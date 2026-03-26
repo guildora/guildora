@@ -1,5 +1,5 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { type NewGuildPlusDatabase, voiceSessions } from "@newguildplus/shared";
+import { type GuildoraDatabase, voiceSessions } from "@guildora/shared";
 
 const MINUTE_MS = 60_000;
 
@@ -26,7 +26,7 @@ function calculateDurationMinutes(startedAt: Date, endedAt: Date, maxDurationMin
   return Math.max(0, Math.min(raw, Math.round(maxDurationMinutes)));
 }
 
-async function getNewestOpenSession(db: NewGuildPlusDatabase, userId: string): Promise<OpenSessionRow | null> {
+async function getNewestOpenSession(db: GuildoraDatabase, userId: string): Promise<OpenSessionRow | null> {
   const rows = await db
     .select({
       id: voiceSessions.id,
@@ -46,7 +46,7 @@ export function isRegularVoiceChannel(channelId: string | null | undefined, afkC
 }
 
 export async function closeSessionById(
-  db: NewGuildPlusDatabase,
+  db: GuildoraDatabase,
   session: OpenSessionRow,
   endedAt: Date,
   options: CloseSessionOptions = {}
@@ -64,7 +64,7 @@ export async function closeSessionById(
 }
 
 export async function closeIfOpen(
-  db: NewGuildPlusDatabase,
+  db: GuildoraDatabase,
   userId: string,
   endedAt: Date,
   options: CloseSessionOptions = {}
@@ -79,7 +79,7 @@ export async function closeIfOpen(
 }
 
 export async function openIfMissing(
-  db: NewGuildPlusDatabase,
+  db: GuildoraDatabase,
   userId: string,
   channelId: string,
   startedAt: Date = new Date()
@@ -105,7 +105,7 @@ export async function openIfMissing(
 }
 
 export async function splitOnChannelMismatch(
-  db: NewGuildPlusDatabase,
+  db: GuildoraDatabase,
   userId: string,
   nextChannelId: string,
   now: Date,

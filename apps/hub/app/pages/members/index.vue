@@ -66,22 +66,22 @@ const roleOptions = computed(() => {
     </div>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <UiRetroInput
+      <UiInput
         v-model="search"
         :label="$t('members.searchPlaceholder')"
         :placeholder="$t('members.searchPlaceholder')"
        
       />
-      <UiRetroSelect v-model="communityRole" :label="$t('members.allRoles')">
+      <UiSelect v-model="communityRole" :label="$t('members.allRoles')">
         <option value="">{{ $t("members.allRoles") }}</option>
         <option v-for="role in roleOptions" :key="role" :value="role">{{ role }}</option>
-      </UiRetroSelect>
-      <UiRetroSelect v-model="sort" :label="$t('members.sortLabel')">
+      </UiSelect>
+      <UiSelect v-model="sort" :label="$t('members.sortLabel')">
         <option value="name">{{ $t("members.sortName") }}</option>
         <option value="joined">{{ $t("members.sortJoined") }}</option>
         <option value="role">{{ $t("members.sortRole") }}</option>
         <option value="voice">{{ $t("members.sortVoice") }}</option>
-      </UiRetroSelect>
+      </UiSelect>
     </div>
 
     <div v-if="pending" class="loading loading-spinner loading-md" />

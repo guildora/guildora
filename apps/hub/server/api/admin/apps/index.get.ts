@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { installedApps, safeParseAppManifest } from "@newguildplus/shared";
+import { installedApps, safeParseAppManifest } from "@guildora/shared";
 import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
 

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "NewGuildPlus"
+    "name": "Guildora"
   },
   "nav": {
     "landing": "Landing",
@@ -340,7 +340,19 @@
     "delete": "Delete",
     "repository": "Repository",
     "sourceMarketplace": "Marketplace",
-    "sourceSideloaded": "Sideload"
+    "sourceSideloaded": "Sideload",
+    "updateAvailable": "Update available ({version})",
+    "updateNow": "Update now",
+    "updating": "Updating…",
+    "updateError": "Update failed. Please try again.",
+    "autoUpdate": "Auto-update",
+    "reinstall": "Reinstall",
+    "reinstalling": "Reinstalling…",
+    "localSideloadTitle": "Install Local App",
+    "localSideloadPath": "Local app directory (absolute path)",
+    "localSideloadInstall": "Install from disk",
+    "localSideloadSuccess": "App installed successfully from local path.",
+    "localPathHint": "You can also enter an absolute local path (e.g. /path/to/my-app) to install directly from disk."
   },
   "adminDiscordRoles": {
     "title": "Community Settings",
@@ -382,7 +394,8 @@
     "description": "The marketplace is embedded as a standalone application.",
     "notConfigured": "Marketplace is not configured",
     "iframeTitle": "Marketplace",
-    "refreshEmbed": "Refresh marketplace"
+    "refreshEmbed": "Refresh marketplace",
+    "loading": "Loading Marketplace…"
   },
   "cmsPage": {
     "title": "Landing page",
@@ -390,7 +403,8 @@
     "notConfigured": "Landing page is not configured correctly.",
     "forbidden": "You currently have no access to the landing page.",
     "iframeTitle": "Landing page Admin",
-    "refreshSession": "Refresh session"
+    "refreshSession": "Refresh session",
+    "loading": "Loading CMS…"
   },
   "language": {
     "label": "Language",
@@ -422,6 +436,23 @@
   },
   "landingBlocks": {
     "unsupported": "Unsupported block type: {type}"
+  },
+  "feedback": {
+    "button": "Feedback",
+    "modalTitle": "Send Feedback",
+    "modalSubtitle": "Help us improve by sharing your thoughts.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Short summary",
+    "categoryLabel": "Category",
+    "categoryBug": "Bug",
+    "categoryFeature": "Feature Request",
+    "categoryOther": "Other",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe your feedback in detail...",
+    "submit": "Send",
+    "submitting": "Sending...",
+    "successMessage": "Thank you! Your feedback has been submitted.",
+    "errorMessage": "Failed to send feedback. Please try again."
   },
   "adminPermissions": {
     "title": "Permissions & User Sync",

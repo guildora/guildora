@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { profiles } from "@newguildplus/shared";
+import { profiles } from "@guildora/shared";
 import type { getDb } from "./db";
 
 type DbClient = ReturnType<typeof getDb>;

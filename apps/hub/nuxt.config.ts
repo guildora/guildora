@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        "data-theme": "retromorphism-light"
+        "data-theme": "guildora-light"
       }
     }
   },
@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     preference: "system",
     fallback: "light",
     storage: "localStorage",
-    storageKey: "newguildplus_appearance",
+    storageKey: "guildora_appearance",
     classPrefix: "",
     classSuffix: "-mode"
   },
@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: false },
-  css: ["./app/assets/css/main.css"],
+  css: ["~/assets/css/main.css"],
   runtimeConfig: {
     discordClientId: process.env.NUXT_OAUTH_DISCORD_CLIENT_ID,
     discordClientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
@@ -38,20 +38,22 @@ export default defineNuxtConfig({
     authDevBypass: process.env.NUXT_AUTH_DEV_BYPASS === "true",
     cmsSsoSecret: process.env.CMS_SSO_SECRET || "",
     payloadInternalUrl: process.env.PAYLOAD_INTERNAL_URL || "http://cms:3002",
+    linearApiKey: process.env.NUXT_LINEAR_API_KEY || "",
     public: {
-      appName: "NewGuildPlus",
+      appName: "Guildora",
       hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003",
       landingUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3000",
       cmsUrl: process.env.NUXT_PUBLIC_CMS_URL || "http://localhost:3002",
       marketplaceEmbedUrl: process.env.NUXT_PUBLIC_MARKETPLACE_EMBED_URL || "",
-      defaultTheme: process.env.NUXT_PUBLIC_DEFAULT_THEME || "retromorphism-dark",
+      defaultTheme: process.env.NUXT_PUBLIC_DEFAULT_THEME || "guildora-dark",
       enablePerformanceDebug: process.env.NUXT_PUBLIC_ENABLE_PERFORMANCE_DEBUG === "true"
     }
   },
   routeRules: {
     "/dashboard/**": { ssr: true },
     "/admin/**": { ssr: true },
-    "/mod/**": { ssr: true }
+    "/mod/**": { ssr: true },
+    "/apps/**": { ssr: false }
   },
   i18n: {
     strategy: "prefix_except_default",
@@ -65,7 +67,7 @@ export default defineNuxtConfig({
     vueI18n: "./i18n.config.ts",
     detectBrowserLanguage: {
       useCookie: true,
-      cookieKey: "newguildplus_i18n",
+      cookieKey: "guildora_i18n",
       redirectOn: "root"
     }
   },

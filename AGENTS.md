@@ -1,73 +1,87 @@
-# Newguild - Kontext fuer KI und Agenten
+# Guildora – Context for AI and Agents
 
-Newguild ist eine Community-Plattform mit oeffentlicher Landing Page, internem Hub, Payload CMS, Discord-Bot und gemeinsamer Postgres-Datenbank mit Drizzle-Schema.
+Guildora is a community platform with a public landing page, internal hub, Payload CMS, Discord bot, and a shared Postgres database with a Drizzle schema.
 
-## Struktur
+## Structure
 
-- **apps/web** - Nuxt 4, oeffentliche Landing Page, CMS-Rendering, Login-CTA und OAuth-Redirect-Shim unter `server/api/auth/discord.get.ts`.
-- **apps/hub** - Nuxt 4, interne Nutzer-, Mod- und Admin-UI; Nitro-API unter `server/api/`; echte Discord-OAuth-Session-Logik; eingebettetes CMS-SSO.
-- **apps/cms** - Payload CMS 3 + Next.js; redaktionelle Inhalte, Seiten, Medien, Site Settings und CMS-User.
-- **apps/bot** - Discord-Bot; Voice-Tracking, Guild-Sync, Slash-Command-Setup und interner Sync-Server.
-- **packages/shared** - Drizzle-Schema, Typen, Zod-App-Manifest, DB-Client, Migrationen, Seeds und Shared Utilities.
+- **apps/web** – Nuxt 4, public landing page, CMS rendering, login CTA, and OAuth redirect shim at `server/api/auth/discord.get.ts`.
+- **apps/hub** – Nuxt 4, internal user, mod, and admin UI; Nitro API at `server/api/`; real Discord OAuth session logic; embedded CMS SSO.
+- **apps/cms** – Payload CMS 3 + Next.js; editorial content, pages, media, site settings, and CMS users.
+- **apps/bot** – Discord bot; voice tracking, guild sync, slash command setup, and internal sync server.
+- **packages/shared** – Drizzle schema, types, Zod app manifest, DB client, migrations, seeds, and shared utilities.
 
-## Rollen (Permission)
+## Roles (Permissions)
 
-- **temporaer**, **user**, **moderator**, **admin**, **superadmin**.
-- Sessions enthalten kanonisch `permissionRoles`.
-- `roles` ist nur Legacy-Kompatibilitaet und nicht die primaere Quelle.
-- Community-Rollen (z. B. Bewerber, Anwaerter, Mitglied) sind fachlich; jede ist genau einer Permission-Rolle zugeordnet.
+- **temporary**, **user**, **moderator**, **admin**, **superadmin**.
+- Sessions canonically contain `permissionRoles`.
+- `roles` is legacy compatibility only and not the primary source.
+- Community roles (e.g. applicant, candidate, member) are domain-level; each maps to exactly one permission role.
 
-## Wichtige Konventionen
+## Key Conventions
 
-- **API:** Methode via Dateisuffix (`.get`, `.post`, `.put`, `.delete`).
-- **Auth:** Server-seitig ueber `requireSession`, `requireModeratorSession`, `requireAdminSession` oder `requireRole(...)`.
-- **Landing vs. Hub:** `apps/web` bleibt oeffentlich; interne Workflows und operative APIs gehoeren in `apps/hub`.
-- **OAuth:** Die echte Discord-OAuth-Callback-Logik lebt in `apps/hub/server/api/auth/discord.get.ts`. Die Landing-Route unter `apps/web/server/api/auth/discord.get.ts` leitet nur weiter.
-- **Bewerbungen** = Mod-Bereich `applications` (Mitglieder-Bewerbungen).
-- **Submissions** = Marketplace-App-Einreichungen (`app_marketplace_submissions`); lokaler Full-Review-Flow ist derzeit nicht aktiv.
-- **Dokumentation:** `docs/` ist kanonisch fuer Architektur, Flows, API, Routing und Berechtigungen. `ai/` enthaelt Skills und JSON-Manifeste fuer Agenten.
+- **API:** Method via file suffix (`.get`, `.post`, `.put`, `.delete`).
+- **Auth:** Server-side via `requireSession`, `requireModeratorSession`, `requireAdminSession`, or `requireRole(...)`.
+- **Landing vs. Hub:** `apps/web` stays public; internal workflows and operational APIs belong in `apps/hub`.
+- **OAuth:** The real Discord OAuth callback logic lives in `apps/hub/server/api/auth/discord.get.ts`. The landing route at `apps/web/server/api/auth/discord.get.ts` only redirects.
+- **Applications** = mod-area `applications` (member applications).
+- **Submissions** = marketplace app submissions (`app_marketplace_submissions`); local full-review flow is not active yet.
+- **Documentation:** Canonical docs live at https://github.com/guildora/docs — see references below.
 
-## Design System (Hub)
+## Documentation
 
-- **Quelle:** `docs/design-system-retromorphism.md`.
-- **Themes:** `retromorphism-light` und `retromorphism-dark`.
-- **Appearance-Praferenz:** `appearancePreference` lebt in `profiles.custom_fields`.
-- **Fonts:** `Nunito` als produktive UI-Basis.
-- **Template-Pfad:** `apps/hub/app/components/ui/` ist die bevorzugte Basis fuer neue interne UI-Bausteine.
-- **Buttons (Pflicht, intern):** Alle Buttons im internen Hub muessen Retro-konform sein und auf den UI-Templates/Klassen aus `apps/hub/app/components/ui/` und `docs/design-system-retromorphism.md` basieren.
-- **Buttons (Ausnahme, extern):** Oeffentliche Landing- und CMS-Layouts sind von dieser Button-Pflicht ausgenommen.
-- **Regel:** Keine Funktionsaenderung durch Styling-PRs, ausser explizit freigegeben.
+All platform documentation: https://github.com/guildora/docs
 
-## Fuer Agenten
+Key references for this repo:
 
-- Kein MCP-Server im Repo. API ist session-basiert; fuer Maschinenzugriff waeren spaeter API-Key-, OAuth- oder MCP-Adapter noetig.
-- Aktionen und API-Oberflaeche: `ai/actions.registry.json`, `ai/resources/resources.manifest.json`, `docs/api-contracts.md`.
-- Domainenmodell: `docs/domain-model.md`.
-- Routing und Ownership: `docs/routing-and-navigation.md`.
-- Workflows: `docs/workflows/`.
-- Wenn sich Routen, Berechtigungen, Tabellen oder Workflows aendern, muessen `docs/`, `ai/` und diese Agent-Anweisungen im selben Change mitgezogen werden.
+- Architecture: https://github.com/guildora/docs/blob/main/internals/guildora/architecture.md
+- Domain model: https://github.com/guildora/docs/blob/main/internals/guildora/domain-model.md
+- API contracts: https://github.com/guildora/docs/blob/main/internals/guildora/api-contracts.md
+- Permissions matrix: https://github.com/guildora/docs/blob/main/internals/guildora/permissions-matrix.md
+- Routing: https://github.com/guildora/docs/blob/main/internals/guildora/routing-and-navigation.md
+- Development workflow: https://github.com/guildora/docs/blob/main/internals/guildora/development-workflow.md
+- i18n architecture: https://github.com/guildora/docs/blob/main/internals/guildora/i18n-architecture.md
+- Design system: https://github.com/guildora/docs/blob/main/DESIGN_SYSTEM.md
+- Workflows: https://github.com/guildora/docs/blob/main/internals/guildora/workflows/
 
-## i18n-Regeln (Pflicht)
+Local MCP access (Claude Code): `guildora-docs` server → `read_file("/internals/guildora/architecture.md")`
 
-- Alle neuen UI-Texte, Labels, Buttons, Hinweise, Statusmeldungen und ARIA-Texte muessen ueber das Uebersetzungssystem laufen.
-- Neue Keys muessen mindestens in `de` und `en` gepflegt werden.
-- Community-Default-Sprache (`community_settings.default_locale`) ist der Fallback fuer User ohne eigene Praeferenz.
-- User-Praeferenz (`profiles.locale_preference`) hat Vorrang, sobald gespeichert.
-- Sprachwechsel im Hub erst nach erfolgreichem Persistieren der Praeferenz (`PUT /api/profile/locale`).
-- Landing (`/`) bleibt oeffentlich und verwaltet Locale-Routing getrennt vom Hub.
-- Referenzdokument: `docs/i18n-architecture.md`.
+## Design System
 
-## Commit-Empfehlungen fuer KI-Agenten (Pflicht)
+- **Global reference:** https://github.com/guildora/docs/blob/main/DESIGN_SYSTEM.md — single source of truth for all design tokens.
+- **Hub-specific docs:** https://github.com/guildora/docs/blob/main/internals/guildora/design-system.md
+- **Themes:** `guildora-dark` (default) and `guildora-light` (Hub only). Landing is dark-only.
+- **Appearance preference:** `appearancePreference` lives in `profiles.custom_fields`.
+- **Font:** DM Sans (400, 500, 600, 700). Not Nunito (deprecated).
+- **Default accent:** `#7C3AED` (Violet). Hub users can customize their community colors via the dynamic theme system in `apps/hub/utils/theme-colors.ts`.
+- **Landing accent:** `#7C3AED` (Violet, matching hub default).
+- **Component path:** `apps/hub/app/components/ui/` — `Ui*` prefixed components (UiButton, UiInput, etc.).
+- **Buttons (required, internal):** All buttons in the internal hub must use the UI components from `apps/hub/app/components/ui/`.
+- **Buttons (exception, external):** Public landing and CMS layouts are exempt from this button requirement.
+- **Shadows:** Subtle only (`--shadow-sm/md/lg`). No neuomorphism.
+- **Border radius:** 8px buttons, 12px cards, 16px modals. No sharp corners (0px) or pill buttons (9999px).
+- **Rule:** No functional changes in styling PRs unless explicitly approved.
 
-- KI-Agenten sollen aktiv Commit-Empfehlungen geben, auch wenn der User nicht explizit danach fragt.
-- Eine Empfehlung soll erfolgen, wenn ein sinnvoller Zwischenstand erreicht ist (abgeschlossener Mini-Task, Bugfix, Refactor-Block, i18n-Block, Styling-Block ohne Funktionsaenderung).
-- Eine Empfehlung soll vor riskanten Aenderungen erfolgen (groesserer Refactor, Datenmodell-/Schema-Aenderung, Routing-/Auth-Umbau).
-- Eine Empfehlung soll spaetestens nach ca. 30-90 Minuten zusammenhaengender Arbeit erfolgen.
-- Eine Empfehlung soll vor Pause oder Thread-Ende erfolgen.
-- Keine Commit-Empfehlung fuer rein experimentelle oder offensichtlich unvollstaendige Zwischenstaende, ausser als expliziter `wip:`-Commit.
-- Empfehlung immer konkret formulieren: `Jetzt committen`, `Noch warten`, oder `WIP-Commit sinnvoll`.
-- Bei Commit-Empfehlung immer eine passende Commit-Message vorschlagen (Conventional Commits, z. B. `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `style:`, `test:`).
-- Wenn mehrere Themen geaendert wurden, soll die KI Split-Commits empfehlen (nach fachlich zusammenhaengenden Bloecken).
+## i18n Rules (Required)
+
+- All new UI texts, labels, buttons, hints, status messages, and ARIA texts must go through the translation system.
+- New keys must be maintained in at least `de` and `en`.
+- Community default locale (`community_settings.default_locale`) is the fallback for users without their own preference.
+- User preference (`profiles.locale_preference`) takes precedence once saved.
+- Language switching in the hub only after successful persistence of the preference (`PUT /api/profile/locale`).
+- Landing (`/`) stays public and manages locale routing separately from the hub.
+- Reference: https://github.com/guildora/docs/blob/main/internals/guildora/i18n-architecture.md
+
+## Commit Recommendations for AI Agents (Required)
+
+- AI agents should actively recommend commits, even if the user does not explicitly ask.
+- A recommendation should be made when a meaningful intermediate state is reached (completed mini-task, bug fix, refactor block, i18n block, styling block without functional change).
+- A recommendation should be made before risky changes (larger refactor, data model/schema change, routing/auth restructure).
+- A recommendation should be made after approximately 30–90 minutes of continuous work at the latest.
+- A recommendation should be made before a break or end of thread.
+- No commit recommendation for purely experimental or obviously incomplete states, except as an explicit `wip:` commit.
+- Always phrase the recommendation concretely: `Commit now`, `Wait a bit longer`, or `WIP commit makes sense`.
+- With a commit recommendation always suggest an appropriate commit message (Conventional Commits, e.g. `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `style:`, `test:`).
+- When multiple topics have been changed, the AI should recommend split commits (by logically related blocks).
 
 ## Skills
 
@@ -91,8 +105,8 @@ A skill is a set of local instructions to follow that is stored in a `SKILL.md` 
   4. If `scripts/` exist, prefer running or patching them instead of retyping large code blocks.
   5. If `assets/` or templates exist, reuse them instead of recreating from scratch.
 - Coordination and sequencing:
-  - If multiple skills apply, choose the minimale Menge, die die Aufgabe sauber abdeckt, und nenne kurz die Reihenfolge.
-  - Wenn du eine naheliegende Skill nicht nutzt, sage kurz warum.
+  - If multiple skills apply, choose the minimal set that cleanly covers the task and briefly state the order.
+  - If you decide not to use an obviously applicable skill, briefly explain why.
 - Context hygiene:
   - Keep context small: summarize long sections instead of pasting them; only load extra files when needed.
   - Avoid deep reference-chasing: prefer opening only files directly linked from `SKILL.md` unless you're blocked.

@@ -39,7 +39,7 @@ const isRouteActive = (target: string) => route.path === target || route.path.st
 
 <template>
   <div class="border-b border-line/60 bg-base-100 px-3 py-3 md:px-5">
-    <div class="navbar mx-auto max-w-[1400px] rounded-2xl border border-accent-subtle bg-base-100/95 px-3 shadow-neu-raised-sm md:px-4">
+    <div class="navbar mx-auto max-w-[1400px] rounded-2xl border border-accent-subtle bg-base-100/95 px-3 shadow-sm md:px-4">
     <div class="navbar-start">
       <!-- Mobile hamburger -->
       <button
@@ -97,7 +97,7 @@ const isRouteActive = (target: string) => route.path === target || route.path.st
 
   <!-- Mobile dropdown menu -->
   <Transition name="nav-slide">
-    <div v-if="mobileMenuOpen" class="mx-3 mt-2 rounded-2xl border border-accent-subtle bg-base-100 p-3 shadow-neu-raised-sm md:hidden">
+    <div v-if="mobileMenuOpen" class="mx-3 mt-2 rounded-2xl border border-accent-subtle bg-base-100 p-3 shadow-sm md:hidden">
       <ul class="menu w-full gap-1">
         <li v-for="item in navItems" :key="item.to">
           <NuxtLink

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "NewGuildPlus"
+    "name": "Guildora"
   },
   "nav": {
     "landing": "Startseite",
@@ -340,7 +340,19 @@
     "delete": "Löschen",
     "repository": "Repository",
     "sourceMarketplace": "Marketplace",
-    "sourceSideloaded": "Sideload"
+    "sourceSideloaded": "Sideload",
+    "updateAvailable": "Update verfügbar ({version})",
+    "updateNow": "Jetzt aktualisieren",
+    "updating": "Wird aktualisiert…",
+    "updateError": "Update fehlgeschlagen. Bitte erneut versuchen.",
+    "autoUpdate": "Automatische Updates",
+    "reinstall": "Neu installieren",
+    "reinstalling": "Wird neu installiert…",
+    "localSideloadTitle": "Lokale App installieren",
+    "localSideloadPath": "Lokales App-Verzeichnis (absoluter Pfad)",
+    "localSideloadInstall": "Von Festplatte installieren",
+    "localSideloadSuccess": "App erfolgreich vom lokalen Pfad installiert.",
+    "localPathHint": "Es kann auch ein absoluter lokaler Pfad angegeben werden (z.B. /pfad/zur/app), um direkt von der Festplatte zu installieren."
   },
   "adminDiscordRoles": {
     "title": "Community-Einstellungen",
@@ -382,7 +394,8 @@
     "description": "Der Marketplace wird als eigenständige Anwendung eingebettet.",
     "notConfigured": "Marketplace nicht konfiguriert",
     "iframeTitle": "Marketplace",
-    "refreshEmbed": "Marketplace aktualisieren"
+    "refreshEmbed": "Marketplace aktualisieren",
+    "loading": "Marketplace wird geladen…"
   },
   "cmsPage": {
     "title": "Landing-Seite",
@@ -390,7 +403,8 @@
     "notConfigured": "Landing-Seite ist nicht korrekt konfiguriert.",
     "forbidden": "Du hast aktuell keinen Zugriff auf die Landing-Seite.",
     "iframeTitle": "Landing-Seite Admin",
-    "refreshSession": "Session aktualisieren"
+    "refreshSession": "Session aktualisieren",
+    "loading": "CMS wird geladen…"
   },
   "language": {
     "label": "Sprache",
@@ -422,6 +436,23 @@
   },
   "landingBlocks": {
     "unsupported": "Nicht unterstützter Blocktyp: {type}"
+  },
+  "feedback": {
+    "button": "Feedback",
+    "modalTitle": "Feedback senden",
+    "modalSubtitle": "Hilf uns, besser zu werden – teile deine Gedanken mit uns.",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Kurze Zusammenfassung",
+    "categoryLabel": "Kategorie",
+    "categoryBug": "Fehler",
+    "categoryFeature": "Feature-Anfrage",
+    "categoryOther": "Sonstiges",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Beschreibe dein Feedback ausführlich...",
+    "submit": "Senden",
+    "submitting": "Wird gesendet...",
+    "successMessage": "Danke! Dein Feedback wurde übermittelt.",
+    "errorMessage": "Feedback konnte nicht gesendet werden. Bitte versuche es erneut."
   },
   "adminPermissions": {
     "title": "Berechtigungen & Nutzer-Sync",

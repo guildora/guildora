@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import type { AppSession, AppSessionUser } from "./auth";
 import { getCommunityRoleName, getUserRoles } from "./community";
 import { getDb } from "./db";

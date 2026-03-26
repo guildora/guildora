@@ -76,7 +76,7 @@ watch(isOpen, async (open) => {
   <div v-if="isAllowed">
     <button
       type="button"
-      class="btn btn-primary btn-sm fixed bottom-4 right-4 z-40 shadow-neu-raised"
+      class="btn btn-primary btn-sm fixed bottom-4 right-4 z-40 shadow-md"
       @click="isOpen = true"
     >
       {{ $t("devRoleSwitcher.trigger") }}
@@ -89,7 +89,7 @@ watch(isOpen, async (open) => {
           class="fixed inset-0 z-[120] bg-black/55 backdrop-blur-sm p-4 md:p-6"
           @click.self="isOpen = false"
         >
-          <div class="mx-auto flex h-full max-w-4xl flex-col rounded-2xl border border-line bg-surface-2 shadow-neu-raised-lg">
+          <div class="mx-auto flex h-full max-w-4xl flex-col rounded-2xl border border-line bg-surface-2 shadow-lg">
             <header class="flex items-start justify-between border-b border-line px-5 py-4">
               <div>
                 <h2 class="text-lg font-semibold">{{ t("devRoleSwitcher.title") }}</h2>
@@ -110,7 +110,7 @@ watch(isOpen, async (open) => {
             </div>
 
             <div class="grid gap-2 border-b border-line px-5 py-4 md:grid-cols-3">
-              <UiRetroInput
+              <UiInput
                 v-model="search"
                 size="sm"
                 :label="t('devRoleSwitcher.searchPlaceholder')"
@@ -118,7 +118,7 @@ watch(isOpen, async (open) => {
                
                 type="search"
               />
-              <UiRetroSelect
+              <UiSelect
                 v-model="selectedPermissionRole"
                 size="sm"
                 :label="t('devRoleSwitcher.allPermissionRoles')"
@@ -127,8 +127,8 @@ watch(isOpen, async (open) => {
                 <option v-for="role in permissionRoleOptions" :key="role" :value="role">
                   {{ role === "ALL" ? t("devRoleSwitcher.allPermissionRoles") : role }}
                 </option>
-              </UiRetroSelect>
-              <UiRetroSelect
+              </UiSelect>
+              <UiSelect
                 v-model="selectedCommunityRole"
                 size="sm"
                 :label="t('devRoleSwitcher.allCommunityRoles')"
@@ -137,7 +137,7 @@ watch(isOpen, async (open) => {
                 <option v-for="role in communityRoleOptions" :key="role" :value="role">
                   {{ role === "ALL" ? t("devRoleSwitcher.allCommunityRoles") : role }}
                 </option>
-              </UiRetroSelect>
+              </UiSelect>
               <button
                 type="button"
                 class="btn btn-outline btn-sm"

@@ -16,9 +16,9 @@ export const setupCommand: BotCommand = {
     .setNameLocalizations({
       de: "einrichten"
     })
-    .setDescription("Post or update the NewGuildPlus info embed")
+    .setDescription("Post or update the Guildora info embed")
     .setDescriptionLocalizations({
-      de: "Erstellt oder aktualisiert das NewGuildPlus-Info-Embed"
+      de: "Erstellt oder aktualisiert das Guildora-Info-Embed"
     })
     .addChannelOption((option) =>
       option

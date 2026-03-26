@@ -1,5 +1,5 @@
 import { inArray } from "drizzle-orm";
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import { requireAdminSession } from "../../../utils/auth";
 import { listSuperadminUserIds } from "../../../utils/admin-mirror";
 import { getDb } from "../../../utils/db";

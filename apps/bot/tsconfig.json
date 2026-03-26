@@ -9,10 +9,11 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "baseUrl": ".",
     "paths": {
-      "@newguildplus/shared": ["../../packages/shared/src/index.ts"],
-      "@newguildplus/shared/*": ["../../packages/shared/src/*"]
+      "@guildora/app-sdk": ["../../packages/app-sdk/src/index.ts"],
+      "@guildora/app-sdk/*": ["../../packages/app-sdk/src/*"],
+      "@guildora/shared": ["../../packages/shared/src/index.ts"],
+      "@guildora/shared/*": ["../../packages/shared/src/*"]
     }
   },
   "include": ["src/**/*.ts"]

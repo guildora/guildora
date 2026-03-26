@@ -2,16 +2,19 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        "data-theme": "retromorphism-light"
+        "data-theme": "guildora-dark"
       }
     }
   },
   modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxt/eslint"],
+  components: {
+    dirs: [{ path: "~/components", pathPrefix: false }]
+  },
   devtools: { enabled: false },
-  css: ["./app/assets/css/main.css"],
+  css: ["~/assets/css/main.css"],
   runtimeConfig: {
     public: {
-      appName: "NewGuildPlus",
+      appName: "Guildora",
       appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3000",
       hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003",
       cmsUrl: process.env.NUXT_PUBLIC_CMS_URL || "http://localhost:3002"
@@ -29,8 +32,11 @@ export default defineNuxtConfig({
     vueI18n: "./i18n.config.ts",
     detectBrowserLanguage: {
       useCookie: true,
-      cookieKey: "newguildplus_i18n",
+      cookieKey: "guildora_i18n",
       redirectOn: "root"
+    },
+    experimental: {
+      localeDetector: "localeDetector.ts"
     }
   },
   compatibilityDate: "2025-01-01"

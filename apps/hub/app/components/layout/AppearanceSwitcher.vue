@@ -35,7 +35,7 @@ function onAppearanceChange(event: Event) {
 </script>
 
 <template>
-  <UiRetroSelect
+  <UiSelect
     class="w-44"
     size="sm"
     :label="$t('appearance.label')"
@@ -46,5 +46,5 @@ function onAppearanceChange(event: Event) {
     <option value="light">{{ $t("appearance.light") }}</option>
     <option value="dark">{{ $t("appearance.dark") }}</option>
     <option value="system">{{ $t("appearance.system") }}</option>
-  </UiRetroSelect>
+  </UiSelect>
 </template>

@@ -1,6 +1,11 @@
 import crypto from "node:crypto";
 import { createServer } from "node:http";
-import type { Client } from "discord.js";
+import { Collection, REST, Routes, SlashCommandBuilder, type Client } from "discord.js";
+import { eq } from "drizzle-orm";
+import { installedApps, safeParseAppManifest } from "@guildora/shared";
+import type { BotCommand } from "../types";
+import { setupCommand } from "../commands/setup";
+import { getDb } from "./db";
 import { botAppHookRegistry } from "./app-hooks";
 import { logger } from "./logger";
 
@@ -142,7 +147,46 @@ async function getGuild(client: Client, guildId: string) {
   return guild;
 }
 
-export function startInternalSyncServer(client: Client) {
+export async function loadAndDeployAppCommands(commands: Collection<string, BotCommand>) {
+  const db = getDb();
+  const rows = await db.select().from(installedApps).where(eq(installedApps.status, "active"));
+
+  commands.clear();
+  commands.set(setupCommand.data.name, setupCommand);
+
+  for (const row of rows) {
+    const parsed = safeParseAppManifest(row.manifest);
+    if (!parsed.success) continue;
+    for (const cmd of parsed.data.botCommands ?? []) {
+      const builder = new SlashCommandBuilder().setName(cmd.name).setDescription(cmd.description);
+      if (cmd.nameLocalizations) builder.setNameLocalizations(cmd.nameLocalizations);
+      if (cmd.descriptionLocalizations) builder.setDescriptionLocalizations(cmd.descriptionLocalizations);
+      commands.set(cmd.name, {
+        data: builder,
+        execute: async (interaction) => {
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ ephemeral: true, content: `/${cmd.name}` });
+          }
+        }
+      });
+    }
+  }
+
+  const token = process.env.DISCORD_BOT_TOKEN;
+  const clientId = process.env.DISCORD_CLIENT_ID;
+  const guildId = process.env.DISCORD_GUILD_ID;
+  if (token && clientId && guildId) {
+    const rest = new REST({ version: "10" }).setToken(token);
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+      body: [...commands.values()].map((c) => c.data.toJSON())
+    });
+    logger.info(`Deployed ${commands.size} slash command(s) to Discord.`);
+  }
+
+  return commands.size;
+}
+
+export function startInternalSyncServer(client: Client, commands: Collection<string, BotCommand>) {
   const portValue = process.env.BOT_INTERNAL_PORT || "3050";
   const port = Number.parseInt(portValue, 10);
   if (!Number.isFinite(port) || port <= 0) {
@@ -244,9 +288,9 @@ export function startInternalSyncServer(client: Client) {
 
           await botAppHookRegistry.emit("onRoleChange", {
             guildId: guild.id,
-            userId: member.user.id,
-            addedRoleIds: toAdd,
-            removedRoleIds: toRemove
+            memberId: member.user.id,
+            addedRoles: toAdd,
+            removedRoles: toRemove
           });
         }
 
@@ -380,9 +424,9 @@ export function startInternalSyncServer(client: Client) {
         if (toAdd.length > 0 || toRemove.length > 0) {
           await botAppHookRegistry.emit("onRoleChange", {
             guildId: guild.id,
-            userId: member.user.id,
-            addedRoleIds: toAdd,
-            removedRoleIds: toRemove
+            memberId: member.user.id,
+            addedRoles: toAdd,
+            removedRoles: toRemove
           });
         }
 
@@ -436,13 +480,19 @@ export function startInternalSyncServer(client: Client) {
           await member.roles.remove(removableRoleIds);
           await botAppHookRegistry.emit("onRoleChange", {
             guildId: guild.id,
-            userId: member.user.id,
-            addedRoleIds: [],
-            removedRoleIds: removableRoleIds
+            memberId: member.user.id,
+            addedRoles: [],
+            removedRoles: removableRoleIds
           });
         }
 
         json(res, 200, { ok: true, removedRoleIds: removableRoleIds });
+        return;
+      }
+
+      if (method === "POST" && pathname === "/internal/sync-commands") {
+        const deployedCount = await loadAndDeployAppCommands(commands);
+        json(res, 200, { ok: true, deployedCount });
         return;
       }
 

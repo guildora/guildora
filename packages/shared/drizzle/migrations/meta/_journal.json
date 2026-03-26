@@ -85,6 +85,13 @@
       "when": 1773600000000,
       "tag": "0011_theme_logo_branding",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1774000000000,
+      "tag": "0024_app_auto_update",
+      "breakpoints": true
     }
   ]
 }

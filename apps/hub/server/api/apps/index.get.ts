@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { installedApps } from "@newguildplus/shared";
+import { installedApps } from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 

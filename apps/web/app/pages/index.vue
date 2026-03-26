@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const config = useRuntimeConfig();
 const { locale } = useI18n();
-const { fetchLandingPage } = usePayload();
+const { fetchLandingPage, cmsBaseUrl } = usePayload();
+const { data: branding } = await useCommunityName();
+const communityName = computed(() => branding.value?.communityName ?? null);
 const landingPage = await fetchLandingPage(locale.value === "de" ? "de" : "en");
 
 const hubLoginUrl = computed(() => {
@@ -32,7 +34,7 @@ if (landingPage?.seo?.title) {
       <a :href="hubLoginUrl" class="link link-primary font-semibold">{{ $t("nav.login") }}</a>
     </div>
     <template v-else>
-      <CmsBlockRenderer v-for="(block, idx) in landingPage.layout || []" :key="idx" :block="block" />
+      <CmsBlockRenderer v-for="(block, idx) in landingPage.layout || []" :key="idx" :block="block" :cms-base-url="cmsBaseUrl" :community-name="communityName ?? undefined" />
       <div class="pt-2">
         <a :href="hubLoginUrl" class="btn btn-primary">{{ $t("nav.login") }}</a>
       </div>

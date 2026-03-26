@@ -6,7 +6,7 @@ import {
   userCommunityRoles,
   userPermissionRoles,
   users
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import { getDb } from "./db";
 
 const basePermissionRoles = [

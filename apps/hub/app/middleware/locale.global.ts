@@ -19,7 +19,7 @@ function withPathLocale(path: string, locale: "en" | "de"): string {
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const { loggedIn } = useUserSession();
-  const localeCookie = useCookie<"en" | "de">("newguildplus_i18n", {
+  const localeCookie = useCookie<"en" | "de">("guildora_i18n", {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax"

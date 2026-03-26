@@ -48,13 +48,13 @@ export function registerVoiceStateUpdateEvent(client: Client) {
       }
 
       if (oldState.guild?.id) {
-        const eventType = !oldChannelId && newChannelId ? "joined" : oldChannelId && !newChannelId ? "left" : "moved";
+        const action = !oldChannelId && newChannelId ? "join" : oldChannelId && !newChannelId ? "leave" : "move";
         await botAppHookRegistry.emit("onVoiceActivity", {
           guildId: oldState.guild.id,
-          userId: discordId,
-          oldChannelId: oldChannelId || null,
-          newChannelId: newChannelId || null,
-          eventType,
+          memberId: discordId,
+          action,
+          channelId: newChannelId || null,
+          previousChannelId: oldChannelId || null,
           occurredAt: now.toISOString()
         });
       }

@@ -5,7 +5,7 @@ definePageMeta({
 
 const { t } = useI18n();
 
-const lastPath = useCookie<string | null>("newguild_admin_last_path", { sameSite: "lax" });
+const lastPath = useCookie<string | null>("guildora_admin_last_path", { sameSite: "lax" });
 lastPath.value = "/admin/permissions";
 const isDev = import.meta.dev;
 
@@ -441,7 +441,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                 <div class="flex items-center gap-2">
                   <span class="label-text font-medium">{{ t("adminPermissions.roles.nameLabel") }}</span>
                   </div>
-                <UiRetroInput
+                <UiInput
                   v-model="newRoleForm.name"
                   :label="t('adminPermissions.roles.nameLabel')"
                   type="text"
@@ -476,7 +476,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                 <div class="flex items-center gap-2">
                   <span class="label-text font-medium">{{ t("adminPermissions.roles.discordRoleLabel") }}</span>
                   </div>
-                <UiRetroSelect
+                <UiSelect
                   v-model="newRoleForm.discordRoleId"
                   :label="t('adminPermissions.roles.discordRoleLabel')"
                  
@@ -486,7 +486,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                   <option v-for="role in discordRolesData?.roles || []" :key="role.id" :value="role.id">
                     {{ role.name }} ({{ role.id }})
                   </option>
-                </UiRetroSelect>
+                </UiSelect>
                 <p id="new-role-discord-help" class="text-xs opacity-70">{{ t("adminPermissions.roles.discordRoleHelp") }}</p>
               </div>
 
@@ -494,7 +494,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                 <div class="flex items-center gap-2">
                   <span class="label-text font-medium">{{ t("adminPermissions.roles.sortOrderLabel") }}</span>
                   </div>
-                <UiRetroInput
+                <UiInput
                   v-model.number="newRoleForm.sortOrder"
                   :label="t('adminPermissions.roles.sortOrderLabel')"
                   type="number"
@@ -509,12 +509,12 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                 <div class="flex items-center gap-2">
                   <span class="label-text font-medium">{{ t("adminPermissions.roles.descriptionLabel") }}</span>
                   </div>
-                <UiRetroTextarea
+                <UiTextarea
                   v-model="newRoleForm.description"
                   :label="t('adminPermissions.roles.descriptionLabel')"
-                  rows="3"
-                 
-                  maxlength="250"
+                  :rows="3"
+
+                  :maxlength="250"
                   :aria-describedby="'new-role-description-help'"
                   :placeholder="t('adminPermissions.roles.descriptionLabel')"
                 />
@@ -567,7 +567,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                     <div class="flex items-center gap-2">
                       <span class="label-text font-medium">{{ t("adminPermissions.roles.nameLabel") }}</span>
                     </div>
-                    <UiRetroInput
+                    <UiInput
                       v-model="row.name"
                       :label="t('adminPermissions.roles.nameLabel')"
                       type="text"
@@ -602,7 +602,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                     <div class="flex items-center gap-2">
                       <span class="label-text font-medium">{{ t("adminPermissions.roles.discordRoleLabel") }}</span>
                     </div>
-                    <UiRetroSelect
+                    <UiSelect
                       v-model="row.discordRoleId"
                       :label="t('adminPermissions.roles.discordRoleLabel')"
                      
@@ -612,7 +612,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                       <option v-for="role in discordRolesData?.roles || []" :key="role.id" :value="role.id">
                         {{ role.name }}
                       </option>
-                    </UiRetroSelect>
+                    </UiSelect>
                     <p :id="`edit-role-${row.id}-discord-help`" class="text-xs opacity-70">{{ t("adminPermissions.roles.discordRoleHelp") }}</p>
                   </div>
 
@@ -620,7 +620,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                     <div class="flex items-center gap-2">
                       <span class="label-text font-medium">{{ t("adminPermissions.roles.sortOrderLabel") }}</span>
                     </div>
-                    <UiRetroInput
+                    <UiInput
                       v-model.number="row.sortOrder"
                       :label="t('adminPermissions.roles.sortOrderLabel')"
                       type="number"
@@ -635,12 +635,12 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                     <div class="flex items-center gap-2">
                       <span class="label-text font-medium">{{ t("adminPermissions.roles.descriptionLabel") }}</span>
                     </div>
-                    <UiRetroTextarea
+                    <UiTextarea
                       v-model="row.description"
                       :label="t('adminPermissions.roles.descriptionLabel')"
-                      rows="3"
-                     
-                      maxlength="250"
+                      :rows="3"
+
+                      :maxlength="250"
                       :aria-describedby="`edit-role-${row.id}-description-help`"
                       :placeholder="t('adminPermissions.roles.descriptionLabel')"
                     />
@@ -648,12 +648,12 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                   </div>
 
                   <div class="mt-2 flex justify-end gap-2 md:col-span-2">
-                    <UiRetroButton variant="success" size="sm" :disabled="busy.savingRole" @click="saveCommunityRole(row.id)">
+                    <UiButton variant="success" size="sm" :disabled="busy.savingRole" @click="saveCommunityRole(row.id)">
                       {{ t("adminPermissions.roles.saveButton") }}
-                    </UiRetroButton>
-                    <UiRetroButton variant="error" size="sm" :disabled="busy.deletingRole" @click="openDeleteRoleConfirm(row.id)">
+                    </UiButton>
+                    <UiButton variant="error" size="sm" :disabled="busy.deletingRole" @click="openDeleteRoleConfirm(row.id)">
                       {{ t("adminPermissions.roles.deleteButton") }}
-                    </UiRetroButton>
+                    </UiButton>
                   </div>
                 </div>
               </article>
@@ -670,7 +670,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
       <div class="card-body space-y-4">
         <h2 class="card-title">{{ t("adminPermissions.cms.title") }}</h2>
         <p class="text-sm opacity-80">{{ t("adminPermissions.cms.description") }}</p>
-        <UiRetroCheckbox
+        <UiCheckbox
           v-model="cmsAccessForm.allowModeratorAccess"
           :label="t('adminPermissions.cms.allowModeratorAccess')"
           :description="t('adminPermissions.cms.allowModeratorAccess')"
@@ -745,7 +745,7 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
                 <tbody>
                   <tr v-for="item in importResult.orphanedCandidates" :key="item.userId">
                     <td>
-                      <UiRetroCheckbox
+                      <UiCheckbox
                         :model-value="orphanSelection.includes(item.userId)"
                         label="Select"
                         size="xs"
@@ -772,26 +772,26 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
         <div v-if="usersPending" class="loading loading-spinner loading-md" />
         <template v-else>
           <div class="grid gap-3 md:grid-cols-3">
-            <UiRetroSelect v-model="selectedUserId" :label="t('adminPermissions.removeUsers.singleUserPlaceholder')">
+            <UiSelect v-model="selectedUserId" :label="t('adminPermissions.removeUsers.singleUserPlaceholder')">
               <option value="">{{ t("adminPermissions.removeUsers.singleUserPlaceholder") }}</option>
               <option v-for="user in usersData || []" :key="user.id" :value="user.id">
                 {{ user.profileName }} ({{ user.discordId }})
               </option>
-            </UiRetroSelect>
-            <UiRetroCheckbox
+            </UiSelect>
+            <UiCheckbox
               v-model="removeAllDiscordRoles"
               :label="t('adminPermissions.removeUsers.removeDiscordRoles')"
               :description="t('adminPermissions.removeUsers.removeDiscordRoles')"
              
               size="sm"
             />
-            <UiRetroButton variant="error" :disabled="busy.deletingUser || !selectedUserId" @click="deleteSingleUser">
+            <UiButton variant="error" :disabled="busy.deletingUser || !selectedUserId" @click="deleteSingleUser">
               {{ busy.deletingUser ? t("adminPermissions.removeUsers.processing") : t("adminPermissions.removeUsers.deleteSingle") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
 
           <div class="grid gap-3 md:grid-cols-2">
-            <UiRetroSelect
+            <UiSelect
               v-model.number="selectedBulkRoleId"
               :label="t('adminPermissions.removeUsers.bulkRolePlaceholder')"
              
@@ -800,10 +800,10 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
               <option v-for="role in permissionData?.communityRoles || []" :key="role.id" :value="role.id">
                 {{ role.name }}
               </option>
-            </UiRetroSelect>
-            <UiRetroButton variant="warning" :disabled="busy.deletingByRole || !selectedBulkRoleId" @click="deleteByCommunityRole">
+            </UiSelect>
+            <UiButton variant="warning" :disabled="busy.deletingByRole || !selectedBulkRoleId" @click="deleteByCommunityRole">
               {{ busy.deletingByRole ? t("adminPermissions.removeUsers.processing") : t("adminPermissions.removeUsers.deleteByRole") }}
-            </UiRetroButton>
+            </UiButton>
           </div>
         </template>
       </div>
@@ -814,31 +814,31 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
         <h2 class="card-title text-error">{{ t("adminPermissions.dev.title") }}</h2>
         <p class="text-sm opacity-80">{{ t("adminPermissions.dev.description") }}</p>
         <div class="grid gap-3 md:grid-cols-2">
-          <UiRetroInput
+          <UiInput
             v-model="devResetToken"
             :label="t('adminPermissions.dev.confirmPlaceholder')"
             type="text"
            
             :placeholder="t('adminPermissions.dev.confirmPlaceholder')"
           />
-          <UiRetroButton variant="error" :disabled="busy.resettingDev" @click="runDevReset">
+          <UiButton variant="error" :disabled="busy.resettingDev" @click="runDevReset">
             {{ busy.resettingDev ? t("adminPermissions.dev.running") : t("adminPermissions.dev.run") }}
-          </UiRetroButton>
+          </UiButton>
         </div>
       </div>
     </div>
 
     <dialog class="modal" :class="{ 'modal-open': deleteRoleConfirm.open }">
-      <div class="modal-box bg-surface-2 shadow-neu-raised-lg">
+      <div class="modal-box bg-surface-2 shadow-lg">
         <h3 class="text-lg font-semibold">{{ t("adminPermissions.roles.deleteConfirmTitle") }}</h3>
         <p class="py-3">{{ t("adminPermissions.roles.deleteConfirmMessage") }}</p>
         <div class="modal-action">
-          <UiRetroButton variant="ghost" :disabled="busy.deletingRole" @click="closeDeleteRoleConfirm">
+          <UiButton variant="ghost" :disabled="busy.deletingRole" @click="closeDeleteRoleConfirm">
             {{ t("common.cancel") }}
-          </UiRetroButton>
-          <UiRetroButton variant="error" :disabled="busy.deletingRole" @click="confirmDeleteRole">
+          </UiButton>
+          <UiButton variant="error" :disabled="busy.deletingRole" @click="confirmDeleteRole">
             {{ busy.deletingRole ? t("common.loading") : t("adminPermissions.roles.deleteConfirmLabel") }}
-          </UiRetroButton>
+          </UiButton>
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">

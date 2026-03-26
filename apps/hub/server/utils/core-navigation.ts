@@ -71,7 +71,9 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     design: { label: "Design", key: "adminTheme.title" },
     apps: { label: "Apps", key: "admin.apps" },
     communitySettings: { label: "Community Settings", key: "adminDiscordRoles.title" },
-    devRoleSwitcher: { label: "DEV", key: "devRoleSwitcher.title" }
+    devRoleSwitcher: { label: "DEV", key: "devRoleSwitcher.title" },
+    modUsers: { label: "User Management", key: "moderation.userManagement" },
+    modApplications: { label: "Applications", key: "moderation.applications" }
   } as const;
 
   const coreRailItems: CoreRailItem[] = [
@@ -127,7 +129,10 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
       title: labels.moderation.label,
       titleKey: labels.moderation.key,
       order: 10,
-      items: [{ id: "moderation-home", label: labels.overview.label, labelKey: labels.overview.key, to: "/mod", requiredRoles: ["moderator", "admin", "superadmin"] }]
+      items: [
+        { id: "mod-users", label: labels.modUsers.label, labelKey: labels.modUsers.key, to: "/mod/users", requiredRoles: ["moderator", "admin", "superadmin"] },
+        { id: "mod-applications", label: labels.modApplications.label, labelKey: labels.modApplications.key, to: "/mod/applications", requiredRoles: ["moderator", "admin", "superadmin"] }
+      ]
     },
     {
       id: "admin-main",

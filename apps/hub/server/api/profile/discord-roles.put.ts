@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import { z } from "zod";
 import { requireSession } from "../../utils/auth";
 import { throwBotBridgeHttpError } from "../../utils/bot-bridge-error";

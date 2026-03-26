@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { themeSettings } from "@newguildplus/shared";
+import { themeSettings } from "@guildora/shared";
 import { getDb } from "../utils/db";
 import { defaultThemeColors, normalizeThemeColors } from "../utils/theme";
 

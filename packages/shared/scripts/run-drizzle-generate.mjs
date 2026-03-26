@@ -25,7 +25,7 @@ const repoRoot = path.resolve(__dirname, "../../..");
 // pnpm exec im Shared-Kontext findet drizzle-kit; .env ist bereits in process.env
 const result = spawnSync(
   "pnpm",
-  ["--filter", "@newguildplus/shared", "exec", "drizzle-kit", "generate"],
+  ["--filter", "@guildora/shared", "exec", "drizzle-kit", "generate"],
   { stdio: "inherit", env: process.env, cwd: repoRoot }
 );
 

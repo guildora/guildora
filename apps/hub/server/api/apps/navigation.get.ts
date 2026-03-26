@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { profiles } from "@newguildplus/shared";
-import { buildAppNavigation, getAppRegistrySnapshot, hasRequiredRoles } from "../../utils/apps";
+import { profiles } from "@guildora/shared";
+import { buildAppNavigation, hasRequiredRoles } from "../../utils/apps";
 import { getLocalizedCoreNavigation, resolveNavigationLocale } from "../../utils/core-navigation";
 import { requireSession } from "../../utils/auth";
 import { loadCmsAccessConfig } from "../../utils/cms-access";
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     .filter((group) => group.items.length > 0)
     .sort((a, b) => a.order - b.order);
 
-  const appNavigation = buildAppNavigation(roles);
+  const appNavigation = buildAppNavigation(roles, event.context.installedApps);
   const rail = [...visibleCoreRail, ...appNavigation.rail].sort((a, b) => a.order - b.order);
   const panelGroups = [...visibleCorePanelGroups, ...appNavigation.panelGroups];
 
@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
     rail,
     panelGroups,
     meta: {
-      loadedAt: getAppRegistrySnapshot()?.loadedAt || null
+      loadedAt: new Date().toISOString()
     }
   };
 });

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { users } from "@newguildplus/shared";
+import { users } from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { loadCmsAccessConfig, hasCmsAccess } from "../../utils/cms-access";
 import { createCmsSsoToken } from "../../utils/cms-sso";

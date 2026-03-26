@@ -11,7 +11,7 @@ RUN pnpm install --no-frozen-lockfile
 FROM base AS build
 COPY --from=deps /repo/node_modules ./node_modules
 COPY . .
-RUN pnpm --filter @newguildplus/hub build
+RUN pnpm --filter @guildora/hub build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

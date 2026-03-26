@@ -1,5 +1,5 @@
 {
-  "name": "@newguildplus/bot",
+  "name": "@guildora/bot",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,15 +8,17 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"No lint configured for @newguildplus/bot\"",
-    "format": "echo \"No format script configured for @newguildplus/bot\"",
+    "lint": "echo \"No lint configured for @guildora/bot\"",
+    "format": "echo \"No format script configured for @guildora/bot\"",
     "deploy:commands": "tsx src/utils/deploy-commands.ts"
   },
   "dependencies": {
-    "@newguildplus/shared": "workspace:*",
+    "@guildora/app-sdk": "workspace:*",
+    "@guildora/shared": "workspace:*",
     "discord.js": "^14.25.1",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.44.5"
+    "drizzle-orm": "^0.44.5",
+    "esbuild": "^0.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

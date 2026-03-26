@@ -12,7 +12,7 @@ defineEmits<{
 
 <template>
   <button
-    class="btn btn-secondary btn-sm h-9 min-h-0 w-9 rounded-full p-0"
+    class="sidebar-rail-item h-9 w-9"
     type="button"
     :aria-label="collapsed ? t('internalNav.expandSidebar') : t('internalNav.collapseSidebar')"
     @click="$emit('toggle')"

@@ -22,12 +22,11 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@payload-config": [
         "./payload.config.ts"
       ],
-      "@newguildplus/shared/*": [
+      "@guildora/shared/*": [
         "../../packages/shared/src/*"
       ]
     }

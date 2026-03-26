@@ -9,6 +9,12 @@ export const HeroBlock: Block = {
   },
   fields: [
     {
+      name: "eyebrowLabel",
+      type: "text",
+      localized: true,
+      label: localizedLabel("Eyebrow-Label", "Eyebrow Label")
+    },
+    {
       name: "heading",
       type: "text",
       required: true,
@@ -37,6 +43,18 @@ export const HeroBlock: Block = {
       name: "ctaLink",
       type: "text",
       label: localizedLabel("CTA-Link", "CTA link")
+    },
+    {
+      name: "ctaExploreLabel",
+      type: "text",
+      localized: true,
+      label: localizedLabel("Explore-Button-Beschriftung", "Explore CTA Label")
+    },
+    {
+      name: "ctaGithubLabel",
+      type: "text",
+      localized: true,
+      label: localizedLabel("GitHub-Button-Beschriftung", "GitHub CTA Label")
     }
   ]
 };

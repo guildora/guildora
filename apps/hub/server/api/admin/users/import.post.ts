@@ -2,7 +2,7 @@ import { listActiveCommunityRoleMappings } from "../../../utils/community";
 import { fetchDiscordGuildMembersByRoleFromBot, fetchDiscordGuildRolesFromBot } from "../../../utils/botSync";
 import { requireAdminSession } from "../../../utils/auth";
 import { listOrphanedCandidates, upsertMirroredDiscordMember, wasUserExistingByDiscordId } from "../../../utils/admin-mirror";
-import { coerceProfileNameFromRaw } from "@newguildplus/shared";
+import { coerceProfileNameFromRaw } from "@guildora/shared";
 
 type ImportAggregation = {
   member: {

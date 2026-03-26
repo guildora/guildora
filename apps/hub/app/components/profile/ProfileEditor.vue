@@ -27,18 +27,18 @@ const localProfile = computed({
   <form class="space-y-4" @submit.prevent="$emit('submit')">
     <h2 v-if="props.showTitle" class="text-xl font-semibold">{{ $t("profile.title") }}</h2>
 
-    <UiRetroInput
+    <UiInput
       v-model="localProfile.ingameName"
       :label="$t('profile.ingameName')"
       :required="true"
-      maxlength="60"
+      :maxlength="60"
      
     />
 
-    <UiRetroInput
+    <UiInput
       v-model="localProfile.rufname"
       :label="$t('profile.rufname')"
-      maxlength="60"
+      :maxlength="60"
      
     />
 

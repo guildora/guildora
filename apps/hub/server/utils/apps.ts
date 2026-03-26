@@ -2,10 +2,12 @@ import { and, desc, eq } from "drizzle-orm";
 import {
   appMarketplaceSubmissions,
   installedApps,
+  roleHierarchy,
   safeParseAppManifest,
-  type NewGuildPlusAppManifest
-} from "@newguildplus/shared";
+  type GuildoraAppManifest
+} from "@guildora/shared";
 import { getDb } from "./db";
+import { refreshBotCommands } from "./botSync";
 
 type AppRegistryState = {
   loadedAt: string;
@@ -13,7 +15,7 @@ type AppRegistryState = {
 };
 
 type GlobalWithRegistry = typeof globalThis & {
-  __NEWGUILDPLUS_APP_REGISTRY__?: AppRegistryState;
+  __GUILDORA_APP_REGISTRY__?: AppRegistryState;
 };
 
 export interface InstalledAppSnapshot {
@@ -26,7 +28,9 @@ export interface InstalledAppSnapshot {
   repositoryUrl: string | null;
   status: "active" | "inactive" | "error";
   config: Record<string, unknown>;
-  manifest: NewGuildPlusAppManifest;
+  /** Transpiled CJS code bundles: filePath → CJS source string */
+  codeBundle: Record<string, string>;
+  manifest: GuildoraAppManifest;
   installedAt: Date;
   updatedAt: Date;
 }
@@ -67,8 +71,8 @@ interface SubmissionCheckResult {
 
 function getRegistryContainer() {
   const container = globalThis as GlobalWithRegistry;
-  if (!container.__NEWGUILDPLUS_APP_REGISTRY__) {
-    container.__NEWGUILDPLUS_APP_REGISTRY__ = {
+  if (!container.__GUILDORA_APP_REGISTRY__) {
+    container.__GUILDORA_APP_REGISTRY__ = {
       loadedAt: new Date(0).toISOString(),
       activeApps: []
     };
@@ -96,11 +100,22 @@ function normalizeIconPath(icon: string) {
   return iconMap[icon] ?? fallbackIconName;
 }
 
+function expandRoles(assignedRoles: string[]): string[] {
+  const expanded = new Set<string>(assignedRoles);
+  for (const role of assignedRoles) {
+    for (const implied of roleHierarchy[role] ?? []) {
+      expanded.add(implied);
+    }
+  }
+  return Array.from(expanded);
+}
+
 export function hasRequiredRoles(requiredRoles: string[] | undefined, assignedRoles: string[]) {
   if (!requiredRoles || requiredRoles.length === 0) {
     return true;
   }
-  return requiredRoles.some((role) => assignedRoles.includes(role));
+  const effective = expandRoles(assignedRoles);
+  return requiredRoles.some((role) => effective.includes(role));
 }
 
 export async function loadActiveInstalledApps() {
@@ -123,7 +138,8 @@ export async function loadActiveInstalledApps() {
       verified: row.verified,
       repositoryUrl: row.repositoryUrl || null,
       status: row.status,
-      config: row.config || {},
+      config: (row.config as Record<string, unknown>) || {},
+      codeBundle: (row.codeBundle as Record<string, string>) || {},
       manifest: parsed.data,
       installedAt: row.installedAt,
       updatedAt: row.updatedAt
@@ -135,19 +151,23 @@ export async function loadActiveInstalledApps() {
 
 export function setAppRegistrySnapshot(activeApps: InstalledAppSnapshot[]) {
   const container = getRegistryContainer();
-  container.__NEWGUILDPLUS_APP_REGISTRY__ = {
+  container.__GUILDORA_APP_REGISTRY__ = {
     loadedAt: new Date().toISOString(),
     activeApps
   };
 }
 
 export function getAppRegistrySnapshot() {
-  return getRegistryContainer().__NEWGUILDPLUS_APP_REGISTRY__;
+  return getRegistryContainer().__GUILDORA_APP_REGISTRY__;
 }
 
 export async function refreshAppRegistry() {
   const activeApps = await loadActiveInstalledApps();
   setAppRegistrySnapshot(activeApps);
+  await Promise.all([
+    useNitroApp().hooks.callHook("app-registry:refresh"),
+    refreshBotCommands().catch((err) => console.warn("[apps] Bot command sync failed:", err))
+  ]);
   return activeApps;
 }
 
@@ -157,13 +177,23 @@ export async function setInstalledAppStatus(appId: string, status: MutableInstal
   await refreshAppRegistry();
 }
 
-export function buildAppNavigation(roles: string[]) {
-  const snapshot = getAppRegistrySnapshot();
-  const activeApps = snapshot?.activeApps || [];
+export function buildAppNavigation(
+  roles: string[],
+  appsOverride?: Array<{ appId: string; name: string; manifest: GuildoraAppManifest | null; config?: Record<string, unknown> }>
+) {
+  const activeApps = appsOverride
+    ? (appsOverride.filter((a) => a.manifest !== null) as Array<{ appId: string; name: string; manifest: GuildoraAppManifest; config?: Record<string, unknown> }>)
+    : (getAppRegistrySnapshot()?.activeApps || []);
   const rail: AppNavigationRailEntry[] = [];
   const panelGroups: AppNavigationPanelGroup[] = [];
 
   for (const app of activeApps) {
+    const appConfig = app.config ?? {};
+    const roleOverrides = (typeof appConfig.__roleOverrides === "object" && appConfig.__roleOverrides !== null && !Array.isArray(appConfig.__roleOverrides))
+      ? (appConfig.__roleOverrides as Record<string, string[]>)
+      : {};
+    const pagesByPath = new Map(app.manifest.pages.map((p) => [p.path, p]));
+
     for (const railItem of app.manifest.navigation.rail || []) {
       if (!hasRequiredRoles(railItem.requiredRoles, roles)) {
         continue;
@@ -181,7 +211,12 @@ export function buildAppNavigation(roles: string[]) {
 
     for (const group of app.manifest.navigation.panelGroups || []) {
       const visibleItems = group.items
-        .filter((item) => hasRequiredRoles(item.requiredRoles, roles))
+        .filter((item) => {
+          const page = pagesByPath.get(item.to);
+          if (page && !page.component) return false;
+          const effectiveRoles = Array.isArray(roleOverrides[item.id]) ? roleOverrides[item.id] : item.requiredRoles;
+          return hasRequiredRoles(effectiveRoles, roles);
+        })
         .map((item) => ({
           id: item.id,
           label: item.label,
@@ -214,7 +249,7 @@ export function buildAppNavigation(roles: string[]) {
   };
 }
 
-export async function runMarketplaceSubmissionChecks(manifest: NewGuildPlusAppManifest) {
+export async function runMarketplaceSubmissionChecks(manifest: GuildoraAppManifest) {
   const db = getDb();
   const checks: SubmissionCheckResult[] = [];
 

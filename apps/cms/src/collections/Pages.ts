@@ -2,10 +2,14 @@ import type { CollectionConfig } from "payload";
 import { isModeratorOrAdmin } from "../access";
 import { CTABlock } from "../blocks/CTABlock";
 import { DiscordInviteBlock } from "../blocks/DiscordInviteBlock";
+import { FeaturesBlock } from "../blocks/FeaturesBlock";
 import { GalleryBlock } from "../blocks/GalleryBlock";
 import { HeroBlock } from "../blocks/HeroBlock";
+import { HowItWorksBlock } from "../blocks/HowItWorksBlock";
 import { ImageBlock } from "../blocks/ImageBlock";
+import { MarketplaceTeaserBlock } from "../blocks/MarketplaceTeaserBlock";
 import { RichTextBlock } from "../blocks/RichTextBlock";
+import { SelfHostCtaBlock } from "../blocks/SelfHostCtaBlock";
 import { localizedLabel } from "../utils/localization";
 import { YouTubeBlock } from "../blocks/YouTubeBlock";
 
@@ -54,7 +58,7 @@ export const Pages: CollectionConfig = {
       name: "layout",
       type: "blocks",
       label: localizedLabel("Layout", "Layout"),
-      blocks: [HeroBlock, RichTextBlock, ImageBlock, GalleryBlock, CTABlock, YouTubeBlock, DiscordInviteBlock]
+      blocks: [HeroBlock, FeaturesBlock, HowItWorksBlock, MarketplaceTeaserBlock, SelfHostCtaBlock, RichTextBlock, ImageBlock, GalleryBlock, CTABlock, YouTubeBlock, DiscordInviteBlock]
     },
     {
       name: "seo",

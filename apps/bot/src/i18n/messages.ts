@@ -3,11 +3,11 @@ export type BotLocale = "de" | "en";
 const botMessages = {
   en: {
     command: {
-      setupDescription: "Post or update the NewGuildPlus info embed",
+      setupDescription: "Post or update the Guildora info embed",
       channelOptionName: "channel",
       channelOptionDescription: "Target channel for the info embed",
       setupNameLocalization: "setup",
-      setupDescriptionLocalization: "Post or update the NewGuildPlus info embed",
+      setupDescriptionLocalization: "Post or update the Guildora info embed",
       channelOptionNameLocalization: "channel",
       channelOptionDescriptionLocalization: "Target channel for the info embed"
     },
@@ -19,7 +19,7 @@ const botMessages = {
       serverOnly: "This command can only run in a server.",
       missingAdminPermission: "You need administrator permission to run setup helpers.",
       invalidChannel: "Please run this command in a text channel or provide one via the channel option.",
-      embedTitle: "NewGuildPlus - Website as central platform",
+      embedTitle: "Guildora - Website as central platform",
       embedDescription:
         "Profile data, absences, and community administration are managed centrally through the website.\n\nDiscord is used for OAuth login and technical synchronization.",
       loginFieldName: "Login",
@@ -34,11 +34,11 @@ const botMessages = {
   },
   de: {
     command: {
-      setupDescription: "Erstellt oder aktualisiert das NewGuildPlus-Info-Embed",
+      setupDescription: "Erstellt oder aktualisiert das Guildora-Info-Embed",
       channelOptionName: "channel",
       channelOptionDescription: "Zielkanal für das Info-Embed",
       setupNameLocalization: "einrichten",
-      setupDescriptionLocalization: "Erstellt oder aktualisiert das NewGuildPlus-Info-Embed",
+      setupDescriptionLocalization: "Erstellt oder aktualisiert das Guildora-Info-Embed",
       channelOptionNameLocalization: "kanal",
       channelOptionDescriptionLocalization: "Zielkanal für das Info-Embed"
     },
@@ -50,7 +50,7 @@ const botMessages = {
       serverOnly: "Dieser Befehl kann nur auf einem Server ausgeführt werden.",
       missingAdminPermission: "Du brauchst Administrator-Rechte, um den Setup-Helper zu nutzen.",
       invalidChannel: "Bitte führe den Befehl in einem Textkanal aus oder gib einen Kanal über die Option an.",
-      embedTitle: "NewGuildPlus - Website als zentrale Plattform",
+      embedTitle: "Guildora - Website als zentrale Plattform",
       embedDescription:
         "Profildaten, Abwesenheiten und Community-Verwaltung laufen zentral über die Website.\n\nDiscord dient für OAuth-Login und technische Synchronisierung.",
       loginFieldName: "Login",

@@ -2,7 +2,7 @@ import {
   parseProfileName,
   users,
   voiceSessions
-} from "@newguildplus/shared";
+} from "@guildora/shared";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 import { loadUserCommunityRolesMap, loadUserPermissionRolesMap } from "../../utils/user-directory";

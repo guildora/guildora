@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { userCommunityRoles } from "@newguildplus/shared";
+import { userCommunityRoles } from "@guildora/shared";
 import { requireAdminSession } from "../../utils/auth";
 import { loadCmsAccessConfig } from "../../utils/cms-access";
 import { listCommunityRoles, listPermissionRoles } from "../../utils/community";

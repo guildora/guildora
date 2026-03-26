@@ -1,4 +1,4 @@
-# NewGuildPlus AI Context
+# Guildora AI Context
 
 This directory is the AI-oriented working layer for the repository.
 
