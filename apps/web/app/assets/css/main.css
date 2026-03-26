@@ -6,7 +6,7 @@
 
 @layer base {
   *, ::before, ::after {
-    border-color: var(--color-line, #1F1F1F);
+    border: none;
   }
 }
 
@@ -238,7 +238,7 @@ a:focus-visible {
 }
 
 /* ============================================================ */
-/* Ersatz-Strukturklassen (vormals via DaisyUI bereitgestellt)  */
+/* Strukturklassen                                               */
 /* ============================================================ */
 
 /* --- Modal --- */

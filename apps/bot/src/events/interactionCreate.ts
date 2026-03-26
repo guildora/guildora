@@ -2,6 +2,7 @@ import type { ChatInputCommandInteraction, Client, Collection } from "discord.js
 import { getBotMessages, interpolate, resolveBotLocale } from "../i18n/messages";
 import type { BotCommand } from "../types";
 import { botAppHookRegistry } from "../utils/app-hooks";
+import { handleApplicationButtonInteraction } from "../interactions/application-button";
 import { logger } from "../utils/logger";
 
 export function registerInteractionCreateEvent(
@@ -9,6 +10,22 @@ export function registerInteractionCreateEvent(
   commands: Collection<string, BotCommand>
 ) {
   client.on("interactionCreate", async (interaction) => {
+    // Handle button interactions for application embeds
+    if (interaction.isButton()) {
+      if (interaction.customId.startsWith("application_apply_")) {
+        try {
+          await handleApplicationButtonInteraction(interaction, client);
+        } catch (error) {
+          logger.error("Application button interaction failed.", error);
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ ephemeral: true, content: "An error occurred. Please try again." }).catch(() => {});
+          }
+        }
+        return;
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) {
       return;
     }

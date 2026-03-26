@@ -7,7 +7,8 @@ import { getDb } from "../../utils/db";
 import { readBodyWithSchema } from "../../utils/http";
 
 const cmsAccessSchema = z.object({
-  allowModeratorAccess: z.boolean()
+  allowModeratorAccess: z.boolean(),
+  allowModeratorAppsAccess: z.boolean().optional()
 });
 
 export default defineEventHandler(async (event) => {
@@ -21,7 +22,8 @@ export default defineEventHandler(async (event) => {
     await db
         .update(cmsAccessSettings)
         .set({
-        allowModeratorAccess: parsed.allowModeratorAccess,
+          allowModeratorAccess: parsed.allowModeratorAccess,
+          ...(parsed.allowModeratorAppsAccess !== undefined ? { allowModeratorAppsAccess: parsed.allowModeratorAppsAccess } : {}),
           updatedAt: new Date(),
           updatedBy: session.user.id
         })
@@ -29,6 +31,7 @@ export default defineEventHandler(async (event) => {
   } else {
     await db.insert(cmsAccessSettings).values({
       allowModeratorAccess: parsed.allowModeratorAccess,
+      ...(parsed.allowModeratorAppsAccess !== undefined ? { allowModeratorAppsAccess: parsed.allowModeratorAppsAccess } : {}),
       updatedBy: session.user.id
     });
   }

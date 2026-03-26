@@ -7,7 +7,7 @@ import {
   type GuildoraAppManifest
 } from "@guildora/shared";
 import { getDb } from "./db";
-import { refreshBotCommands } from "./botSync";
+import { refreshBotCommands, reloadBotHooks } from "./botSync";
 
 type AppRegistryState = {
   loadedAt: string;
@@ -166,7 +166,8 @@ export async function refreshAppRegistry() {
   setAppRegistrySnapshot(activeApps);
   await Promise.all([
     useNitroApp().hooks.callHook("app-registry:refresh"),
-    refreshBotCommands().catch((err) => console.warn("[apps] Bot command sync failed:", err))
+    refreshBotCommands().catch((err) => console.warn("[apps] Bot command sync failed:", err)),
+    reloadBotHooks().catch((err) => console.warn("[apps] Bot hook reload failed:", err))
   ]);
   return activeApps;
 }

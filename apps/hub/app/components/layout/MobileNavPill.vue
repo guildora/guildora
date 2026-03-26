@@ -40,13 +40,12 @@ defineEmits<{
   width: 3rem;
   height: 3rem;
   border-radius: 9999px;
-  border: 1px solid var(--color-accent-border, rgba(255, 255, 255, 0.12));
   background-color: color-mix(in srgb, var(--color-surface-3, #3c3938) 96%, transparent);
-  box-shadow: var(--surface-shadow-sm, 0 4px 10px rgba(0, 0, 0, 0.2));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.30);
   color: var(--color-base-content, #fff);
   outline: none;
   transform: translateX(0);
-  transition: transform 0.4s ease-out, background-color 0.3s ease-out, border-color 0.3s ease-out, box-shadow 0.3s ease-out;
+  transition: transform 0.4s ease-out, background-color 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
 .mobile-burger--open {

@@ -12,7 +12,9 @@
     "login": "Login with Discord",
     "logout": "Logout",
     "marketplace": "Marketplace",
+    "apps": "Apps",
     "cms": "Landing page",
+    "applications": "Applications",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
@@ -90,7 +92,17 @@
     "sortVoice": "Voice activity",
     "viewProfile": "View profile",
     "voiceHours": "Voice hours",
-    "backToOverview": "Back to overview"
+    "backToOverview": "Back to overview",
+    "detailsShow": "Show details",
+    "detailsHide": "Hide details",
+    "detailsPlaceholder": "Additional member details are shown here.",
+    "openDetails": "Details",
+    "openDetailsAria": "Show details for {name}",
+    "roleLabel": "Role",
+    "roleFallback": "No role",
+    "avatarAlt": "Profile image of {name}",
+    "modalTitle": "Member details",
+    "modalSubtitle": "Profile view for {name}"
   },
   "profile": {
     "title": "Profile",
@@ -108,6 +120,9 @@
     "saveDiscordRoles": "Save Discord roles",
     "voiceLabel": "Voice label",
     "voiceDuration": "{hours} h {minutes} min",
+    "rolesSection": "Roles",
+    "voiceSection": "Voice Activity",
+    "noRoles": "None assigned",
     "voice7d": "Time in voice (7d)",
     "voice14d": "Voice (14 days)",
     "voice28d": "Voice (28 days)",
@@ -155,19 +170,11 @@
     "description": "Moderators and admins can access this area.",
     "communityRoles": "Community roles",
     "userManagement": "User management",
-    "applications": "Applications",
-    "applicationStatus": {
-      "open": "Open",
-      "approved": "Approved",
-      "rejected": "Rejected"
-    },
     "errors": {
       "save": "Failed to save.",
       "delete": "Failed to delete.",
       "roleChange": "Failed to change role.",
-      "discordSync": "Failed to run Discord sync.",
-      "approve": "Failed to approve.",
-      "reject": "Failed to reject."
+      "discordSync": "Failed to run Discord sync."
     },
     "actions": {
       "close": "Close",
@@ -175,10 +182,7 @@
       "delete": "Delete",
       "apply": "Apply",
       "editProfile": "Edit profile",
-      "discordSync": "Discord sync",
-      "details": "Details",
-      "approve": "Approve",
-      "reject": "Reject"
+      "discordSync": "Discord sync"
     },
     "roles": {
       "namePlaceholder": "Name",
@@ -211,39 +215,19 @@
       "tableActions": "Actions",
       "selectRole": "Select role"
     },
-    "applicationsTab": {
-      "empty": "No open applications.",
-      "tableName": "Name",
-      "tableDiscordId": "Discord ID",
-      "tableActions": "Actions"
-    },
     "confirm": {
       "deleteRoleTitle": "Delete community role",
       "deleteRoleMessage": "Do you really want to delete this role?",
       "deleteRoleLabel": "Delete",
       "changeRoleTitle": "Role change",
       "changeRoleMessage": "Do you want to apply this role change?",
-      "changeRoleLabel": "Apply",
-      "approveTitle": "Approve application",
-      "approveMessage": "Do you want to approve this application?",
-      "approveLabel": "Approve",
-      "rejectTitle": "Reject application",
-      "rejectMessage": "Do you want to reject this application?",
-      "rejectLabel": "Reject"
+      "changeRoleLabel": "Apply"
     },
     "profileEditor": {
       "title": "Edit profile",
       "displayName": "Display name",
       "nickname": "Nickname"
     },
-    "applicationDetails": {
-      "title": "Application details",
-      "name": "Name",
-      "discordId": "Discord ID",
-      "status": "Status",
-      "data": "Application data",
-      "close": "Close"
-    }
   },
   "devRoleSwitcher": {
     "trigger": "DEV",
@@ -352,7 +336,18 @@
     "localSideloadPath": "Local app directory (absolute path)",
     "localSideloadInstall": "Install from disk",
     "localSideloadSuccess": "App installed successfully from local path.",
-    "localPathHint": "You can also enter an absolute local path (e.g. /path/to/my-app) to install directly from disk."
+    "localPathHint": "You can also enter an absolute local path (e.g. /path/to/my-app) to install directly from disk.",
+    "overviewNavLabel": "Overview",
+    "overviewTitle": "Installed Apps",
+    "overviewDescription": "Manage your installed apps.",
+    "exploreNavLabel": "Explore Apps",
+    "exploreTitle": "Explore Apps",
+    "exploreDescription": "Browse available apps from the marketplace.",
+    "exploreEmpty": "No apps available yet.",
+    "exploreError": "Could not load apps from the marketplace.",
+    "exploreNotConfigured": "Marketplace is not configured.",
+    "exploreInstall": "Install",
+    "sideloadPageDescription": "Install apps from a GitHub repository URL or a local path."
   },
   "adminDiscordRoles": {
     "title": "Community Settings",
@@ -495,10 +490,11 @@
       "deleteConfirmLabel": "Delete"
     },
     "cms": {
-      "title": "Landing page access",
-      "description": "Admin and superadmin always keep access. Here you control whether moderators can use the landing page embed.",
-      "allowModeratorAccess": "Allow moderators to access landing page",
-      "saveButton": "Save landing page access"
+      "title": "Page access",
+      "description": "Admin and superadmin always keep access. Control who can edit the landing page content and access the Apps area.",
+      "allowModeratorAccess": "Allow moderators to edit landing page content",
+      "allowModeratorAppsAccess": "Allow moderators to access the Apps area",
+      "saveButton": "Save page access"
     },
     "import": {
       "title": "Global User Import",
@@ -543,7 +539,7 @@
       "roleCreated": "Community role created.",
       "roleSaved": "Community role saved.",
       "roleDeleted": "Community role deleted.",
-      "cmsSaved": "Landing page access saved.",
+      "cmsSaved": "Page access saved.",
       "importDone": "Import completed.",
       "orphansDeleted": "Orphaned profiles deleted.",
       "userProcessed": "User processed.",
@@ -554,13 +550,201 @@
       "roleCreate": "Failed to create community role.",
       "roleSave": "Failed to save community role.",
       "roleDelete": "Failed to delete community role.",
-      "cmsSave": "Failed to save landing page access.",
+      "cmsSave": "Failed to save page access.",
       "importRun": "Import failed.",
       "orphanDelete": "Failed to delete orphaned profiles.",
       "userProcess": "Failed to process user.",
       "bulkDelete": "Bulk deletion failed.",
       "requireResetToken": "Please type RESET to confirm.",
       "devReset": "Dev reset failed."
+    }
+  },
+  "applications": {
+    "flows": "Flows",
+    "flowsDescription": "Create and manage application flows for your community.",
+    "newFlow": "New Flow",
+    "flowBuilder": "Flow Builder",
+    "flowSettings": "Flow Settings",
+    "openApplications": "Open Applications",
+    "applicationDetail": "Application Detail",
+    "archive": "Archive",
+    "archivedDetail": "Archived Application",
+    "config": "Application Settings",
+    "open": "Open Applications",
+    "applyTitle": "Application",
+    "applyLoading": "Loading application form...",
+    "applyExpired": "This link has expired. Please go back to Discord and click the button again to get a new link.",
+    "applySuccess": "Your application has been submitted successfully!",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "actions": {
+      "create": "Create Flow",
+      "edit": "Edit",
+      "settings": "Settings",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "approve": "Approve",
+      "reject": "Reject",
+      "retryRoles": "Retry Role Assignment"
+    },
+    "empty": {
+      "flows": "No flows created yet.",
+      "open": "No open applications.",
+      "archive": "No archived applications."
+    },
+    "flowBuilder": {
+      "nodes": {
+        "start": "Start",
+        "end": "End",
+        "info": "Info",
+        "infoBlock": "Info block",
+        "abort": "Abort",
+        "applicationAborted": "Application aborted",
+        "branch": "Branch",
+        "conditional": "Conditional",
+        "stepGroup": "Step Group",
+        "role": "Role",
+        "noRolesConfigured": "No roles configured",
+        "roleAssignment": "Role Assignment"
+      },
+      "inputTypes": {
+        "shortText": "Short Text",
+        "longText": "Long Text",
+        "number": "Number",
+        "email": "Email",
+        "radioSelect": "Radio Select",
+        "dropdown": "Dropdown",
+        "dropdownSelect": "Dropdown Select",
+        "multiSelect": "Multi Select",
+        "multiSelectCheckboxes": "Multi Select (Checkboxes)",
+        "yesNo": "Yes/No",
+        "date": "Date",
+        "fileUpload": "File Upload",
+        "discordUsername": "Discord Username",
+        "displayName": "Display Name",
+        "untitledField": "Untitled Field"
+      },
+      "toolbar": {
+        "nodes": "Nodes",
+        "inputField": "Input Field",
+        "infoHint": "Info / Hint",
+        "saving": "Saving...",
+        "saved": "Saved",
+        "saveFailed": "Save failed",
+        "undoTooltip": "Undo (Ctrl+Z)",
+        "redoTooltip": "Redo (Ctrl+Shift+Z)"
+      },
+      "sidebar": {
+        "inputType": "Input Type",
+        "label": "Label",
+        "description": "Description",
+        "placeholder": "Placeholder",
+        "required": "Required",
+        "options": "Options",
+        "optionLabel": "Option label",
+        "addOption": "+ Add Option",
+        "markdownContent": "Markdown Content",
+        "ctaButtonLabel": "CTA Button Label",
+        "ctaButtonUrl": "CTA Button URL",
+        "abortMessage": "Abort Message",
+        "roleIds": "Role IDs (comma-separated)",
+        "roleNames": "Role Names (for display)",
+        "groupTitle": "Group Title",
+        "description2": "Description",
+        "sourceNode": "Source Node",
+        "selectSourceNode": "Select an input node...",
+        "noBranchableNodes": "No input nodes with options found. Add a radio, dropdown, multi-select, or yes/no input first.",
+        "selectSourceFirst": "Select a source node above to populate branches.",
+        "branches": "Branches",
+        "addBranch": "+ Add Branch",
+        "deleteNode": "Delete Node",
+        "newField": "New Field"
+      }
+    },
+    "form": {
+      "yes": "Yes",
+      "no": "No",
+      "select": "Select...",
+      "uploading": "Uploading...",
+      "fileUploaded": "File uploaded",
+      "stepOf": "Step {current} of {total}",
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "submissionFailed": "Submission failed. Please try again."
+    },
+    "detail": {
+      "previousApplications": "This user has applied before ({count} previous application(s)).",
+      "roleAssignmentFailed": "Roles could not be automatically assigned.",
+      "displayName": "Display Name:",
+      "rolesAssigned": "Roles assigned:",
+      "reviewedOn": "Reviewed on {date}",
+      "pendingRoles": "Pending Roles",
+      "notificationPreferences": "Notification preferences"
+    },
+    "settings": {
+      "general": "General",
+      "name": "Name",
+      "status": "Status",
+      "discordEmbed": "Discord Embed",
+      "channelId": "Channel ID",
+      "embedDescription": "Embed Description",
+      "buttonLabel": "Button Label",
+      "applyNow": "Apply Now",
+      "roles": "Roles",
+      "rolesDescription": "Select Discord roles to assign on submission and approval.",
+      "onSubmission": "On Submission",
+      "onApproval": "On Approval",
+      "loadingRoles": "Loading roles...",
+      "displayNameTemplate": "Display Name Template",
+      "displayNameDescription": "Compose the display name from Display Name fields. Use {'{field-id}'} syntax.",
+      "preview": "Preview: ",
+      "exceedsNicknameLimit": "Exceeds Discord nickname limit!",
+      "welcome": "Welcome",
+      "welcomeChannelId": "Welcome Channel ID",
+      "welcomeMessageTemplate": "Welcome Message Template",
+      "welcomeMessageHint": "Use {'{discordId}'} to mention the user.",
+      "behavior": "Behavior",
+      "allowReapply": "Allow reapply to same flow",
+      "allowCrossFlow": "Allow cross-flow applications",
+      "testMode": "Test Mode (skip guild checks)",
+      "archiveRetention": "Archive Retention (days, 0 = keep forever)",
+      "tokenExpiry": "Token Expiry (minutes)",
+      "discordMessages": "Discord Messages",
+      "ephemeralConfirmation": "Ephemeral Confirmation",
+      "ephemeralButtonLabel": "Ephemeral Button Label",
+      "ephemeralConfirmationPlaceholder": "Click the button below to open the application form.",
+      "ephemeralButtonLabelPlaceholder": "Open Application",
+      "tokenExpiredMessage": "Token Expired Message",
+      "tokenExpiredPlaceholder": "This link has expired.",
+      "dmOnApproval": "DM on Approval",
+      "dmOnApprovalPlaceholder": "Your application has been approved!",
+      "dmOnRejection": "DM on Rejection",
+      "dmOnRejectionPlaceholder": "Your application has been rejected.",
+      "dmToModerators": "DM to Moderators on Submission",
+      "dmToModeratorsPlaceholder": "A new application has been submitted.",
+      "submissionConfirmation": "Submission Confirmation",
+      "submissionConfirmationPlaceholder": "Your application has been submitted!"
+    },
+    "configPage": {
+      "access": "Access",
+      "allowModeratorAccess": "Allow moderators to access the Applications section",
+      "moderatorNotifications": "Moderator Notifications",
+      "moderatorNotificationsDescription": "Overview of which moderators receive notifications for each flow.",
+      "noModsSubscribed": "No moderators subscribed.",
+      "noFlowsYet": "No flows created yet.",
+      "archiveCleanup": "Archive Cleanup",
+      "archiveCleanupDescription": "Manually trigger cleanup of archived applications past their retention period. This also runs automatically daily.",
+      "cleaningUp": "Cleaning up...",
+      "runCleanup": "Run Cleanup",
+      "cleanupResult": "Deleted {apps} applications, {tokens} tokens."
     }
   }
 }

@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/core/dist/theme-default.css";
+@import "@vue-flow/controls/dist/style.css";
+@import "@vue-flow/minimap/dist/style.css";
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +10,7 @@
 
 @layer base {
   *, ::before, ::after {
-    border-color: var(--color-line, #1F1F1F);
+    border: none;
   }
 }
 
@@ -19,6 +23,7 @@
   --color-surface-3: #1A1A1A;
   --color-surface-4: #222222;
   --color-surface-5: #2A2A2A;
+  --color-field-bg: var(--color-surface-3);
   --color-dominant-200: #1A1A1A;
   --color-dominant-300: #2A2A2A;
   --color-dominant-400: #3A3A3A;
@@ -37,9 +42,9 @@
   --color-accent-border-active: rgba(124, 58, 237, 0.5);
   --color-line: #1F1F1F;
   --color-accent-glow: rgba(124, 58, 237, 0.3);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.09);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.22);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.30);
   --color-btn-outline-border: #2A2A2A;
   --color-btn-ghost-hover: rgba(255, 255, 255, 0.06);
   --color-info: #3B82F6;
@@ -185,9 +190,6 @@ h2 {
 }
 
 .btn:focus-visible,
-.input:focus-visible,
-.select:focus-visible,
-.textarea:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -205,7 +207,6 @@ a:focus-visible {
 }
 
 .btn-secondary {
-  border: 1px solid var(--color-line);
   background-color: var(--color-surface-3);
   color: var(--color-text-primary);
 }
@@ -385,7 +386,6 @@ a:focus-visible {
 /* --- Card Overrides --- */
 
 .card {
-  border: 1px solid var(--color-line);
   border-radius: 0.75rem;
   background-color: var(--color-surface-2);
   box-shadow: var(--shadow-md);
@@ -393,13 +393,12 @@ a:focus-visible {
 }
 
 .stat {
-  border: 1px solid var(--color-line);
   border-radius: 0.75rem;
   background-color: var(--color-surface-2);
+  box-shadow: var(--shadow-sm);
 }
 
 .modal-box {
-  border: 1px solid var(--color-line);
   border-radius: 1rem;
   background-color: var(--color-surface-3);
   box-shadow: var(--shadow-lg);
@@ -412,15 +411,16 @@ a:focus-visible {
 .textarea {
   display: block;
   width: 100%;
-  border: 1px solid var(--color-line);
+  border: none;
   border-radius: 0.5rem;
-  background-color: var(--color-surface-1);
+  background-color: var(--color-field-bg);
   color: var(--color-text-primary);
   min-height: 2.75rem;
   padding-inline: 0.875rem;
   font-family: inherit;
   font-size: 1rem;
-  transition: background-color 0.15s ease-out, border-color 0.15s ease-out;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
 .select {
@@ -438,11 +438,17 @@ a:focus-visible {
   color: var(--color-text-tertiary);
 }
 
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-sm), 0 0 0 2px rgba(124, 58, 237, 0.30);
+}
+
 .input:hover,
 .select:hover,
 .textarea:hover {
-  border-color: var(--color-accent-border-active);
-  background-color: var(--color-surface-2);
+  filter: brightness(1.08);
 }
 
 /* --- Form Field Classes --- */
@@ -495,12 +501,11 @@ a:focus-visible {
   align-items: center;
   padding-right: 1rem;
   min-height: 2.75rem;
-  border: 1px solid var(--color-line);
   border-radius: 0.5rem;
-  background: var(--color-surface-1);
+  background: var(--color-field-bg);
   color: var(--color-text-primary);
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+  transition: box-shadow 0.15s ease-out, background-color 0.15s ease-out;
   overflow: hidden;
 }
 
@@ -556,20 +561,31 @@ a:focus-visible {
   color: var(--color-text-tertiary);
 }
 
+.field__control:focus-within,
+.checkbox-field:focus-within {
+  box-shadow: var(--shadow-sm), 0 0 0 2px rgba(124, 58, 237, 0.30);
+}
+
 .field__input:focus-visible,
 .field__select:focus-visible,
 .field__textarea:focus-visible,
-.field__file:focus-visible,
-.checkbox-field:focus-within {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  box-shadow: none;
+.field__file:focus-visible {
+  outline: none;
+}
+
+.field--error .field__control,
+.field--error.checkbox-field {
+  box-shadow: var(--shadow-sm), 0 0 0 2px rgba(239, 68, 68, 0.30);
+}
+
+.field--success .field__control,
+.field--success.checkbox-field {
+  box-shadow: var(--shadow-sm), 0 0 0 2px rgba(34, 197, 94, 0.30);
 }
 
 .field__control:hover,
 .checkbox-field:hover {
-  border-color: var(--color-accent-border-active);
-  background: var(--color-surface-2);
+  filter: brightness(1.08);
 }
 
 .field__input:disabled,
@@ -579,6 +595,79 @@ a:focus-visible {
 .checkbox-field__input:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.field__leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6rem;
+  color: var(--color-text-secondary);
+  padding-inline: 0.7rem;
+}
+
+.field__leading > :is(svg, .iconify, .lucide, [class^="i-"], [class*=" i-"]) {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.field__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+}
+
+.field__message {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.field--error .field__message {
+  color: var(--color-error);
+}
+
+.field--success .field__message {
+  color: var(--color-success);
+}
+
+.field__sub-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.field__counter {
+  font-size: 0.72rem;
+  color: var(--color-text-tertiary);
+  text-align: right;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.field__counter--warn {
+  color: var(--color-warning);
+}
+
+.field__counter--limit {
+  color: var(--color-error);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-group__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-line);
 }
 
 .color-input__group {
@@ -592,10 +681,10 @@ a:focus-visible {
 .color-input__picker {
   width: 2.25rem;
   height: 2rem;
-  border: 1px solid var(--color-line);
   border-radius: 0.5rem;
   background: transparent;
   padding: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .color-input__text {
@@ -617,7 +706,6 @@ a:focus-visible {
 .checkbox-field__input {
   width: 1.15rem;
   height: 1.15rem;
-  border: 1px solid var(--color-line);
   border-radius: 0.25rem;
   accent-color: var(--color-accent);
   margin-inline-end: 0.75rem;
@@ -665,24 +753,36 @@ a:focus-visible {
 
 /* --- Utility Classes --- */
 
-.surface-level-1 {
+/* surface-level utilities + bg-base-* / bg-surface-* all cascade --color-field-bg */
+
+.surface-level-1,
+.bg-base-100 {
   background-color: var(--color-surface-1);
+  --color-field-bg: var(--color-surface-3);
 }
 
-.surface-level-2 {
+.surface-level-2,
+.bg-base-200 {
   background-color: var(--color-surface-2);
+  --color-field-bg: var(--color-surface-4);
 }
 
-.surface-level-3 {
+.surface-level-3,
+.bg-base-300 {
   background-color: var(--color-surface-3);
+  --color-field-bg: var(--color-surface-5);
 }
+
+.bg-surface-1 { --color-field-bg: var(--color-surface-3); }
+.bg-surface-2 { --color-field-bg: var(--color-surface-4); }
+.bg-surface-3 { --color-field-bg: var(--color-surface-5); }
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ============================================================ */
-/* Ersatz-Strukturklassen (vormals via DaisyUI bereitgestellt)  */
+/* Strukturklassen                                               */
 /* ============================================================ */
 
 /* --- Modal --- */
@@ -744,7 +844,6 @@ a:focus-visible {
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--color-line);
   font-size: 0.875rem;
 }
 .alert-info    { background: color-mix(in srgb, var(--color-info) 12%, transparent); color: var(--color-info); }
@@ -760,7 +859,6 @@ a:focus-visible {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid var(--color-line);
   background: var(--color-surface-3);
   color: var(--color-text-primary);
 }
@@ -808,8 +906,8 @@ kbd {
   border-radius: 0.25rem;
   font-size: 0.8em;
   font-family: inherit;
-  border: 1px solid var(--color-line);
   background: var(--color-surface-3);
+  box-shadow: var(--shadow-sm);
 }
 
 /* --- Tabs --- */
@@ -894,12 +992,87 @@ kbd {
   --color-accent-border: #E5E5E5;
   --color-accent-border-active: rgba(124, 58, 237, 0.4);
   --color-line: #E5E5E5;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
   --color-btn-outline-border: #D4D4D8;
   --color-btn-ghost-hover: rgba(0, 0, 0, 0.04);
   --color-warning-content: #001429;
   --color-info-content: #ffffff;
   --color-success-content: #ffffff;
+}
+
+/* ─── Vue Flow Theme ───────────────────────────────────────────────── */
+.vue-flow {
+  --vf-node-bg: var(--color-surface-2);
+  --vf-node-color: var(--color-base-content);
+  --vf-node-text: var(--color-base-content);
+  --vf-connection-stroke: var(--color-accent);
+  --vf-handle: var(--color-accent);
+  --vf-edge-stroke: var(--color-line);
+  --vf-edge-stroke-selected: var(--color-accent);
+  --vf-bg-color: var(--color-surface-1);
+  --vf-bg-pattern-color: var(--color-surface-3);
+}
+
+.vue-flow__minimap {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+}
+
+.vue-flow__controls {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+}
+
+.vue-flow__controls button {
+  background: var(--color-surface-2);
+  color: var(--color-base-content);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.vue-flow__controls button:hover {
+  background: var(--color-surface-3);
+}
+
+/* Reset default theme styles that conflict with our custom node types */
+.vue-flow__node-default,
+.vue-flow__node-input,
+.vue-flow__node-output {
+  padding: 0;
+  width: auto;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.vue-flow__node-default.selected,
+.vue-flow__node-default:hover,
+.vue-flow__node-input.selected,
+.vue-flow__node-input:hover,
+.vue-flow__node-output.selected,
+.vue-flow__node-output:hover {
+  box-shadow: none;
+  border: none;
+}
+
+.vue-flow__node {
+  border-radius: 0.75rem;
+}
+
+.vue-flow__node.selected {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+.vue-flow__node.selected > .flow-node,
+.vue-flow__node:focus > .flow-node,
+.vue-flow__node:focus-visible > .flow-node {
+  outline: none;
 }

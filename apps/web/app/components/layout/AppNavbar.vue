@@ -21,8 +21,8 @@ const discordInviteUrl = computed(() =>
 </script>
 
 <template>
-  <div class="border-b border-line/60 bg-base-100 px-3 py-3 md:px-5">
-    <div class="navbar mx-auto max-w-[1400px] rounded-2xl border border-accent-subtle bg-base-100/95 px-3 shadow-sm md:px-4">
+  <div class="bg-base-100 px-3 py-3 md:px-5">
+    <div class="navbar mx-auto max-w-[1400px] rounded-2xl bg-base-100/95 px-3 shadow-sm md:px-4">
       <div class="navbar-start">
         <NuxtLink to="/" class="btn btn-ghost text-lg font-semibold tracking-wide">{{ props.communityName || $t("app.name") }}</NuxtLink>
       </div>

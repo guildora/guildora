@@ -12,7 +12,9 @@
     "login": "Mit Discord anmelden",
     "logout": "Abmelden",
     "marketplace": "Marketplace",
+    "apps": "Apps",
     "cms": "Landing-Seite",
+    "applications": "Bewerbungen",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen"
   },
@@ -90,7 +92,17 @@
     "sortVoice": "Voice-Aktivität",
     "viewProfile": "Profil ansehen",
     "voiceHours": "Voice-Stunden",
-    "backToOverview": "Zurück zur Übersicht"
+    "backToOverview": "Zurück zur Übersicht",
+    "detailsShow": "Details anzeigen",
+    "detailsHide": "Details ausblenden",
+    "detailsPlaceholder": "Weitere Mitgliederdetails werden hier angezeigt.",
+    "openDetails": "Details",
+    "openDetailsAria": "Details von {name} anzeigen",
+    "roleLabel": "Rolle",
+    "roleFallback": "Keine Rolle",
+    "avatarAlt": "Profilbild von {name}",
+    "modalTitle": "Mitgliedsdetails",
+    "modalSubtitle": "Profilansicht für {name}"
   },
   "profile": {
     "title": "Profil",
@@ -108,6 +120,9 @@
     "saveDiscordRoles": "Discord-Rollen speichern",
     "voiceLabel": "Voice-Label",
     "voiceDuration": "{hours} h {minutes} min",
+    "rolesSection": "Rollen",
+    "voiceSection": "Voice-Aktivität",
+    "noRoles": "Keine zugewiesen",
     "voice7d": "Zeit im Voice (7T)",
     "voice14d": "Voice (14 Tage)",
     "voice28d": "Voice (28 Tage)",
@@ -155,19 +170,11 @@
     "description": "Moderatoren und Admins können diesen Bereich aufrufen.",
     "communityRoles": "Community-Rollen",
     "userManagement": "Mitgliederverwaltung",
-    "applications": "Bewerbungen",
-    "applicationStatus": {
-      "open": "Offen",
-      "approved": "Angenommen",
-      "rejected": "Abgelehnt"
-    },
     "errors": {
       "save": "Fehler beim Speichern.",
       "delete": "Fehler beim Löschen.",
       "roleChange": "Fehler beim Rollenwechsel.",
-      "discordSync": "Fehler beim Discord-Sync.",
-      "approve": "Fehler beim Bestätigen.",
-      "reject": "Fehler beim Ablehnen."
+      "discordSync": "Fehler beim Discord-Sync."
     },
     "actions": {
       "close": "Schließen",
@@ -175,10 +182,7 @@
       "delete": "Löschen",
       "apply": "Übernehmen",
       "editProfile": "Profil bearbeiten",
-      "discordSync": "Discord-Sync",
-      "details": "Details",
-      "approve": "Bestätigen",
-      "reject": "Ablehnen"
+      "discordSync": "Discord-Sync"
     },
     "roles": {
       "namePlaceholder": "Name",
@@ -211,39 +215,19 @@
       "tableActions": "Aktionen",
       "selectRole": "Rolle auswählen"
     },
-    "applicationsTab": {
-      "empty": "Keine offenen Bewerbungen.",
-      "tableName": "Name",
-      "tableDiscordId": "Discord-ID",
-      "tableActions": "Aktionen"
-    },
     "confirm": {
       "deleteRoleTitle": "Community-Rolle löschen",
       "deleteRoleMessage": "Soll die Rolle wirklich gelöscht werden?",
       "deleteRoleLabel": "Löschen",
       "changeRoleTitle": "Rollenwechsel",
       "changeRoleMessage": "Soll der Rollenwechsel wirklich ausgeführt werden?",
-      "changeRoleLabel": "Übernehmen",
-      "approveTitle": "Bewerbung bestätigen",
-      "approveMessage": "Soll die Bewerbung bestätigt werden?",
-      "approveLabel": "Bestätigen",
-      "rejectTitle": "Bewerbung ablehnen",
-      "rejectMessage": "Soll die Bewerbung abgelehnt werden?",
-      "rejectLabel": "Ablehnen"
+      "changeRoleLabel": "Übernehmen"
     },
     "profileEditor": {
       "title": "Profil bearbeiten",
       "displayName": "Anzeigename",
       "nickname": "Rufname"
     },
-    "applicationDetails": {
-      "title": "Bewerbungsdetails",
-      "name": "Name",
-      "discordId": "Discord-ID",
-      "status": "Status",
-      "data": "Bewerbungsdaten",
-      "close": "Schließen"
-    }
   },
   "devRoleSwitcher": {
     "trigger": "DEV",
@@ -296,8 +280,8 @@
     "logoSaveSuccess": "Logo erfolgreich gespeichert.",
     "logoSaveError": "Logo konnte nicht gespeichert werden.",
     "previewTitle": "Live-Vorschau",
-    "previewDark": "Dark Preview",
-    "previewLight": "Light Preview",
+    "previewDark": "Dunkle Vorschau",
+    "previewLight": "Helle Vorschau",
     "previewCardTitle": "Buttons",
     "previewPrimary": "Primär",
     "previewSecondary": "Sekundär",
@@ -352,7 +336,18 @@
     "localSideloadPath": "Lokales App-Verzeichnis (absoluter Pfad)",
     "localSideloadInstall": "Von Festplatte installieren",
     "localSideloadSuccess": "App erfolgreich vom lokalen Pfad installiert.",
-    "localPathHint": "Es kann auch ein absoluter lokaler Pfad angegeben werden (z.B. /pfad/zur/app), um direkt von der Festplatte zu installieren."
+    "localPathHint": "Es kann auch ein absoluter lokaler Pfad angegeben werden (z.B. /pfad/zur/app), um direkt von der Festplatte zu installieren.",
+    "overviewNavLabel": "Übersicht",
+    "overviewTitle": "Installierte Apps",
+    "overviewDescription": "Installierte Apps verwalten.",
+    "exploreNavLabel": "Apps entdecken",
+    "exploreTitle": "Apps entdecken",
+    "exploreDescription": "Verfügbare Apps aus dem Marketplace durchsuchen.",
+    "exploreEmpty": "Noch keine Apps verfügbar.",
+    "exploreError": "Apps konnten nicht vom Marketplace geladen werden.",
+    "exploreNotConfigured": "Marketplace ist nicht konfiguriert.",
+    "exploreInstall": "Installieren",
+    "sideloadPageDescription": "Apps über eine GitHub-Repository-URL oder einen lokalen Pfad installieren."
   },
   "adminDiscordRoles": {
     "title": "Community-Einstellungen",
@@ -408,7 +403,7 @@
   },
   "language": {
     "label": "Sprache",
-    "english": "English",
+    "english": "Englisch",
     "german": "Deutsch",
     "switchError": "Sprache konnte nicht geändert werden."
   },
@@ -495,10 +490,11 @@
       "deleteConfirmLabel": "Löschen"
     },
     "cms": {
-      "title": "Landing-Seiten-Zugriff",
-      "description": "Admin und Superadmin behalten immer Zugriff. Hier steuerst du, ob Moderatoren den Landing-Seiten-Embed nutzen dürfen.",
-      "allowModeratorAccess": "Moderatoren den Zugriff auf die Landing-Seite erlauben",
-      "saveButton": "Landing-Seiten-Zugriff speichern"
+      "title": "Seiten-Zugriffe",
+      "description": "Admin und Superadmin behalten immer Zugriff. Lege fest, wer die Landing-Page bearbeiten und den Apps-Bereich nutzen darf.",
+      "allowModeratorAccess": "Moderatoren dürfen Landing-Page-Inhalte bearbeiten",
+      "allowModeratorAppsAccess": "Moderatoren dürfen den Apps-Bereich nutzen",
+      "saveButton": "Seiten-Zugriffe speichern"
     },
     "import": {
       "title": "Globaler Nutzerimport",
@@ -543,7 +539,7 @@
       "roleCreated": "Community-Rolle angelegt.",
       "roleSaved": "Community-Rolle gespeichert.",
       "roleDeleted": "Community-Rolle gelöscht.",
-      "cmsSaved": "Landing-Seiten-Zugriff gespeichert.",
+      "cmsSaved": "Seiten-Zugriffe gespeichert.",
       "importDone": "Import abgeschlossen.",
       "orphansDeleted": "Verwaiste Profile gelöscht.",
       "userProcessed": "Nutzer verarbeitet.",
@@ -554,13 +550,201 @@
       "roleCreate": "Community-Rolle konnte nicht angelegt werden.",
       "roleSave": "Community-Rolle konnte nicht gespeichert werden.",
       "roleDelete": "Community-Rolle konnte nicht gelöscht werden.",
-      "cmsSave": "Landing-Seiten-Zugriff konnte nicht gespeichert werden.",
+      "cmsSave": "Seiten-Zugriffe konnten nicht gespeichert werden.",
       "importRun": "Import fehlgeschlagen.",
       "orphanDelete": "Verwaiste Profile konnten nicht gelöscht werden.",
       "userProcess": "Nutzer konnte nicht verarbeitet werden.",
       "bulkDelete": "Bulk-Löschung fehlgeschlagen.",
       "requireResetToken": "Bitte zur Bestätigung RESET eingeben.",
       "devReset": "Dev-Reset fehlgeschlagen."
+    }
+  },
+  "applications": {
+    "flows": "Flows",
+    "flowsDescription": "Erstelle und verwalte Bewerbungs-Flows für deine Community.",
+    "newFlow": "Neuer Flow",
+    "flowBuilder": "Flow-Builder",
+    "flowSettings": "Flow-Einstellungen",
+    "openApplications": "Offene Bewerbungen",
+    "applicationDetail": "Bewerbungsdetails",
+    "archive": "Archiv",
+    "archivedDetail": "Archivierte Bewerbung",
+    "config": "Bewerbungs-Einstellungen",
+    "open": "Offene Bewerbungen",
+    "applyTitle": "Bewerbung",
+    "applyLoading": "Bewerbungsformular wird geladen...",
+    "applyExpired": "Dieser Link ist abgelaufen. Bitte gehe zurück zu Discord und klicke erneut auf den Button, um einen neuen Link zu erhalten.",
+    "applySuccess": "Deine Bewerbung wurde erfolgreich eingereicht!",
+    "status": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "pending": "Ausstehend",
+      "approved": "Angenommen",
+      "rejected": "Abgelehnt"
+    },
+    "actions": {
+      "create": "Flow erstellen",
+      "edit": "Bearbeiten",
+      "settings": "Einstellungen",
+      "duplicate": "Duplizieren",
+      "delete": "Löschen",
+      "approve": "Annehmen",
+      "reject": "Ablehnen",
+      "retryRoles": "Rollenvergabe wiederholen"
+    },
+    "empty": {
+      "flows": "Noch keine Flows erstellt.",
+      "open": "Keine offenen Bewerbungen.",
+      "archive": "Keine archivierten Bewerbungen."
+    },
+    "flowBuilder": {
+      "nodes": {
+        "start": "Start",
+        "end": "Ende",
+        "info": "Info",
+        "infoBlock": "Infoblock",
+        "abort": "Abbruch",
+        "applicationAborted": "Bewerbung abgebrochen",
+        "branch": "Verzweigung",
+        "conditional": "Bedingung",
+        "stepGroup": "Schrittgruppe",
+        "role": "Rolle",
+        "noRolesConfigured": "Keine Rollen konfiguriert",
+        "roleAssignment": "Rollenzuweisung"
+      },
+      "inputTypes": {
+        "shortText": "Kurztext",
+        "longText": "Langtext",
+        "number": "Zahl",
+        "email": "E-Mail",
+        "radioSelect": "Einzelauswahl",
+        "dropdown": "Dropdown",
+        "dropdownSelect": "Dropdown-Auswahl",
+        "multiSelect": "Mehrfachauswahl",
+        "multiSelectCheckboxes": "Mehrfachauswahl (Checkboxen)",
+        "yesNo": "Ja/Nein",
+        "date": "Datum",
+        "fileUpload": "Datei-Upload",
+        "discordUsername": "Discord-Benutzername",
+        "displayName": "Anzeigename",
+        "untitledField": "Unbenanntes Feld"
+      },
+      "toolbar": {
+        "nodes": "Knoten",
+        "inputField": "Eingabefeld",
+        "infoHint": "Info / Hinweis",
+        "saving": "Speichern...",
+        "saved": "Gespeichert",
+        "saveFailed": "Speichern fehlgeschlagen",
+        "undoTooltip": "Rückgängig (Strg+Z)",
+        "redoTooltip": "Wiederholen (Strg+Umschalt+Z)"
+      },
+      "sidebar": {
+        "inputType": "Eingabetyp",
+        "label": "Bezeichnung",
+        "description": "Beschreibung",
+        "placeholder": "Platzhalter",
+        "required": "Pflichtfeld",
+        "options": "Optionen",
+        "optionLabel": "Optionsbezeichnung",
+        "addOption": "+ Option hinzufügen",
+        "markdownContent": "Markdown-Inhalt",
+        "ctaButtonLabel": "CTA-Button Bezeichnung",
+        "ctaButtonUrl": "CTA-Button URL",
+        "abortMessage": "Abbruch-Nachricht",
+        "roleIds": "Rollen-IDs (kommagetrennt)",
+        "roleNames": "Rollennamen (zur Anzeige)",
+        "groupTitle": "Gruppentitel",
+        "description2": "Beschreibung",
+        "sourceNode": "Quellknoten",
+        "selectSourceNode": "Eingabeknoten auswählen...",
+        "noBranchableNodes": "Keine Eingabeknoten mit Optionen gefunden. Füge zuerst ein Radio-, Dropdown-, Mehrfachauswahl- oder Ja/Nein-Feld hinzu.",
+        "selectSourceFirst": "Wähle oben einen Quellknoten, um die Verzweigungen zu befüllen.",
+        "branches": "Verzweigungen",
+        "addBranch": "+ Verzweigung hinzufügen",
+        "deleteNode": "Knoten löschen",
+        "newField": "Neues Feld"
+      }
+    },
+    "form": {
+      "yes": "Ja",
+      "no": "Nein",
+      "select": "Auswählen...",
+      "uploading": "Wird hochgeladen...",
+      "fileUploaded": "Datei hochgeladen",
+      "stepOf": "Schritt {current} von {total}",
+      "back": "Zurück",
+      "next": "Weiter",
+      "submit": "Absenden",
+      "submitting": "Wird abgesendet...",
+      "submissionFailed": "Übermittlung fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "detail": {
+      "previousApplications": "Dieser Benutzer hat sich bereits beworben ({count} vorherige Bewerbung(en)).",
+      "roleAssignmentFailed": "Rollen konnten nicht automatisch zugewiesen werden.",
+      "displayName": "Anzeigename:",
+      "rolesAssigned": "Zugewiesene Rollen:",
+      "reviewedOn": "Überprüft am {date}",
+      "pendingRoles": "Ausstehende Rollen",
+      "notificationPreferences": "Benachrichtigungseinstellungen"
+    },
+    "settings": {
+      "general": "Allgemein",
+      "name": "Name",
+      "status": "Status",
+      "discordEmbed": "Discord-Einbettung",
+      "channelId": "Kanal-ID",
+      "embedDescription": "Einbettungs-Beschreibung",
+      "buttonLabel": "Button-Bezeichnung",
+      "applyNow": "Jetzt bewerben",
+      "roles": "Rollen",
+      "rolesDescription": "Wähle Discord-Rollen, die bei Einreichung und Genehmigung zugewiesen werden.",
+      "onSubmission": "Bei Einreichung",
+      "onApproval": "Bei Genehmigung",
+      "loadingRoles": "Rollen werden geladen...",
+      "displayNameTemplate": "Anzeigename-Vorlage",
+      "displayNameDescription": "Setze den Anzeigenamen aus Anzeigename-Feldern zusammen. Verwende {'{field-id}'}-Syntax.",
+      "preview": "Vorschau: ",
+      "exceedsNicknameLimit": "Überschreitet Discord-Nickname-Limit!",
+      "welcome": "Willkommen",
+      "welcomeChannelId": "Willkommenskanal-ID",
+      "welcomeMessageTemplate": "Willkommensnachricht-Vorlage",
+      "welcomeMessageHint": "Verwende {'{discordId}'} um den Benutzer zu erwähnen.",
+      "behavior": "Verhalten",
+      "allowReapply": "Erneute Bewerbung im selben Flow erlauben",
+      "allowCrossFlow": "Flow-übergreifende Bewerbungen erlauben",
+      "testMode": "Testmodus (Guild-Prüfungen überspringen)",
+      "archiveRetention": "Archiv-Aufbewahrung (Tage, 0 = unbegrenzt)",
+      "tokenExpiry": "Token-Ablauf (Minuten)",
+      "discordMessages": "Discord-Nachrichten",
+      "ephemeralConfirmation": "Ephemeral-Bestätigung",
+      "ephemeralButtonLabel": "Ephemeral-Button-Text",
+      "ephemeralConfirmationPlaceholder": "Klicke auf den Button, um das Bewerbungsformular zu öffnen.",
+      "ephemeralButtonLabelPlaceholder": "Bewerbung öffnen",
+      "tokenExpiredMessage": "Token-abgelaufen-Nachricht",
+      "tokenExpiredPlaceholder": "Dieser Link ist abgelaufen.",
+      "dmOnApproval": "DM bei Genehmigung",
+      "dmOnApprovalPlaceholder": "Deine Bewerbung wurde angenommen!",
+      "dmOnRejection": "DM bei Ablehnung",
+      "dmOnRejectionPlaceholder": "Deine Bewerbung wurde abgelehnt.",
+      "dmToModerators": "DM an Moderatoren bei Einreichung",
+      "dmToModeratorsPlaceholder": "Eine neue Bewerbung wurde eingereicht.",
+      "submissionConfirmation": "Einreichungsbestätigung",
+      "submissionConfirmationPlaceholder": "Deine Bewerbung wurde eingereicht!"
+    },
+    "configPage": {
+      "access": "Zugriff",
+      "allowModeratorAccess": "Moderatoren Zugriff auf den Bewerbungsbereich erlauben",
+      "moderatorNotifications": "Moderator-Benachrichtigungen",
+      "moderatorNotificationsDescription": "Übersicht, welche Moderatoren Benachrichtigungen für jeden Flow erhalten.",
+      "noModsSubscribed": "Keine Moderatoren abonniert.",
+      "noFlowsYet": "Noch keine Flows erstellt.",
+      "archiveCleanup": "Archiv-Bereinigung",
+      "archiveCleanupDescription": "Manuelle Bereinigung archivierter Bewerbungen nach Ablauf der Aufbewahrungsfrist. Läuft auch täglich automatisch.",
+      "cleaningUp": "Wird bereinigt...",
+      "runCleanup": "Bereinigung starten",
+      "cleanupResult": "{apps} Bewerbungen und {tokens} Tokens gelöscht."
     }
   }
 }

@@ -68,7 +68,7 @@ function getBotRequestConfig() {
   return { baseUrl, token };
 }
 
-async function requestBotInternal<T>(path: string, options?: { method?: "GET" | "POST"; body?: unknown }) {
+async function requestBotInternal<T>(path: string, options?: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown }) {
   const { baseUrl, token } = getBotRequestConfig();
   if (!baseUrl) {
     throw new Error("BOT_INTERNAL_URL is not configured.");
@@ -152,6 +152,12 @@ export async function refreshBotCommands(): Promise<void> {
   await requestBotInternal<{ ok: boolean }>("/internal/sync-commands", { method: "POST" });
 }
 
+export async function reloadBotHooks(): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+  await requestBotInternal<{ ok: boolean }>("/internal/reload-hooks", { method: "POST" });
+}
+
 export async function syncDiscordCommunityRolesFromBot(discordId: string, payload: SyncCommunityRolesPayload) {
   const encodedDiscordId = encodeURIComponent(discordId);
   return requestBotInternal<{ ok: boolean; addedRoleIds: string[]; removedRoleIds: string[]; currentRoleIds: string[] }>(
@@ -161,4 +167,122 @@ export async function syncDiscordCommunityRolesFromBot(discordId: string, payloa
       body: payload
     }
   );
+}
+
+// ─── Application Flow Bridge Functions ────────────────────────────────────
+
+export type EmbedConfig = {
+  description?: string;
+  buttonLabel?: string;
+  color?: string;
+};
+
+export async function postApplicationEmbed(
+  flowId: string,
+  channelId: string,
+  embed: EmbedConfig
+): Promise<{ messageId: string } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  try {
+    return await requestBotInternal<{ messageId: string }>("/internal/applications/embed", {
+      method: "POST",
+      body: { flowId, channelId, ...embed }
+    });
+  } catch (error) {
+    console.error("[botSync] Failed to post application embed:", error);
+    throw error;
+  }
+}
+
+export async function patchApplicationEmbed(
+  channelId: string,
+  messageId: string,
+  embed: EmbedConfig
+): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+
+  await requestBotInternal<{ ok: boolean }>("/internal/applications/embed", {
+    method: "PATCH",
+    body: { channelId, messageId, ...embed }
+  });
+}
+
+export async function deleteApplicationEmbed(channelId: string, messageId: string): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+
+  await requestBotInternal<{ ok: boolean }>("/internal/applications/embed", {
+    method: "DELETE",
+    body: { channelId, messageId }
+  });
+}
+
+export async function addDiscordRolesToMember(
+  discordId: string,
+  roleIds: string[]
+): Promise<{ ok: boolean; addedRoleIds: string[] } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+  if (roleIds.length === 0) return { ok: true, addedRoleIds: [] };
+
+  const encodedDiscordId = encodeURIComponent(discordId);
+  return requestBotInternal<{ ok: boolean; addedRoleIds: string[] }>(
+    `/internal/guild/members/${encodedDiscordId}/add-roles`,
+    { method: "POST", body: { roleIds } }
+  );
+}
+
+export async function setDiscordNickname(
+  discordId: string,
+  nickname: string
+): Promise<{ ok: boolean } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  const encodedDiscordId = encodeURIComponent(discordId);
+  return requestBotInternal<{ ok: boolean }>(
+    `/internal/guild/members/${encodedDiscordId}/set-nickname`,
+    { method: "POST", body: { nickname } }
+  );
+}
+
+export async function sendDiscordDm(
+  discordId: string,
+  message: string
+): Promise<{ ok: boolean } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  const encodedDiscordId = encodeURIComponent(discordId);
+  try {
+    return await requestBotInternal<{ ok: boolean }>(
+      `/internal/guild/members/${encodedDiscordId}/dm`,
+      { method: "POST", body: { message } }
+    );
+  } catch (error) {
+    console.error("[botSync] Failed to send DM:", error);
+    return null;
+  }
+}
+
+export async function sendChannelMessage(
+  channelId: string,
+  message: string
+): Promise<{ ok: boolean } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  const encodedChannelId = encodeURIComponent(channelId);
+  try {
+    return await requestBotInternal<{ ok: boolean }>(
+      `/internal/guild/channels/${encodedChannelId}/send`,
+      { method: "POST", body: { message } }
+    );
+  } catch (error) {
+    console.error("[botSync] Failed to send channel message:", error);
+    return null;
+  }
 }

@@ -14,7 +14,6 @@ const hasRole = (role: string) => {
 
 const navItems = computed(() => {
   const items = [
-    { to: "/marketplace", label: t("nav.marketplace"), visible: true },
     { to: "/cms", label: t("nav.cms"), visible: hasRole("moderator") || hasRole("admin") || hasRole("superadmin") },
     { to: "/dashboard", label: t("nav.dashboard"), visible: loggedIn.value },
     { to: "/members", label: t("nav.members"), visible: loggedIn.value },
@@ -38,8 +37,8 @@ const isRouteActive = (target: string) => route.path === target || route.path.st
 </script>
 
 <template>
-  <div class="border-b border-line/60 bg-base-100 px-3 py-3 md:px-5">
-    <div class="navbar mx-auto max-w-[1400px] rounded-2xl border border-accent-subtle bg-base-100/95 px-3 shadow-sm md:px-4">
+  <div class="bg-base-100 px-3 py-3 md:px-5">
+    <div class="navbar mx-auto max-w-[1400px] rounded-2xl bg-base-100/95 px-3 shadow-sm md:px-4">
     <div class="navbar-start">
       <!-- Mobile hamburger -->
       <button
@@ -75,7 +74,7 @@ const isRouteActive = (target: string) => route.path === target || route.path.st
           <NuxtLink
             :to="localePath(item.to)"
             :class="isRouteActive(localePath(item.to))
-              ? 'menu-active rounded-full border border-accent-subtle bg-base-200'
+              ? 'menu-active rounded-full bg-base-200'
               : 'rounded-full text-base-content/80 hover:bg-base-200 hover:text-base-content'"
           >
             {{ item.label }}
@@ -97,14 +96,14 @@ const isRouteActive = (target: string) => route.path === target || route.path.st
 
   <!-- Mobile dropdown menu -->
   <Transition name="nav-slide">
-    <div v-if="mobileMenuOpen" class="mx-3 mt-2 rounded-2xl border border-accent-subtle bg-base-100 p-3 shadow-sm md:hidden">
+    <div v-if="mobileMenuOpen" class="mx-3 mt-2 rounded-2xl bg-base-100 p-3 shadow-sm md:hidden">
       <ul class="menu w-full gap-1">
         <li v-for="item in navItems" :key="item.to">
           <NuxtLink
             :to="localePath(item.to)"
             class="rounded-full"
             :class="isRouteActive(localePath(item.to))
-              ? 'menu-active border border-accent-subtle bg-base-200'
+              ? 'menu-active bg-base-200'
               : 'text-base-content/80 hover:bg-base-200 hover:text-base-content'"
             @click="mobileMenuOpen = false"
           >

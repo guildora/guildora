@@ -35,6 +35,7 @@ type DiscordRole = {
 
 type CmsAccess = {
   allowModeratorAccess: boolean;
+  allowModeratorAppsAccess: boolean;
 };
 
 type AdminUser = {
@@ -105,7 +106,8 @@ const deleteRoleConfirm = reactive<{
 });
 
 const cmsAccessForm = reactive<CmsAccess>({
-  allowModeratorAccess: true
+  allowModeratorAccess: true,
+  allowModeratorAppsAccess: true
 });
 
 const { data: permissionData, pending: permissionPending, refresh: refreshPermissions } = await useFetch<{
@@ -149,6 +151,7 @@ watch(
   () => permissionData.value?.cmsAccess,
   (value) => {
     cmsAccessForm.allowModeratorAccess = value?.allowModeratorAccess ?? true;
+    cmsAccessForm.allowModeratorAppsAccess = value?.allowModeratorAppsAccess ?? true;
   },
   { immediate: true }
 );
@@ -270,7 +273,8 @@ const saveCmsAccess = async () => {
     await $fetch("/api/admin/cms-access", {
       method: "PUT",
       body: {
-        allowModeratorAccess: cmsAccessForm.allowModeratorAccess
+        allowModeratorAccess: cmsAccessForm.allowModeratorAccess,
+        allowModeratorAppsAccess: cmsAccessForm.allowModeratorAppsAccess
       }
     });
     await refreshPermissions();
@@ -673,8 +677,11 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
         <UiCheckbox
           v-model="cmsAccessForm.allowModeratorAccess"
           :label="t('adminPermissions.cms.allowModeratorAccess')"
-          :description="t('adminPermissions.cms.allowModeratorAccess')"
-         
+          size="sm"
+        />
+        <UiCheckbox
+          v-model="cmsAccessForm.allowModeratorAppsAccess"
+          :label="t('adminPermissions.cms.allowModeratorAppsAccess')"
           size="sm"
         />
         <div class="flex justify-end">

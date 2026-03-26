@@ -4,6 +4,7 @@ import { buildAppNavigation, hasRequiredRoles } from "../../utils/apps";
 import { getLocalizedCoreNavigation, resolveNavigationLocale } from "../../utils/core-navigation";
 import { requireSession } from "../../utils/auth";
 import { loadCmsAccessConfig } from "../../utils/cms-access";
+import { loadApplicationAccessConfig } from "../../utils/application-access";
 import { getDb } from "../../utils/db";
 import {
   normalizeUserLocalePreference,
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const session = await requireSession(event);
   const db = getDb();
   const roles = session.user.permissionRoles ?? session.user.roles ?? [];
-  const [profile, communityDefaultLocale, cmsAccess] = await Promise.all([
+  const [profile, communityDefaultLocale, cmsAccess, applicationAccess] = await Promise.all([
     db
       .select({ localePreference: profiles.localePreference, customFields: profiles.customFields })
       .from(profiles)
@@ -24,7 +25,8 @@ export default defineEventHandler(async (event) => {
       .limit(1)
       .then((rows) => rows[0] ?? null),
     loadCommunitySettingsLocale(db),
-    loadCmsAccessConfig(db)
+    loadCmsAccessConfig(db),
+    loadApplicationAccessConfig(db)
   ]);
   const userLocalePreference = normalizeUserLocalePreference(
     profile?.localePreference ?? readLegacyLocalePreferenceFromCustomFields(profile?.customFields ?? {}),
@@ -35,7 +37,9 @@ export default defineEventHandler(async (event) => {
     communityDefaultLocale
   }).locale);
   const { coreRailItems, corePanelGroups } = getLocalizedCoreNavigation(locale, {
-    allowModeratorCmsAccess: cmsAccess.allowModeratorAccess
+    allowModeratorCmsAccess: cmsAccess.allowModeratorAccess,
+    allowModeratorAppsAccess: cmsAccess.allowModeratorAppsAccess,
+    allowModeratorApplicationsAccess: applicationAccess.allowModeratorAccess
   });
 
   const visibleCoreRail = coreRailItems.filter((item) => hasRequiredRoles(item.requiredRoles, roles));

@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-  (event: "close" | "feedback"): void;
+  (event: "close"): void;
   (event: "toggle-section", sectionId: string): void;
 }>();
 
@@ -122,11 +122,11 @@ onBeforeUnmount(() => {
           :id="panelId"
           ref="panelRef"
           tabindex="-1"
-          class="mobile-drawer-panel absolute inset-y-0 left-0 w-full max-w-[340px] overflow-y-auto rounded-r-3xl border-r border-line/70 bg-base-100 safe-top safe-bottom outline-none"
+          class="mobile-drawer-panel absolute inset-y-0 left-0 w-full max-w-[340px] overflow-y-auto rounded-r-3xl bg-base-100 safe-top safe-bottom outline-none shadow-lg"
           @keydown="onKeydown"
           @mouseleave="onPanelMouseLeave"
         >
-          <div class="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-base-100/95 px-4 py-3 backdrop-blur-sm">
+          <div class="sticky top-0 z-10 flex items-center justify-between gap-3 bg-base-100/95 px-4 py-3 backdrop-blur-sm">
             <div class="flex min-w-0 items-center gap-3">
               <NuxtLink
                 :to="localePath('/dashboard')"
@@ -172,12 +172,12 @@ onBeforeUnmount(() => {
             />
           </div>
 
-          <div class="border-t border-line px-4 py-4">
+          <div class="px-4 py-4">
             <div class="mb-3">
               <p class="text-sm font-medium">{{ currentUser?.profileName ?? t("internalNav.defaultMember") }}</p>
               <p class="text-xs opacity-65">{{ permissionRoles.join(", ") || t("internalNav.defaultPermissionRole") }}</p>
             </div>
-            <button type="button" class="btn btn-ghost w-full" @click="$emit('feedback'); $emit('close')">{{ $t("feedback.button") }}</button>
+            <NuxtLink :to="localePath('/marketplace')" class="btn btn-ghost w-full" @click="$emit('close')">{{ $t("nav.marketplace") }}</NuxtLink>
           </div>
         </div>
       </div>

@@ -15,11 +15,14 @@ import {
 import { relations, sql } from "drizzle-orm";
 import type { GuildoraAppManifest } from "../types/app-manifest";
 import type { LocaleCode } from "../types/locale";
+import type { ApplicationFlowGraph, ApplicationFlowSettings } from "../types/application-flow";
 
 export const absenceStatusEnum = pgEnum("absence_status", ["away", "maintenance"]);
 export const appInstallStatusEnum = pgEnum("app_install_status", ["active", "inactive", "error"]);
 export const appInstallSourceEnum = pgEnum("app_install_source", ["marketplace", "sideloaded"]);
 export const appSubmissionStatusEnum = pgEnum("app_submission_status", ["pending", "approved", "rejected"]);
+export const applicationFlowStatusEnum = pgEnum("application_flow_status", ["draft", "active", "inactive"]);
+export const applicationStatusEnum = pgEnum("application_status", ["pending", "approved", "rejected"]);
 export type ThemeContentTone = "light" | "dark";
 
 export const users = pgTable("users", {
@@ -28,6 +31,8 @@ export const users = pgTable("users", {
   email: text("email"),
   displayName: text("display_name").notNull(),
   avatarUrl: text("avatar_url"),
+  avatarSource: text("avatar_source"),
+  primaryDiscordRoleName: text("primary_discord_role_name"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
@@ -242,6 +247,7 @@ export const themeSettings = pgTable("theme_settings", {
 export const cmsAccessSettings = pgTable("cms_access_settings", {
   id: serial("id").primaryKey(),
   allowModeratorAccess: boolean("allow_moderator_access").notNull().default(true),
+  allowModeratorAppsAccess: boolean("allow_moderator_apps_access").notNull().default(true),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull()
@@ -260,6 +266,132 @@ export const communitySettings = pgTable("community_settings", {
     .$onUpdateFn(() => sql`now()`),
   updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
 });
+
+// ─── Application Flow Tables ──────────────────────────────────────────────
+
+export const applicationFlows = pgTable("application_flows", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  status: applicationFlowStatusEnum("status").notNull().default("draft"),
+  flowJson: jsonb("flow_json").$type<ApplicationFlowGraph>().notNull(),
+  settingsJson: jsonb("settings_json").$type<ApplicationFlowSettings>().notNull(),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => sql`now()`)
+});
+
+export const applicationFlowEmbeds = pgTable("application_flow_embeds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  flowId: uuid("flow_id")
+    .notNull()
+    .references(() => applicationFlows.id, { onDelete: "cascade" }),
+  discordChannelId: text("discord_channel_id").notNull(),
+  discordMessageId: text("discord_message_id"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => sql`now()`)
+});
+
+export const applicationTokens = pgTable(
+  "application_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    flowId: uuid("flow_id")
+      .notNull()
+      .references(() => applicationFlows.id, { onDelete: "cascade" }),
+    discordId: text("discord_id").notNull(),
+    discordUsername: text("discord_username").notNull(),
+    discordAvatarUrl: text("discord_avatar_url"),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    index("application_tokens_flow_id_idx").on(table.flowId),
+    index("application_tokens_discord_id_idx").on(table.discordId)
+  ]
+);
+
+export const applications = pgTable(
+  "applications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    flowId: uuid("flow_id")
+      .notNull()
+      .references(() => applicationFlows.id, { onDelete: "cascade" }),
+    discordId: text("discord_id").notNull(),
+    discordUsername: text("discord_username").notNull(),
+    discordAvatarUrl: text("discord_avatar_url"),
+    answersJson: jsonb("answers_json").$type<Record<string, unknown>>().notNull(),
+    status: applicationStatusEnum("status").notNull().default("pending"),
+    rolesAssigned: jsonb("roles_assigned").$type<string[]>().default([]),
+    pendingRoleAssignments: jsonb("pending_role_assignments").$type<string[]>().default([]),
+    displayNameComposed: text("display_name_composed"),
+    reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdateFn(() => sql`now()`)
+  },
+  (table) => [
+    index("applications_flow_id_idx").on(table.flowId),
+    index("applications_discord_id_idx").on(table.discordId),
+    index("applications_status_idx").on(table.status)
+  ]
+);
+
+export const applicationFileUploads = pgTable(
+  "application_file_uploads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "cascade" }),
+    discordId: text("discord_id").notNull(),
+    flowId: uuid("flow_id")
+      .notNull()
+      .references(() => applicationFlows.id, { onDelete: "cascade" }),
+    originalFilename: text("original_filename").notNull(),
+    mimeType: text("mime_type").notNull(),
+    storagePath: text("storage_path").notNull(),
+    fileSize: integer("file_size").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [index("application_file_uploads_application_id_idx").on(table.applicationId)]
+);
+
+export const applicationModeratorNotifications = pgTable(
+  "application_moderator_notifications",
+  {
+    flowId: uuid("flow_id")
+      .notNull()
+      .references(() => applicationFlows.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    enabled: boolean("enabled").notNull().default(true)
+  },
+  (table) => [primaryKey({ columns: [table.flowId, table.userId] })]
+);
+
+export const applicationAccessSettings = pgTable("application_access_settings", {
+  id: serial("id").primaryKey(),
+  allowModeratorAccess: boolean("allow_moderator_access").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => sql`now()`),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
+});
+
+// ─── Relations ────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -281,7 +413,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reviewedAppSubmissions: many(appMarketplaceSubmissions, {
     relationName: "app_submission_reviewer"
   }),
-  updatedCmsAccessSettings: many(cmsAccessSettings)
+  updatedCmsAccessSettings: many(cmsAccessSettings),
+  createdApplicationFlows: many(applicationFlows),
+  reviewedApplications: many(applications, { relationName: "application_reviewer" }),
+  applicationModeratorNotifications: many(applicationModeratorNotifications)
 }));
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
@@ -389,6 +524,79 @@ export const cmsAccessSettingsRelations = relations(cmsAccessSettings, ({ one })
 export const communitySettingsRelations = relations(communitySettings, ({ one }) => ({
   updatedByUser: one(users, {
     fields: [communitySettings.updatedBy],
+    references: [users.id]
+  })
+}));
+
+// ─── Application Flow Relations ───────────────────────────────────────────
+
+export const applicationFlowsRelations = relations(applicationFlows, ({ one, many }) => ({
+  createdByUser: one(users, {
+    fields: [applicationFlows.createdBy],
+    references: [users.id]
+  }),
+  embeds: many(applicationFlowEmbeds),
+  applications: many(applications),
+  tokens: many(applicationTokens),
+  fileUploads: many(applicationFileUploads),
+  moderatorNotifications: many(applicationModeratorNotifications)
+}));
+
+export const applicationFlowEmbedsRelations = relations(applicationFlowEmbeds, ({ one }) => ({
+  flow: one(applicationFlows, {
+    fields: [applicationFlowEmbeds.flowId],
+    references: [applicationFlows.id]
+  })
+}));
+
+export const applicationTokensRelations = relations(applicationTokens, ({ one }) => ({
+  flow: one(applicationFlows, {
+    fields: [applicationTokens.flowId],
+    references: [applicationFlows.id]
+  })
+}));
+
+export const applicationsRelations = relations(applications, ({ one, many }) => ({
+  flow: one(applicationFlows, {
+    fields: [applications.flowId],
+    references: [applicationFlows.id]
+  }),
+  reviewedByUser: one(users, {
+    fields: [applications.reviewedBy],
+    references: [users.id],
+    relationName: "application_reviewer"
+  }),
+  fileUploads: many(applicationFileUploads)
+}));
+
+export const applicationFileUploadsRelations = relations(applicationFileUploads, ({ one }) => ({
+  application: one(applications, {
+    fields: [applicationFileUploads.applicationId],
+    references: [applications.id]
+  }),
+  flow: one(applicationFlows, {
+    fields: [applicationFileUploads.flowId],
+    references: [applicationFlows.id]
+  })
+}));
+
+export const applicationModeratorNotificationsRelations = relations(
+  applicationModeratorNotifications,
+  ({ one }) => ({
+    flow: one(applicationFlows, {
+      fields: [applicationModeratorNotifications.flowId],
+      references: [applicationFlows.id]
+    }),
+    user: one(users, {
+      fields: [applicationModeratorNotifications.userId],
+      references: [users.id]
+    })
+  })
+);
+
+export const applicationAccessSettingsRelations = relations(applicationAccessSettings, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [applicationAccessSettings.updatedBy],
     references: [users.id]
   })
 }));

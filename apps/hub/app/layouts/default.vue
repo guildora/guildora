@@ -2,8 +2,6 @@
 import InternalNavSections from "../components/layout/InternalNavSections.vue";
 import MobileNavDrawer from "../components/layout/MobileNavDrawer.vue";
 import MobileNavPill from "../components/layout/MobileNavPill.vue";
-import FeedbackModal from "../components/feedback/FeedbackModal.vue";
-
 interface InternalNavItem {
   id: string;
   label: string;
@@ -34,7 +32,6 @@ interface InternalNavSection {
 const route = useRoute();
 const { user, logout } = useAuth();
 const { t } = useI18n();
-const feedbackModal = ref<{ open: () => void } | null>(null);
 const localePath = useLocalePath();
 const { data } = await useSidebarNavigation();
 const { data: branding } = await useFetch<{ logoDataUrl: string | null; communityName: string | null; sidebarLogoSizePx: number }>("/api/internal/branding", {
@@ -58,7 +55,7 @@ const iconNames = {
   profile: "proicons:person",
   moderation: "proicons:shield",
   admin: "proicons:lock",
-  marketplace: "proicons:cart",
+  apps: "proicons:grid",
   cms: "proicons:document"
 } as const;
 
@@ -71,7 +68,7 @@ const fallbackRail = computed(() => {
     { id: "profile", to: localePath("/profile"), label: t("nav.profile"), labelKey: "nav.profile", iconPath: iconNames.profile, visible: true },
     { id: "moderation", to: localePath("/mod"), label: t("nav.moderation"), labelKey: "nav.moderation", iconPath: iconNames.moderation, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "admin", to: localePath("/admin"), label: t("nav.admin"), labelKey: "nav.admin", iconPath: iconNames.admin, visible: hasAnyRole("admin", "superadmin") },
-    { id: "marketplace", to: localePath("/marketplace"), label: t("nav.marketplace"), labelKey: "nav.marketplace", iconPath: iconNames.marketplace, visible: true },
+    { id: "apps", to: localePath("/apps"), label: t("nav.apps"), labelKey: "nav.apps", iconPath: iconNames.apps, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "cms", to: localePath("/cms"), label: t("nav.cms"), labelKey: "nav.cms", iconPath: iconNames.cms, visible: hasAnyRole("moderator", "admin", "superadmin") }
   ];
 
@@ -140,7 +137,9 @@ const sections = computed<InternalNavSection[]>(() => {
     const uniqueTargets = Array.from(new Set(items.map((item) => item.to)));
     const isDirect = uniqueTargets.length <= 1;
     const sectionTo = isDirect ? uniqueTargets[0] || entryToLocalized : entryToLocalized;
-    const isActive = isRouteMatch(sectionTo, route.path) || items.some((item) => item.active);
+    const isActive = isDirect
+      ? isRouteMatch(sectionTo, route.path)
+      : items.some((item) => item.active);
 
     return {
       id: entry.id,
@@ -169,12 +168,14 @@ const sidebarLogoSizePx = computed(() => {
 });
 const mobileLogoSizePx = computed(() => Math.min(sidebarLogoSizePx.value, 48));
 const cmsBasePath = computed(() => localePath("/cms"));
-const marketplaceBasePath = computed(() => localePath("/marketplace"));
+const isFlowBuilderRoute = computed(() => {
+  return /^(\/[a-z]{2})?\/applications\/flows\/[^/]+$/.test(route.path);
+});
 const isTinySidebar = computed(() => {
-  return isRouteMatch(cmsBasePath.value, route.path) || isRouteMatch(marketplaceBasePath.value, route.path);
+  return isRouteMatch(cmsBasePath.value, route.path) || isFlowBuilderRoute.value;
 });
 const isEmbedFullContentRoute = computed(() => {
-  return isRouteMatch(cmsBasePath.value, route.path) || isRouteMatch(marketplaceBasePath.value, route.path);
+  return isRouteMatch(cmsBasePath.value, route.path) || isFlowBuilderRoute.value;
 });
 
 const desktopExpandedIds = computed(() => {
@@ -280,16 +281,16 @@ watch(() => route.path, () => {
     ]"
   >
     <aside
-      class="fixed z-30 hidden border border-line/70 bg-base-100/95 shadow-md lg:flex lg:flex-col"
+      class="fixed z-30 hidden bg-base-100/95 lg:flex lg:flex-col"
       :class="isTinySidebar
-        ? 'inset-y-0 left-0 w-14 rounded-none border-y-0 border-l-0 shadow-none'
-        : 'inset-y-3 left-3 w-[19.25rem] rounded-3xl'"
+        ? 'inset-y-0 left-0 w-14 rounded-none shadow-none'
+        : 'inset-y-3 left-3 w-[19.25rem] rounded-3xl shadow-md'"
     >
       <template v-if="isTinySidebar">
         <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-4" :aria-label="$t('internalNav.ariaLabel')">
           <div class="flex flex-col items-center gap-1">
             <NuxtLink
-              v-for="section in sections"
+              v-for="section in sections.filter(s => s.kind === 'core')"
               :key="section.id"
               :to="section.to"
               class="sidebar-rail-item"
@@ -302,13 +303,30 @@ watch(() => route.path, () => {
                 <path :d="section.iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </NuxtLink>
+            <template v-if="sections.some(s => s.kind === 'app')">
+              <div class="my-1 h-px w-6 bg-base-content/10" />
+              <NuxtLink
+                v-for="section in sections.filter(s => s.kind === 'app')"
+                :key="section.id"
+                :to="section.to"
+                class="sidebar-rail-item"
+                :class="{ 'sidebar-rail-item-active': section.isActive }"
+                :title="section.label"
+                :aria-label="section.label"
+              >
+                <Icon v-if="section.iconPath?.includes(':')" :name="section.iconPath" class="h-4 w-4" aria-hidden="true" />
+                <svg v-else class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path :d="section.iconPath" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </NuxtLink>
+            </template>
           </div>
         </nav>
 
       </template>
 
       <template v-else>
-        <div class="flex items-center gap-3 border-b border-line px-4 py-2">
+        <div class="flex items-center gap-3 px-4 py-2">
           <NuxtLink
             :to="localePath('/dashboard')"
             class="relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-sm font-bold text-white"
@@ -337,12 +355,12 @@ watch(() => route.path, () => {
           />
         </div>
 
-        <div class="border-t border-line px-4 py-4">
+        <div class="px-4 py-4">
           <div class="mb-3">
             <p class="text-sm font-medium">{{ currentUser?.profileName || $t("internalNav.defaultMember") }}</p>
             <p class="text-xs opacity-65">{{ permissionRoles.join(", ") || $t("internalNav.defaultPermissionRole") }}</p>
           </div>
-          <button class="btn btn-ghost w-full" type="button" @click="feedbackModal?.open()">{{ $t("feedback.button") }}</button>
+          <NuxtLink :to="localePath('/marketplace')" class="btn btn-ghost w-full">{{ $t("nav.marketplace") }}</NuxtLink>
         </div>
       </template>
     </aside>
@@ -355,7 +373,7 @@ watch(() => route.path, () => {
       >
         <div
           v-if="!isEmbedFullContentRoute"
-          class="mx-auto max-w-[1700px] rounded-2xl border border-line/60 bg-base-100 p-4 shadow-md lg:p-6"
+          class="mx-auto max-w-[1700px] rounded-2xl bg-base-100 p-4 shadow-md lg:p-6"
         >
           <slot />
         </div>
@@ -377,10 +395,7 @@ watch(() => route.path, () => {
       :logo-size-px="mobileLogoSizePx"
       @toggle-section="toggleMobileSection"
       @close="closeNav"
-      @feedback="feedbackModal?.open()"
     />
-
-    <FeedbackModal ref="feedbackModal" />
 
     <MobileNavPill
       :open="isNavOpen"

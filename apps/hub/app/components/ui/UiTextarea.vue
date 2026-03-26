@@ -11,6 +11,9 @@ const props = withDefaults(
     rows?: number;
     name?: string;
     id?: string;
+    hint?: string;
+    error?: string;
+    showCounter?: boolean;
   }>(),
   {
     required: false,
@@ -19,17 +22,34 @@ const props = withDefaults(
     maxlength: undefined,
     rows: 3,
     name: undefined,
-    id: undefined
+    id: undefined,
+    hint: undefined,
+    error: undefined,
+    showCounter: false,
   }
 );
 
 const attrs = useAttrs();
 const autoId = useId();
 const textareaId = computed(() => props.id || `ui-textarea-${autoId}`);
+
+const currentLength = computed(() => model.value?.length ?? 0);
+
+const counterClass = computed(() => {
+  if (!props.maxlength) return "field__counter";
+  const ratio = currentLength.value / props.maxlength;
+  if (ratio >= 1) return "field__counter field__counter--limit";
+  if (ratio >= 0.8) return "field__counter field__counter--warn";
+  return "field__counter";
+});
+
+const showSubRow = computed(() =>
+  (props.showCounter && props.maxlength) || props.hint || props.error
+);
 </script>
 
 <template>
-  <div class="field field--textarea">
+  <div class="field field--textarea" :class="{ 'field--error': !!error }">
     <label class="field__label" :for="textareaId">
       {{ label }}
       <span v-if="required" aria-hidden="true">*</span>
@@ -46,6 +66,14 @@ const textareaId = computed(() => props.id || `ui-textarea-${autoId}`);
         :name="name"
         v-bind="attrs"
       />
+    </div>
+    <div v-if="showSubRow" class="field__sub-row">
+      <span v-if="error" class="field__message">{{ error }}</span>
+      <span v-else-if="hint" class="field__hint">{{ hint }}</span>
+      <span v-else />
+      <span v-if="showCounter && maxlength" :class="counterClass">
+        {{ currentLength }}/{{ maxlength }}
+      </span>
     </div>
   </div>
 </template>

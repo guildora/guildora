@@ -1,21 +1,14 @@
 <script setup lang="ts">
+import MemberExpandableCard from "~/components/members/MemberExpandableCard.vue";
+import MemberDetailsModal from "~/components/members/MemberDetailsModal.vue";
+
 definePageMeta({
   middleware: ["auth"],
 });
 
-const localePath = useLocalePath();
+const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
-
-function formatVoiceDuration(minutes: number | null | undefined) {
-  if (!Number.isFinite(minutes) || (minutes || 0) <= 0) {
-    return "0";
-  }
-
-  const totalMinutes = Math.round(minutes as number);
-  const hours = Math.floor(totalMinutes / 60);
-  const remainingMinutes = totalMinutes % 60;
-  return t("profile.voiceDuration", { hours, minutes: remainingMinutes });
-}
 
 interface MemberItem {
   id: string;
@@ -23,6 +16,8 @@ interface MemberItem {
   ingameName: string;
   rufname: string | null;
   communityRole: string | null;
+  avatarUrl: string | null;
+  cardRoleName: string | null;
   voice: {
     label: string;
     minutes: number;
@@ -33,6 +28,22 @@ interface MemberItem {
 interface MembersResponse {
   days: number;
   items: MemberItem[];
+}
+
+interface MemberProfileResponse {
+  id: string;
+  profileName: string;
+  ingameName: string;
+  rufname: string | null;
+  permissionRoles: string[];
+  communityRole: string | null;
+  voiceSummary?: {
+    minutes7d: number;
+    minutes14d: number;
+    minutes28d: number;
+    hours7d: number;
+    label: string;
+  };
 }
 
 const search = ref("");
@@ -57,10 +68,77 @@ const roleOptions = computed(() => {
   }
   return Array.from(values).sort();
 });
+
+const selectedMemberId = ref<string | null>(null);
+const selectedProfile = ref<MemberProfileResponse | null>(null);
+const selectedProfilePending = ref(false);
+const selectedProfileError = ref<string | null>(null);
+
+async function updateMemberQuery(memberId: string | null) {
+  if (!import.meta.client) return;
+
+  const nextQuery = { ...route.query } as Record<string, unknown>;
+  if (memberId) {
+    nextQuery.member = memberId;
+  } else {
+    delete nextQuery.member;
+  }
+
+  await router.replace({ query: nextQuery });
+}
+
+async function loadSelectedProfile(memberId: string) {
+  selectedProfilePending.value = true;
+  selectedProfileError.value = null;
+  try {
+    selectedProfile.value = await $fetch<MemberProfileResponse>("/api/profile", {
+      query: { id: memberId }
+    });
+  } catch {
+    selectedProfile.value = null;
+    selectedProfileError.value = t("common.error");
+  } finally {
+    selectedProfilePending.value = false;
+  }
+}
+
+async function openMemberDetails(memberId: string) {
+  selectedMemberId.value = memberId;
+  await loadSelectedProfile(memberId);
+  await updateMemberQuery(memberId);
+}
+
+async function closeMemberDetails() {
+  selectedMemberId.value = null;
+  selectedProfile.value = null;
+  selectedProfileError.value = null;
+  await updateMemberQuery(null);
+}
+
+watch(
+  () => route.query.member,
+  async (queryMember) => {
+    const memberId = typeof queryMember === "string" && queryMember.trim().length > 0 ? queryMember : null;
+    if (!memberId) {
+      selectedMemberId.value = null;
+      selectedProfile.value = null;
+      selectedProfileError.value = null;
+      return;
+    }
+
+    if (selectedMemberId.value === memberId && (selectedProfile.value || selectedProfilePending.value)) {
+      return;
+    }
+
+    selectedMemberId.value = memberId;
+    await loadSelectedProfile(memberId);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <section class="space-y-6">
+  <section class="space-y-8">
     <div>
       <h1 class="text-2xl font-bold md:text-3xl">{{ $t("members.title") }}</h1>
     </div>
@@ -86,19 +164,21 @@ const roleOptions = computed(() => {
 
     <div v-if="pending" class="loading loading-spinner loading-md" />
     <div v-else-if="error" class="alert alert-error">{{ $t("common.error") }}</div>
-    <div v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <article v-for="item in data?.items || []" :key="item.id" class="card bg-base-200">
-        <div class="card-body">
-          <div class="flex items-start justify-between gap-3">
-            <h2 class="card-title">{{ item.profileName }}</h2>
-          </div>
-          <p><strong>{{ $t("profile.communityRole") }}:</strong> {{ item.communityRole || "-" }}</p>
-          <p><strong>{{ $t("profile.voice7d") }}:</strong> {{ formatVoiceDuration(item.voice.minutes) }}</p>
-          <div class="card-actions justify-end">
-            <NuxtLink class="btn btn-primary btn-sm" :to="localePath(`/members/${item.id}`)">{{ $t("members.viewProfile") }}</NuxtLink>
-          </div>
-        </div>
-      </article>
+    <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <MemberExpandableCard
+        v-for="item in data?.items || []"
+        :key="item.id"
+        :member="item"
+        @open-details="openMemberDetails"
+      />
     </div>
+
+    <MemberDetailsModal
+      :open="Boolean(selectedMemberId)"
+      :pending="selectedProfilePending"
+      :error="selectedProfileError"
+      :profile="selectedProfile"
+      @close="closeMemberDetails"
+    />
   </section>
 </template>

@@ -79,6 +79,8 @@ export async function ensureCommunityUser(input: {
   discordId: string;
   profileName: string;
   avatarUrl: string | null;
+  avatarSource?: string | null;
+  primaryDiscordRoleName?: string | null;
   email?: string | null;
   superadminDiscordId?: string | null;
 }) {
@@ -95,6 +97,8 @@ export async function ensureCommunityUser(input: {
           discordId: input.discordId,
           displayName: input.profileName,
           avatarUrl: input.avatarUrl,
+          avatarSource: input.avatarSource ?? null,
+          primaryDiscordRoleName: input.primaryDiscordRoleName ?? null,
           email: input.email ?? null
         })
         .returning()
@@ -104,11 +108,20 @@ export async function ensureCommunityUser(input: {
   }
 
   if (existing[0]) {
+    const currentUser = existing[0];
+    const keepLocalAvatar = currentUser.avatarSource === "local" && input.avatarSource === undefined;
+    const nextAvatarUrl = keepLocalAvatar ? currentUser.avatarUrl : input.avatarUrl;
+    const nextAvatarSource = input.avatarSource !== undefined ? input.avatarSource : currentUser.avatarSource;
+
     await db
       .update(users)
       .set({
         // Keep user-chosen displayName; only refresh avatar/email on login.
-        avatarUrl: input.avatarUrl,
+        avatarUrl: nextAvatarUrl,
+        avatarSource: nextAvatarSource,
+        ...(input.primaryDiscordRoleName !== undefined
+          ? { primaryDiscordRoleName: input.primaryDiscordRoleName }
+          : {}),
         email: input.email ?? null,
         updatedAt: new Date()
       })

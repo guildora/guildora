@@ -1,10 +1,11 @@
 import crypto from "node:crypto";
 import { collectMappedRolesForMember } from "../../utils/admin-mirror";
-import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot } from "../../utils/botSync";
+import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot, type DiscordGuildRole } from "../../utils/botSync";
 import { coerceProfileNameFromRaw } from "@guildora/shared";
 import { replaceAuthSessionForUserId } from "../../utils/auth-session";
 import { ensureCommunityUser, ensureUserProfile, getUserByDiscordId, listActiveCommunityRoleMappings, upsertCommunityRoleAssignment } from "../../utils/community";
 import { replaceUserDiscordRolesSnapshotFromMember } from "../../utils/discord-roles";
+import { persistDiscordAvatarLocally } from "../../utils/avatar-storage";
 
 type DiscordUser = {
   id: string;
@@ -14,12 +15,19 @@ type DiscordUser = {
   email?: string | null;
 };
 
-function getAvatarUrl(user: DiscordUser) {
-  if (!user.avatar) {
-    return null;
+function resolvePrimaryDiscordRoleName(roleIds: string[], guildRoles: DiscordGuildRole[]): string | null {
+  const roleById = new Map(guildRoles.map((role) => [role.id, role]));
+  let topRole: DiscordGuildRole | null = null;
+
+  for (const roleId of roleIds) {
+    const role = roleById.get(roleId);
+    if (!role) continue;
+    if (!topRole || role.position > topRole.position) {
+      topRole = role;
+    }
   }
 
-  return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+  return topRole?.name ?? null;
 }
 
 type DiscordTokenResponse = {
@@ -235,10 +243,30 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    const existingUser = await getUserByDiscordId(discordUser.id);
+    let localAvatarUrl: string | null = null;
+    if (discordUser.avatar) {
+      try {
+        localAvatarUrl = await persistDiscordAvatarLocally(discordUser.id, discordUser.avatar);
+      } catch (avatarError) {
+        console.warn("Local avatar persistence failed:", avatarError);
+      }
+    }
+
+    const primaryDiscordRoleName = botMember.member
+      ? resolvePrimaryDiscordRoleName(botMember.member.roleIds, guildRoles)
+      : null;
+    const resolvedAvatarUrl = localAvatarUrl ?? existingUser?.avatarUrl ?? null;
+    const avatarSource = localAvatarUrl
+      ? "local"
+      : existingUser?.avatarSource ?? null;
+
     const dbUser = await ensureCommunityUser({
       discordId: discordUser.id,
       profileName,
-      avatarUrl: getAvatarUrl(discordUser),
+      avatarUrl: resolvedAvatarUrl,
+      avatarSource,
+      primaryDiscordRoleName,
       email: discordUser.email ?? null,
       superadminDiscordId: configuredSuperadminDiscordId
     });

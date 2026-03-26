@@ -54,6 +54,20 @@ export interface AppDb {
 export interface BotClient {
   /** Send a message to a Discord channel by ID. */
   sendMessage(channelId: string, content: string): Promise<void>;
+  /** Create a voice channel inside a category. Returns the created channel info or null. */
+  createVoiceChannel(name: string, parentId: string): Promise<{ id: string; name: string } | null>;
+  /** Delete a channel by ID. Returns true if deleted. */
+  deleteChannel(channelId: string): Promise<boolean>;
+  /** Fetch a channel by ID. */
+  getChannel(channelId: string): Promise<{ id: string; name: string; parentId: string | null; memberCount: number | null } | null>;
+  /** Rename a channel. Returns true on success. */
+  setChannelName(channelId: string, name: string): Promise<boolean>;
+  /** Move a guild member to a voice channel. Guild is derived from the channel. */
+  moveMemberToChannel(memberId: string, channelId: string): Promise<boolean>;
+  /** Get the voice channel ID a member is currently in. */
+  getMemberVoiceChannelId(memberId: string): Promise<string | null>;
+  /** List voice channels in a category. Guild is derived from the category. */
+  listVoiceChannelsByCategory(categoryId: string): Promise<Array<{ id: string; name: string; parentId: string | null; memberCount: number | null }>>;
 }
 
 // ─── Bot context ─────────────────────────────────────────────────────────────

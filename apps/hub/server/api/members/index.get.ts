@@ -1,11 +1,14 @@
 import {
   parseProfileName,
+  permissionRoles,
+  userPermissionRoles,
   users,
   voiceSessions
 } from "@guildora/shared";
+import { eq } from "drizzle-orm";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
-import { loadUserCommunityRolesMap, loadUserPermissionRolesMap } from "../../utils/user-directory";
+import { loadUserCommunityRolesMap } from "../../utils/user-directory";
 import { calculateVoiceMinutesFromSessions, classifyVoiceActivity, formatMinutesToHours } from "../../utils/voice";
 
 export default defineEventHandler(async (event) => {
@@ -19,10 +22,17 @@ export default defineEventHandler(async (event) => {
   const voiceActivityDays = Number.parseInt(typeof query.voiceActivityDays === "string" ? query.voiceActivityDays : "7", 10);
   const days = [7, 14, 28].includes(voiceActivityDays) ? voiceActivityDays : 7;
 
-  const [userRows, communityMap, permissionsMap, sessions] = await Promise.all([
+  const [userRows, communityMap, permissionRows, sessions] = await Promise.all([
     db.select().from(users),
     loadUserCommunityRolesMap(db),
-    loadUserPermissionRolesMap(db),
+    db
+      .select({
+        userId: userPermissionRoles.userId,
+        roleName: permissionRoles.name,
+        roleLevel: permissionRoles.level
+      })
+      .from(userPermissionRoles)
+      .innerJoin(permissionRoles, eq(permissionRoles.id, userPermissionRoles.permissionRoleId)),
     db
       .select({
         userId: voiceSessions.userId,
@@ -40,19 +50,41 @@ export default defineEventHandler(async (event) => {
     voiceMap.set(session.userId, list);
   }
 
+  const permissionRolesByUser = new Map<string, string[]>();
+  const highestPermissionRoleByUser = new Map<string, { name: string; level: number }>();
+  for (const row of permissionRows) {
+    const list = permissionRolesByUser.get(row.userId) || [];
+    list.push(row.roleName);
+    permissionRolesByUser.set(row.userId, list);
+
+    const currentTop = highestPermissionRoleByUser.get(row.userId);
+    if (!currentTop || row.roleLevel > currentTop.level) {
+      highestPermissionRoleByUser.set(row.userId, {
+        name: row.roleName,
+        level: row.roleLevel
+      });
+    }
+  }
+
   let items = userRows.map((user) => {
     const userSessions = voiceMap.get(user.id) || [];
     const minutes = calculateVoiceMinutesFromSessions(userSessions, days);
     const hours = formatMinutesToHours(minutes);
+    const permissionRolesForUser = permissionRolesByUser.get(user.id) || [];
+    const highestPermissionRoleName = highestPermissionRoleByUser.get(user.id)?.name ?? null;
+
     return {
       id: user.id,
       discordId: user.discordId,
       profileName: user.displayName,
       ...parseProfileName(user.displayName),
       avatarUrl: user.avatarUrl,
+      avatarSource: user.avatarSource,
       createdAt: user.createdAt,
       communityRole: communityMap.get(user.id)?.name ?? null,
-      permissionRoles: permissionsMap.get(user.id) || [],
+      permissionRoles: permissionRolesForUser,
+      primaryDiscordRoleName: user.primaryDiscordRoleName ?? null,
+      cardRoleName: user.primaryDiscordRoleName ?? highestPermissionRoleName,
       voice: {
         minutes,
         hours,

@@ -1,13 +1,14 @@
 import crypto from "node:crypto";
 import { createServer } from "node:http";
-import { Collection, REST, Routes, SlashCommandBuilder, type Client } from "discord.js";
+import { Collection, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, type Client } from "discord.js";
 import { eq } from "drizzle-orm";
-import { installedApps, safeParseAppManifest } from "@guildora/shared";
+import { installedApps, safeParseAppManifest, applicationTokens } from "@guildora/shared";
 import type { BotCommand } from "../types";
 import { setupCommand } from "../commands/setup";
 import { getDb } from "./db";
-import { botAppHookRegistry } from "./app-hooks";
+import { botAppHookRegistry, loadInstalledAppHooks } from "./app-hooks";
 import { logger } from "./logger";
+import { signTokenId } from "./application-tokens";
 
 type SyncPayload = {
   discordId?: string;
@@ -96,9 +97,15 @@ type InternalSyncErrorCode =
   | "MISSING_DISCORD_ID"
   | "MISSING_ROLE_ID"
   | "MISSING_ROLE_IDS"
+  | "MISSING_CHANNEL_ID"
+  | "MISSING_MESSAGE_ID"
+  | "MISSING_FLOW_ID"
+  | "MISSING_MESSAGE"
+  | "MISSING_NICKNAME"
   | "INVALID_SELECTED_ROLE_IDS"
   | "NON_EDITABLE_ALLOWED_ROLES"
   | "NOT_FOUND"
+  | "CHANNEL_NOT_FOUND"
   | "REQUEST_BODY_TOO_LARGE"
   | "SYNC_FAILED";
 
@@ -493,6 +500,238 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
       if (method === "POST" && pathname === "/internal/sync-commands") {
         const deployedCount = await loadAndDeployAppCommands(commands);
         json(res, 200, { ok: true, deployedCount });
+        return;
+      }
+
+      if (method === "POST" && pathname === "/internal/reload-hooks") {
+        await loadInstalledAppHooks(client);
+        logger.info("App hooks reloaded via internal sync.");
+        json(res, 200, { ok: true });
+        return;
+      }
+
+      // ─── Application Flow Endpoints ─────────────────────────────────
+
+      // POST /internal/applications/embed — post embed with button
+      if (method === "POST" && pathname === "/internal/applications/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { flowId?: string; channelId?: string; description?: string; buttonLabel?: string; color?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.flowId) { jsonError(res, 400, "MISSING_FLOW_ID", "Missing flowId"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (!channel || !("send" in channel)) { jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found or not text-based"); return; }
+
+        const embed = new EmbedBuilder()
+          .setDescription(body.description || "Click the button below to apply.")
+          .setColor(body.color ? (parseInt(body.color.replace("#", ""), 16) || 0x7C3AED) : 0x7C3AED);
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`application_apply_${body.flowId}`)
+            .setLabel(body.buttonLabel || "Apply")
+            .setStyle(ButtonStyle.Primary)
+        );
+
+        const message = await (channel as { send: Function }).send({ embeds: [embed], components: [row] });
+        json(res, 200, { ok: true, messageId: (message as { id: string }).id });
+        return;
+      }
+
+      // PATCH /internal/applications/embed — update existing embed
+      if (method === "PATCH" && pathname === "/internal/applications/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { channelId?: string; messageId?: string; description?: string; buttonLabel?: string; color?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.messageId) { jsonError(res, 400, "MISSING_MESSAGE_ID", "Missing messageId"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (!channel || !("messages" in channel)) { jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found"); return; }
+
+        const ch = channel as { messages: { fetch: Function } };
+        const msg = await ch.messages.fetch(body.messageId).catch(() => null);
+        if (!msg || !("edit" in msg)) { jsonError(res, 404, "NOT_FOUND", "Message not found"); return; }
+
+        const embed = new EmbedBuilder()
+          .setDescription(body.description || "Click the button below to apply.")
+          .setColor(body.color ? (parseInt(body.color.replace("#", ""), 16) || 0x7C3AED) : 0x7C3AED);
+
+        await (msg as { edit: Function }).edit({ embeds: [embed] });
+        json(res, 200, { ok: true });
+        return;
+      }
+
+      // DELETE /internal/applications/embed — delete embed message
+      if (method === "DELETE" && pathname === "/internal/applications/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { channelId?: string; messageId?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.messageId) { jsonError(res, 400, "MISSING_MESSAGE_ID", "Missing messageId"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (channel && "messages" in channel) {
+          const ch = channel as { messages: { fetch: Function } };
+          const msg = await ch.messages.fetch(body.messageId).catch(() => null);
+          if (msg && "delete" in msg) {
+            await (msg as { delete: Function }).delete().catch(() => {});
+          }
+        }
+
+        json(res, 200, { ok: true });
+        return;
+      }
+
+      // POST /internal/applications/token — create DB-backed token
+      if (method === "POST" && pathname === "/internal/applications/token") {
+        const bodyRaw = await readBody(req);
+        let body: { flowId?: string; discordId?: string; discordUsername?: string; discordAvatarUrl?: string; expiryMinutes?: number } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.flowId) { jsonError(res, 400, "MISSING_FLOW_ID", "Missing flowId"); return; }
+        if (!body.discordId) { jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discordId"); return; }
+
+        const db = getDb();
+        const expiryMinutes = body.expiryMinutes || 60;
+        const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+        const tokenSecret = process.env.APPLICATION_TOKEN_SECRET;
+        if (!tokenSecret) {
+          jsonError(res, 500, "SYNC_FAILED", "APPLICATION_TOKEN_SECRET not configured");
+          return;
+        }
+
+        const tokenId = crypto.randomUUID();
+        const signedToken = signTokenId(tokenId, expiresAt, tokenSecret);
+
+        await db.insert(applicationTokens).values({
+          id: tokenId,
+          flowId: body.flowId,
+          discordId: body.discordId,
+          discordUsername: body.discordUsername || "Unknown",
+          discordAvatarUrl: body.discordAvatarUrl || null,
+          token: signedToken,
+          expiresAt
+        });
+
+        json(res, 200, { ok: true, tokenId, signedToken, expiresAt: expiresAt.toISOString() });
+        return;
+      }
+
+      // POST /internal/guild/members/:discordId/add-roles
+      const addRolesMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/add-roles$/);
+      if (method === "POST" && addRolesMatch) {
+        const discordId = decodeURIComponent(addRolesMatch[1] || "");
+        if (!discordId) { jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id"); return; }
+
+        const bodyRaw = await readBody(req);
+        let body: { roleIds?: string[] } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        const roleIds = parseRoleIds(body.roleIds);
+        if (roleIds.length === 0) { jsonError(res, 400, "MISSING_ROLE_IDS", "Missing roleIds"); return; }
+
+        const guild = await getGuild(client, guildId);
+        const member = await guild.members.fetch(discordId);
+
+        const validRoleIds = roleIds.filter((roleId) => {
+          if (member.roles.cache.has(roleId)) return false;
+          const role = guild.roles.cache.get(roleId);
+          return role && role.editable && !role.managed;
+        });
+
+        if (validRoleIds.length > 0) {
+          await member.roles.add(validRoleIds);
+        }
+        const addedRoleIds = validRoleIds;
+
+        if (addedRoleIds.length > 0) {
+          await botAppHookRegistry.emit("onRoleChange", {
+            guildId: guild.id,
+            memberId: member.user.id,
+            addedRoles: addedRoleIds,
+            removedRoles: []
+          });
+        }
+
+        json(res, 200, { ok: true, addedRoleIds });
+        return;
+      }
+
+      // POST /internal/guild/members/:discordId/set-nickname
+      const setNicknameMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/set-nickname$/);
+      if (method === "POST" && setNicknameMatch) {
+        const discordId = decodeURIComponent(setNicknameMatch[1] || "");
+        if (!discordId) { jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id"); return; }
+
+        const bodyRaw = await readBody(req);
+        let body: { nickname?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.nickname) { jsonError(res, 400, "MISSING_NICKNAME", "Missing nickname"); return; }
+
+        const guild = await getGuild(client, guildId);
+        const member = await guild.members.fetch(discordId);
+
+        if (!member.manageable) {
+          json(res, 200, { ok: false, reason: "member_not_manageable" });
+          return;
+        }
+
+        const nickname = body.nickname.slice(0, 32);
+        await member.setNickname(nickname);
+        json(res, 200, { ok: true, appliedNickname: nickname });
+        return;
+      }
+
+      // POST /internal/guild/members/:discordId/dm
+      const dmMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/dm$/);
+      if (method === "POST" && dmMatch) {
+        const discordId = decodeURIComponent(dmMatch[1] || "");
+        if (!discordId) { jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id"); return; }
+
+        const bodyRaw = await readBody(req);
+        let body: { message?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.message) { jsonError(res, 400, "MISSING_MESSAGE", "Missing message"); return; }
+
+        try {
+          const user = await client.users.fetch(discordId);
+          await user.send(body.message);
+          json(res, 200, { ok: true });
+        } catch (error) {
+          logger.warn(`Failed to send DM to ${discordId}:`, error);
+          json(res, 200, { ok: false, reason: "dm_failed" });
+        }
+        return;
+      }
+
+      // POST /internal/guild/channels/:channelId/send
+      const channelSendMatch = pathname.match(/^\/internal\/guild\/channels\/([^/]+)\/send$/);
+      if (method === "POST" && channelSendMatch) {
+        const channelId = decodeURIComponent(channelSendMatch[1] || "");
+        if (!channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channel id"); return; }
+
+        const bodyRaw = await readBody(req);
+        let body: { message?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.message) { jsonError(res, 400, "MISSING_MESSAGE", "Missing message"); return; }
+
+        const channel = await client.channels.fetch(channelId).catch(() => null);
+        if (!channel || !("send" in channel)) {
+          jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found or not text-based");
+          return;
+        }
+
+        await (channel as { send: Function }).send(body.message);
+        json(res, 200, { ok: true });
         return;
       }
 

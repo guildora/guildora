@@ -89,7 +89,7 @@ watch(isOpen, async (open) => {
           class="fixed inset-0 z-[120] bg-black/55 backdrop-blur-sm p-4 md:p-6"
           @click.self="isOpen = false"
         >
-          <div class="mx-auto flex h-full max-w-4xl flex-col rounded-2xl border border-line bg-surface-2 shadow-lg">
+          <div class="mx-auto flex h-full max-w-4xl flex-col rounded-2xl bg-surface-2 shadow-lg">
             <header class="flex items-start justify-between border-b border-line px-5 py-4">
               <div>
                 <h2 class="text-lg font-semibold">{{ t("devRoleSwitcher.title") }}</h2>
@@ -157,7 +157,7 @@ watch(isOpen, async (open) => {
                 <li
                   v-for="entry in filteredUsers"
                   :key="entry.id"
-                  class="rounded-xl border border-line bg-base-100 px-4 py-3"
+                  class="rounded-xl bg-base-100 px-4 py-3"
                 >
                   <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="min-w-0">

@@ -9,13 +9,17 @@ const props = withDefaults(
     name?: string;
     id?: string;
     size?: "md" | "sm" | "xs";
+    hint?: string;
+    error?: string;
   }>(),
   {
     required: false,
     disabled: false,
     name: undefined,
     id: undefined,
-    size: "md"
+    size: "md",
+    hint: undefined,
+    error: undefined,
   }
 );
 
@@ -27,7 +31,7 @@ const hasTrailing = computed(() => Boolean(slots.trailing));
 </script>
 
 <template>
-  <div class="field" :class="[`field--${size}`]">
+  <div class="field" :class="[`field--${size}`, { 'field--error': !!error }]">
     <label class="field__label" :for="selectId">
       {{ label }}
       <span v-if="required" aria-hidden="true">*</span>
@@ -46,6 +50,10 @@ const hasTrailing = computed(() => Boolean(slots.trailing));
       <span v-if="hasTrailing" class="field__trailing">
         <slot name="trailing" />
       </span>
+    </div>
+    <div v-if="error || hint" class="field__sub-row">
+      <span v-if="error" class="field__message">{{ error }}</span>
+      <span v-else-if="hint" class="field__hint">{{ hint }}</span>
     </div>
   </div>
 </template>

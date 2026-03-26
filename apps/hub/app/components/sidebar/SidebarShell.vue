@@ -34,7 +34,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="flex h-full rounded-r-2xl border-r border-line/60 bg-base-100/95 shadow-lg">
+  <div class="flex h-full rounded-r-2xl bg-base-100/95 shadow-lg">
     <div class="flex w-16 shrink-0 flex-col">
       <SidebarRail :items="railItems" :active-id="activeRailId" class="min-h-0 flex-1">
         <template #toggle>
