@@ -59,7 +59,7 @@ const apps = computed(() => data.value?.items ?? []);
   <section class="space-y-6">
     <div>
       <h1 class="text-2xl font-bold md:text-3xl">{{ $t("adminApps.exploreTitle") }}</h1>
-      <p class="opacity-80">{{ $t("adminApps.exploreDescription") }}</p>
+      <p class="mt-2 text-[var(--color-text-secondary)]">{{ $t("adminApps.exploreDescription") }}</p>
     </div>
 
     <div v-if="!apiUrl" class="alert alert-warning">{{ $t("adminApps.exploreNotConfigured") }}</div>
@@ -79,7 +79,7 @@ const apps = computed(() => data.value?.items ?? []);
           :key="app.id"
           class="card bg-base-200 shadow-sm"
         >
-          <div class="card-body gap-3">
+          <div class="card-body gap-4">
             <div class="flex items-start justify-between gap-2">
               <div>
                 <h3 class="card-title text-base">{{ app.name }}</h3>

@@ -1,6 +1,6 @@
 <template>
   <div v-if="loading" class="flex min-h-32 items-center justify-center text-[var(--color-text-muted)]">Loading…</div>
-  <div v-else-if="errorMsg" class="rounded-lg border border-red-400 bg-red-50 p-4 text-red-700">{{ errorMsg }}</div>
+  <div v-else-if="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
   <component :is="appComponent" v-else-if="appComponent" />
   <div v-else class="flex min-h-32 items-center justify-center text-[var(--color-text-muted)]">No component available for this page.</div>
 </template>

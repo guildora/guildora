@@ -143,20 +143,20 @@ const sourceLabel = (source: "marketplace" | "sideloaded") => {
 
 <template>
   <section class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold md:text-3xl">{{ $t("adminApps.overviewTitle") }}</h1>
-        <p class="opacity-80">{{ $t("adminApps.overviewDescription") }}</p>
+        <p class="mt-2 text-[var(--color-text-secondary)]">{{ $t("adminApps.overviewDescription") }}</p>
       </div>
       <button class="btn btn-outline btn-sm" @click="refresh">{{ $t("adminApps.refresh") }}</button>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 md:gap-4">
-      <div class="stat rounded-2xl bg-base-200 p-4 shadow-sm">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="stat rounded-xl bg-base-200 p-4 shadow-sm">
         <div class="stat-title text-xs md:text-sm">{{ $t("adminApps.installed") }}</div>
         <div class="stat-value text-lg text-primary md:text-xl">{{ data?.stats.installed || 0 }}</div>
       </div>
-      <div class="stat rounded-2xl bg-base-200 p-4 shadow-sm">
+      <div class="stat rounded-xl bg-base-200 p-4 shadow-sm">
         <div class="stat-title text-xs md:text-sm">{{ $t("adminApps.active") }}</div>
         <div class="stat-value text-lg text-success md:text-xl">{{ data?.stats.active || 0 }}</div>
       </div>
@@ -166,7 +166,7 @@ const sourceLabel = (source: "marketplace" | "sideloaded") => {
       <div class="card-body relative">
         <div
           v-if="actionPending"
-          class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-base-200/60"
+          class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-base-200/60"
         >
           <span class="loading loading-spinner loading-lg" />
         </div>
@@ -183,9 +183,9 @@ const sourceLabel = (source: "marketplace" | "sideloaded") => {
             <article
               v-for="app in data?.apps || []"
               :key="app.id"
-              class="rounded-2xl bg-base-100 p-4 shadow-sm"
+              class="rounded-xl bg-base-100 p-4 shadow-sm"
             >
-              <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h3 class="text-lg font-semibold">
                     {{ app.name }}

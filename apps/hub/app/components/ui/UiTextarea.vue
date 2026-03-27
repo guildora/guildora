@@ -64,12 +64,15 @@ const showSubRow = computed(() =>
         :maxlength="maxlength"
         :rows="rows"
         :name="name"
+        :aria-required="required || undefined"
+        :aria-invalid="!!error || undefined"
+        :aria-describedby="error ? `${textareaId}-error` : hint ? `${textareaId}-hint` : undefined"
         v-bind="attrs"
       />
     </div>
     <div v-if="showSubRow" class="field__sub-row">
-      <span v-if="error" class="field__message">{{ error }}</span>
-      <span v-else-if="hint" class="field__hint">{{ hint }}</span>
+      <span v-if="error" :id="`${textareaId}-error`" class="field__message">{{ error }}</span>
+      <span v-else-if="hint" :id="`${textareaId}-hint`" class="field__hint">{{ hint }}</span>
       <span v-else />
       <span v-if="showCounter && maxlength" :class="counterClass">
         {{ currentLength }}/{{ maxlength }}

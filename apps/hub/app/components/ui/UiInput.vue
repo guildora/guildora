@@ -76,6 +76,9 @@ const showSubRow = computed(() =>
         :maxlength="maxlength"
         :type="type"
         :name="name"
+        :aria-required="required || undefined"
+        :aria-invalid="!!error || undefined"
+        :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"
         v-bind="attrs"
       >
       <span v-if="hasTrailing" class="field__trailing">
@@ -83,8 +86,8 @@ const showSubRow = computed(() =>
       </span>
     </div>
     <div v-if="showSubRow" class="field__sub-row">
-      <span v-if="error" class="field__message">{{ error }}</span>
-      <span v-else-if="hint" class="field__hint">{{ hint }}</span>
+      <span v-if="error" :id="`${inputId}-error`" class="field__message">{{ error }}</span>
+      <span v-else-if="hint" :id="`${inputId}-hint`" class="field__hint">{{ hint }}</span>
       <span v-else />
       <span v-if="showCounter && maxlength" :class="counterClass">
         {{ currentLength }}/{{ maxlength }}

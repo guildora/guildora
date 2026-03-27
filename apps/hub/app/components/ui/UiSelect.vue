@@ -43,6 +43,9 @@ const hasTrailing = computed(() => Boolean(slots.trailing));
         class="field__select"
         :disabled="disabled"
         :name="name"
+        :aria-required="required || undefined"
+        :aria-invalid="!!error || undefined"
+        :aria-describedby="error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined"
         v-bind="attrs"
       >
         <slot />
@@ -52,8 +55,8 @@ const hasTrailing = computed(() => Boolean(slots.trailing));
       </span>
     </div>
     <div v-if="error || hint" class="field__sub-row">
-      <span v-if="error" class="field__message">{{ error }}</span>
-      <span v-else-if="hint" class="field__hint">{{ hint }}</span>
+      <span v-if="error" :id="`${selectId}-error`" class="field__message">{{ error }}</span>
+      <span v-else-if="hint" :id="`${selectId}-hint`" class="field__hint">{{ hint }}</span>
     </div>
   </div>
 </template>
