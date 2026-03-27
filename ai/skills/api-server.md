@@ -27,6 +27,7 @@ Work correctly within the Nitro API layer and its current auth, validation, and 
 - use `requireSession`, `requireAdminSession`, `requireModeratorSession`, or `requireRole`
 - do not rely on page middleware for actual authorization
 - update route docs and AI manifests when contracts change
+- new endpoint patterns to be aware of: `admin/custom-fields/*` (CRUD), `admin/moderation-rights` (GET/PUT), `admin/tags/*`, `mod/tags/*`, `mod/users/:id/custom-fields` (GET/PUT), `profile/custom-fields` (GET/PUT), `applications/*` (full flow lifecycle)
 
 ## Step-By-Step Orientation
 

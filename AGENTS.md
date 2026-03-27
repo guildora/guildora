@@ -5,7 +5,7 @@ Guildora is a community platform with a public landing page, internal hub, Paylo
 ## Structure
 
 - **apps/web** – Nuxt 4, public landing page, CMS rendering, login CTA, and OAuth redirect shim at `server/api/auth/discord.get.ts`.
-- **apps/hub** – Nuxt 4, internal user, mod, and admin UI; Nitro API at `server/api/`; real Discord OAuth session logic; embedded CMS SSO.
+- **apps/hub** – Nuxt 4, internal user UI with unified `/settings` section (replaces former `/admin` and `/mod` pages); Nitro API at `server/api/`; real Discord OAuth session logic; embedded CMS SSO.
 - **apps/cms** – Payload CMS 3 + Next.js; editorial content, pages, media, site settings, and CMS users.
 - **apps/bot** – Discord bot; voice tracking, guild sync, slash command setup, and internal sync server.
 - **packages/shared** – Drizzle schema, types, Zod app manifest, DB client, migrations, seeds, and shared utilities.

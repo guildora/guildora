@@ -14,7 +14,7 @@ Apply the repository's real access model correctly across sessions, page middlew
 ## Relevant Project Areas
 
 - `apps/hub/server/utils/auth.ts`
-- `apps/hub/app/middleware/*`
+- `apps/hub/app/middleware/*` (incl. `mandatory-fields.global.ts` for required custom fields, `settings.ts` for moderation-rights gating)
 - `apps/hub/server/api/*`
 - `apps/hub/server/utils/cms-access.ts`
 - `apps/web/server/api/auth/discord.get.ts`

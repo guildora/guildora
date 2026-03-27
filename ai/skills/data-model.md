@@ -23,6 +23,10 @@ Use the shared schema and domain concepts correctly when changing persistence, j
 - `profiles.customFields` is a mixed-use extension area; preserve existing keys unless intentionally migrated
 - community roles and permission roles are different concepts and must not be collapsed
 - singleton-like settings tables are still regular tables and should be handled consistently
+- `communityCustomFields` is a separate table from `profiles.customFields` — do not confuse admin-managed field definitions with per-user extension data
+- `applicationFlows` and `applications` are the current application system; the old `profiles.customFields.applicationStatus` is deprecated
+- `applicationAccessSettings` is a singleton that controls moderator access to the applications section
+- `communityTags` are moderator-managed labels distinct from Discord roles
 
 ## Step-By-Step Orientation
 

@@ -8,7 +8,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 
 - adding or editing pages under `apps/hub/app/pages`
 - creating internal UI components
-- touching layout, sidebar, or profile, admin, and moderation pages
+- touching layout, sidebar, profile, settings, or application pages
 - updating the public landing renderer in `apps/web`
 
 ## Relevant Project Areas

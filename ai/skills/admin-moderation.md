@@ -6,17 +6,20 @@ Work safely inside the moderator and admin feature set, especially where actions
 
 ## When To Use
 
-- editing `/mod` flows
-- editing `/admin` flows
+- editing `/settings` pages (community, permissions, moderation rights, custom fields, design, apps)
+- editing application flow management at `/applications`
 - changing community role, application, Discord mirror, or app-management behavior
 
 ## Relevant Project Areas
 
-- `apps/hub/app/pages/mod/index.vue`
-- `apps/hub/app/pages/admin/*`
+- `apps/hub/app/pages/settings/*`
+- `apps/hub/app/pages/applications/*`
 - `apps/hub/server/api/mod/*`
 - `apps/hub/server/api/admin/*`
+- `apps/hub/server/api/applications/*`
 - `apps/hub/server/utils/admin-mirror.ts`
+- `apps/hub/server/utils/custom-fields.ts`
+- `apps/hub/server/utils/moderation-rights.ts`
 
 ## Rules And Constraints
 
