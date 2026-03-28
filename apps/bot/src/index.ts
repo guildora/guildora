@@ -1,10 +1,14 @@
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+try {
+  const dotenv = await import("dotenv");
+  dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+} catch {
+  // dotenv not available in production Docker — env vars injected by container
+}
 
 import type { BotCommand } from "./types";
 import { setupCommand } from "./commands/setup";
