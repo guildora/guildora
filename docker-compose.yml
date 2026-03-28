@@ -110,6 +110,8 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-production}
+      PORT: "3001"
+      HOSTNAME: "0.0.0.0"
       DATABASE_URL: postgresql://postgres:postgres@db:5432/guildora
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL}
@@ -124,7 +126,7 @@ services:
       BUCKET_PUBLIC_URL: ${BUCKET_PUBLIC_URL:-}
       BUCKET_PATH_PREFIX: ${BUCKET_PATH_PREFIX:-}
     volumes:
-      - cms_media:/app/media
+      - cms_media:/app/apps/cms/media
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3001/admin').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 20s
