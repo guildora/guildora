@@ -207,13 +207,27 @@ export async function getMappedCommunityRolesForDiscordRoleIds(discordRoleIds: s
 
 export async function getUserRoles(userId: string) {
   const db = getDb();
-  const mapped = await db
-    .select({ roleName: permissionRoles.name })
-    .from(userPermissionRoles)
-    .innerJoin(permissionRoles, eq(userPermissionRoles.permissionRoleId, permissionRoles.id))
-    .where(eq(userPermissionRoles.userId, userId));
 
-  return mapped.map((entry) => entry.roleName);
+  const [directRoles, inheritedRoles] = await Promise.all([
+    db
+      .select({ roleName: permissionRoles.name })
+      .from(userPermissionRoles)
+      .innerJoin(permissionRoles, eq(userPermissionRoles.permissionRoleId, permissionRoles.id))
+      .where(eq(userPermissionRoles.userId, userId)),
+    db
+      .select({ roleName: permissionRoles.name })
+      .from(userCommunityRoles)
+      .innerJoin(communityRoles, eq(userCommunityRoles.communityRoleId, communityRoles.id))
+      .innerJoin(permissionRoles, eq(communityRoles.permissionRoleId, permissionRoles.id))
+      .where(eq(userCommunityRoles.userId, userId))
+  ]);
+
+  const allRoles = new Set([
+    ...directRoles.map((entry) => entry.roleName),
+    ...inheritedRoles.map((entry) => entry.roleName)
+  ]);
+
+  return [...allRoles];
 }
 
 export async function getUserById(userId: string) {
