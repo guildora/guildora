@@ -12,11 +12,12 @@ RUN pnpm install --frozen-lockfile
 FROM base AS build
 COPY --from=deps /repo ./
 COPY . .
-RUN pnpm --filter @guildora/shared build && pnpm --filter @guildora/bot build
+RUN pnpm --filter @guildora/shared build
 
 FROM node:22-alpine AS runner
 WORKDIR /repo
 ENV NODE_ENV=production
+RUN corepack enable && npm install -g tsx
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=build /repo/package.json ./package.json
 COPY --from=build /repo/node_modules ./node_modules
@@ -24,4 +25,4 @@ COPY --from=build /repo/apps/bot ./apps/bot
 COPY --from=build /repo/packages/shared ./packages/shared
 COPY --from=build /repo/packages/app-sdk ./packages/app-sdk
 USER app
-CMD ["node", "apps/bot/dist/apps/bot/src/index.js"]
+CMD ["tsx", "apps/bot/src/index.ts"]
