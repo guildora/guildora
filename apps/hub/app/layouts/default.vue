@@ -365,7 +365,6 @@ watch(() => route.path, () => {
               <p class="truncate text-xs opacity-65">{{ permissionRoles.join(", ") || $t("internalNav.defaultPermissionRole") }}</p>
             </div>
           </NuxtLink>
-          <NuxtLink :to="localePath('/marketplace')" class="btn btn-ghost w-full">{{ $t("nav.marketplace") }}</NuxtLink>
         </div>
       </template>
     </aside>

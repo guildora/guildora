@@ -38,14 +38,13 @@ export default defineNuxtConfig({
     authDevBypass: process.env.NUXT_AUTH_DEV_BYPASS === "true",
     cmsSsoSecret: process.env.CMS_SSO_SECRET || "",
     payloadInternalUrl: process.env.PAYLOAD_INTERNAL_URL || "http://cms:3002",
-    linearApiKey: process.env.NUXT_LINEAR_API_KEY || "",
+    enableSideloading: process.env.NUXT_ENABLE_SIDELOADING === "true",
     public: {
       isDev: process.env.NODE_ENV === "development",
       appName: "Guildora",
       hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003",
       landingUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3000",
       cmsUrl: process.env.NUXT_PUBLIC_CMS_URL || "http://localhost:3002",
-      marketplaceEmbedUrl: process.env.NUXT_PUBLIC_MARKETPLACE_EMBED_URL || "",
       defaultTheme: process.env.NUXT_PUBLIC_DEFAULT_THEME || "guildora-dark",
       enablePerformanceDebug: process.env.NUXT_PUBLIC_ENABLE_PERFORMANCE_DEBUG === "true"
     }

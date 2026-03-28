@@ -11,7 +11,6 @@
     "moderation": "Moderation",
     "login": "Mit Discord anmelden",
     "logout": "Abmelden",
-    "marketplace": "Marketplace",
     "apps": "Apps",
     "cms": "Landing-Seite",
     "applications": "Bewerbungen",
@@ -171,7 +170,6 @@
     "title": "Admin-Bereich",
     "users": "Nutzer",
     "apps": "Apps",
-    "marketplace": "Marketplace",
     "roles": "Rollen / Berechtigungen",
     "description": "Nur Admins können diesen Bereich aufrufen.",
     "table": {
@@ -357,13 +355,6 @@
     "overviewNavLabel": "Übersicht",
     "overviewTitle": "Installierte Apps",
     "overviewDescription": "Installierte Apps verwalten.",
-    "exploreNavLabel": "Apps entdecken",
-    "exploreTitle": "Apps entdecken",
-    "exploreDescription": "Verfügbare Apps aus dem Marketplace durchsuchen.",
-    "exploreEmpty": "Noch keine Apps verfügbar.",
-    "exploreError": "Apps konnten nicht vom Marketplace geladen werden.",
-    "exploreNotConfigured": "Marketplace ist nicht konfiguriert.",
-    "exploreInstall": "Installieren",
     "sideloadPageDescription": "Apps über eine GitHub-Repository-URL oder einen lokalen Pfad installieren."
   },
   "adminDiscordRoles": {
@@ -400,14 +391,6 @@
       "invalidRoleSelection": "Ausgewählte Discord-Rollen sind ungültig oder nicht bearbeitbar.",
       "syncFailed": "Synchronisierung über die Discord-Bot-Bridge fehlgeschlagen."
     }
-  },
-  "marketplacePage": {
-    "title": "Marketplace",
-    "description": "Der Marketplace wird als eigenständige Anwendung eingebettet.",
-    "notConfigured": "Marketplace nicht konfiguriert",
-    "iframeTitle": "Marketplace",
-    "refreshEmbed": "Marketplace aktualisieren",
-    "loading": "Marketplace wird geladen…"
   },
   "cmsPage": {
     "title": "Landing-Seite",
@@ -448,23 +431,6 @@
   },
   "landingBlocks": {
     "unsupported": "Nicht unterstützter Blocktyp: {type}"
-  },
-  "feedback": {
-    "button": "Feedback",
-    "modalTitle": "Feedback senden",
-    "modalSubtitle": "Hilf uns, besser zu werden – teile deine Gedanken mit uns.",
-    "titleLabel": "Titel",
-    "titlePlaceholder": "Kurze Zusammenfassung",
-    "categoryLabel": "Kategorie",
-    "categoryBug": "Fehler",
-    "categoryFeature": "Feature-Anfrage",
-    "categoryOther": "Sonstiges",
-    "descriptionLabel": "Beschreibung",
-    "descriptionPlaceholder": "Beschreibe dein Feedback ausführlich...",
-    "submit": "Senden",
-    "submitting": "Wird gesendet...",
-    "successMessage": "Danke! Dein Feedback wurde übermittelt.",
-    "errorMessage": "Feedback konnte nicht gesendet werden. Bitte versuche es erneut."
   },
   "adminPermissions": {
     "title": "Berechtigungen & Nutzer-Sync",

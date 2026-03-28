@@ -4,6 +4,7 @@ export type CoreNavigationOptions = {
   allowModeratorAppsAccess?: boolean;
   allowModeratorApplicationsAccess?: boolean;
   isDev?: boolean;
+  enableSideloading?: boolean;
 };
 
 export type CoreRailItem = {
@@ -57,6 +58,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
   const allowModeratorAppsAccess = options.allowModeratorAppsAccess ?? true;
   const allowModeratorApplicationsAccess = options.allowModeratorApplicationsAccess ?? true;
   const isDev = options.isDev ?? false;
+  const enableSideloading = options.enableSideloading ?? false;
   const cmsRequiredRoles = allowModeratorCmsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
   const appsRequiredRoles = allowModeratorAppsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
   const applicationsRequiredRoles = allowModeratorApplicationsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
@@ -79,7 +81,6 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     appsSection: { label: "Apps", key: "nav.apps" },
     appsOverview: { label: "Overview", key: "adminApps.overviewNavLabel" },
     appsSideload: { label: "Sideloading", key: "adminApps.sideloadTitle" },
-    appsExplore: { label: "Explore Apps", key: "adminApps.exploreNavLabel" },
     settingsApps: { label: "Apps", key: "nav.apps" },
     applicationsSection: { label: "Applications", key: "nav.applications" },
     applicationsFlows: { label: "Flows", key: "applications.flows" },
@@ -88,7 +89,6 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     applicationsConfig: { label: "Settings", key: "applications.config" },
     devSection: { label: "DEV", key: "nav.dev" },
     devRoleSwitcher: { label: "Role Switcher", key: "devRoleSwitcher.title" },
-    devSideload: { label: "Sideload", key: "adminApps.sideloadTitle" },
     devReset: { label: "Reset", key: "dev.resetTitle" }
   } as const;
 
@@ -164,7 +164,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
       order: 10,
       items: [
         { id: "apps-overview", label: labels.appsOverview.label, labelKey: labels.appsOverview.key, to: "/apps/overview", requiredRoles: appsRequiredRoles },
-        { id: "apps-explore", label: labels.appsExplore.label, labelKey: labels.appsExplore.key, to: "/apps/explore", requiredRoles: appsRequiredRoles }
+        ...((isDev || enableSideloading) ? [{ id: "apps-sideload", label: labels.appsSideload.label, labelKey: labels.appsSideload.key, to: "/apps/sideload", requiredRoles: ["superadmin"] as string[] }] : [])
       ]
     },
     {
@@ -183,7 +183,6 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
       order: 10,
       items: [
         { id: "dev-role-switcher", label: labels.devRoleSwitcher.label, labelKey: labels.devRoleSwitcher.key, to: "/dev/role-switcher", requiredRoles: [] as string[] },
-        { id: "dev-sideload", label: labels.devSideload.label, labelKey: labels.devSideload.key, to: "/dev/sideload", requiredRoles: [] as string[] },
         { id: "dev-reset", label: labels.devReset.label, labelKey: labels.devReset.key, to: "/dev/reset", requiredRoles: [] as string[] }
       ]
     }] : [])

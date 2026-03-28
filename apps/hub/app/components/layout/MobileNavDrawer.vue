@@ -183,7 +183,6 @@ onBeforeUnmount(() => {
                 <p class="truncate text-xs opacity-65">{{ permissionRoles.join(", ") || t("internalNav.defaultPermissionRole") }}</p>
               </div>
             </div>
-            <NuxtLink :to="localePath('/marketplace')" class="btn btn-ghost w-full" @click="$emit('close')">{{ $t("nav.marketplace") }}</NuxtLink>
           </div>
         </div>
       </div>
