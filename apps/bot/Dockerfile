@@ -21,7 +21,6 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=build /repo/apps/bot/dist ./apps/bot/dist
 COPY --from=build /repo/apps/bot/package.json ./apps/bot/package.json
-COPY --from=build /repo/packages/shared/dist ./packages/shared/dist
-COPY --from=build /repo/packages/shared/package.json ./packages/shared/package.json
+COPY --from=build /repo/package.json ./package.json
 USER app
-CMD ["node", "apps/bot/dist/index.js"]
+CMD ["node", "apps/bot/dist/apps/bot/src/index.js"]
