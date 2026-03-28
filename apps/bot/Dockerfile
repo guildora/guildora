@@ -18,9 +18,10 @@ FROM node:22-alpine AS runner
 WORKDIR /repo
 ENV NODE_ENV=production
 RUN addgroup -S app && adduser -S app -G app
-COPY --from=deps /repo/node_modules ./node_modules
-COPY --from=build /repo/apps/bot/dist ./apps/bot/dist
-COPY --from=build /repo/apps/bot/package.json ./apps/bot/package.json
 COPY --from=build /repo/package.json ./package.json
+COPY --from=build /repo/node_modules ./node_modules
+COPY --from=build /repo/apps/bot ./apps/bot
+COPY --from=build /repo/packages/shared ./packages/shared
+COPY --from=build /repo/packages/app-sdk ./packages/app-sdk
 USER app
 CMD ["node", "apps/bot/dist/apps/bot/src/index.js"]
