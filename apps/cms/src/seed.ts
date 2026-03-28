@@ -293,7 +293,7 @@ async function seed() {
         title: "Landing Page",
         slug: "landing",
         status: "published",
-        layout: layoutEn,
+        layout: layoutEn as any,
         seo: {
           title: "Guildora – Build Your Legacy",
           description:
@@ -312,7 +312,7 @@ async function seed() {
         title: "Landing Page",
         slug: "landing",
         status: "published",
-        layout: layoutEn,
+        layout: layoutEn as any,
         seo: {
           title: "Guildora – Build Your Legacy",
           description:
@@ -421,7 +421,7 @@ async function seed() {
     locale: "de",
     data: {
       title: "Startseite",
-      layout: layoutDe,
+      layout: layoutDe as any,
       seo: {
         title: "Guildora – Schreib deine Geschichte",
         description:
