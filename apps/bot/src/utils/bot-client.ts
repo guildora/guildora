@@ -56,7 +56,7 @@ export function createBotClient(client: Client): BotClient {
       try {
         const channel = await client.channels.fetch(channelId);
         if (!channel) return null;
-        const raw = channel as Record<string, unknown>;
+        const raw = channel as unknown as Record<string, unknown>;
         const name = typeof raw.name === "string" ? raw.name : "";
         const parentId = typeof raw.parentId === "string" ? raw.parentId : null;
         let memberCount: number | null = null;

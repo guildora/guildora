@@ -1,12 +1,13 @@
 import crypto from "node:crypto";
 import { createServer } from "node:http";
-import { ChannelType, Collection, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, type Client } from "discord.js";
+import { ChannelType, type GuildChannelTypes, Collection, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, type Client } from "discord.js";
 import { eq } from "drizzle-orm";
 import { installedApps, safeParseAppManifest, applicationTokens } from "@guildora/shared";
 import type { BotCommand } from "../types";
 import { setupCommand } from "../commands/setup";
 import { getDb } from "./db";
 import { botAppHookRegistry, loadInstalledAppHooks } from "./app-hooks";
+import { getUserProfileByDiscordId } from "./community";
 import { logger } from "./logger";
 import { signTokenId } from "./application-tokens";
 
@@ -360,6 +361,44 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
           json(res, 200, { member: toMemberPayload(member) });
         } catch {
           json(res, 200, { member: null });
+        }
+        return;
+      }
+
+      // GET /internal/guild/members/:discordId/permission-roles
+      const permissionRolesMatch = pathname.match(/^\/internal\/guild\/members\/([^/]+)\/permission-roles$/);
+      if (method === "GET" && permissionRolesMatch) {
+        const discordId = decodeURIComponent(permissionRolesMatch[1] || "");
+        if (!discordId) {
+          jsonError(res, 400, "MISSING_DISCORD_ID", "Missing discord id");
+          return;
+        }
+
+        const roleLevels: Record<string, number> = {
+          temporaer: 0, user: 10, moderator: 50, admin: 80, superadmin: 100
+        };
+
+        try {
+          const profile = await getUserProfileByDiscordId(discordId);
+          if (!profile) {
+            json(res, 200, { permissionRoles: [], highestRole: null });
+            return;
+          }
+
+          const roles = profile.roles || [];
+          let highestRole: string | null = null;
+          let highestLevel = -1;
+          for (const r of roles) {
+            const level = roleLevels[r] ?? -1;
+            if (level > highestLevel) {
+              highestRole = r;
+              highestLevel = level;
+            }
+          }
+
+          json(res, 200, { permissionRoles: roles, highestRole });
+        } catch {
+          json(res, 200, { permissionRoles: [], highestRole: null });
         }
         return;
       }
@@ -830,7 +869,7 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
           forum: ChannelType.GuildForum,
           stage: ChannelType.GuildStageVoice
         };
-        const channelType = typeMap[body.type || "text"] || ChannelType.GuildText;
+        const channelType = (typeMap[body.type || "text"] || ChannelType.GuildText) as GuildChannelTypes;
 
         const guild = await getGuild(client, guildId);
         try {
@@ -850,14 +889,14 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
         return;
       }
 
-      // PATCH /internal/guild/channels/:channelId — move channel to category
-      const moveChannelMatch = pathname.match(/^\/internal\/guild\/channels\/([^/]+)$/);
-      if (method === "PATCH" && moveChannelMatch) {
-        const channelId = decodeURIComponent(moveChannelMatch[1] || "");
+      // PATCH /internal/guild/channels/:channelId — move or rename channel
+      const patchChannelMatch = pathname.match(/^\/internal\/guild\/channels\/([^/]+)$/);
+      if (method === "PATCH" && patchChannelMatch) {
+        const channelId = decodeURIComponent(patchChannelMatch[1] || "");
         if (!channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channel id"); return; }
 
         const bodyRaw = await readBody(req);
-        let body: { parentId?: string | null } = {};
+        let body: { parentId?: string | null; name?: string } = {};
         try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
 
         const guild = await getGuild(client, guildId);
@@ -867,15 +906,27 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
             jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found");
             return;
           }
-          if (!("setParent" in channel)) {
-            jsonError(res, 400, "SYNC_FAILED", "Channel type does not support moving");
-            return;
+
+          if (body.name) {
+            if (!("setName" in channel)) {
+              jsonError(res, 400, "SYNC_FAILED", "Channel type does not support renaming");
+              return;
+            }
+            await (channel as { setName: Function }).setName(body.name);
           }
-          await (channel as { setParent: Function }).setParent(body.parentId ?? null);
-          json(res, 200, { ok: true, channelId: channel.id, parentId: body.parentId ?? null });
+
+          if (body.parentId !== undefined) {
+            if (!("setParent" in channel)) {
+              jsonError(res, 400, "SYNC_FAILED", "Channel type does not support moving");
+              return;
+            }
+            await (channel as { setParent: Function }).setParent(body.parentId ?? null);
+          }
+
+          json(res, 200, { ok: true, channelId: channel.id, name: body.name, parentId: body.parentId ?? null });
         } catch (error) {
           if (isMissingPermissionsError(error)) {
-            jsonError(res, 403, "SYNC_FAILED", "Missing permissions to move channel");
+            jsonError(res, 403, "SYNC_FAILED", "Missing permissions to modify channel");
           } else {
             throw error;
           }
@@ -896,7 +947,7 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
             jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found");
             return;
           }
-          if (!channel.deletable) {
+          if (!("deletable" in channel) || !channel.deletable) {
             jsonError(res, 400, "SYNC_FAILED", "Channel is not deletable");
             return;
           }
