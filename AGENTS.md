@@ -45,7 +45,7 @@ Key references for this repo:
 - Design system: https://github.com/guildora/docs/blob/main/DESIGN_SYSTEM.md
 - Workflows: https://github.com/guildora/docs/blob/main/architecture-systems/guildora/workflows/
 
-Local MCP access (Claude Code): `guildora-docs` server → `read_file("/architecture-systems/guildora/architecture.md")`
+Deployed docs (accessible from any system): https://guildora.github.io/docs — Claude Code agents can fetch any page directly via WebFetch.
 
 ## Design System
 

@@ -19,4 +19,4 @@ All documentation has been moved to the central docs repository.
 - Workflows: https://github.com/guildora/docs/blob/main/architecture-systems/guildora/workflows/
 - Subsystems: https://github.com/guildora/docs/blob/main/architecture-systems/guildora/subsystems/
 
-Local MCP access (Claude Code): `guildora-docs` server → `read_file("/architecture-systems/guildora/README.md")`
+Deployed docs (accessible from any system): https://guildora.github.io/docs
