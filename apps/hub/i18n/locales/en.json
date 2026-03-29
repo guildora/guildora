@@ -45,7 +45,13 @@
   "auth": {
     "loginTitle": "Sign in with Discord",
     "loginDescription": "Use your Discord account to access member features.",
-    "sessionRequired": "You must be logged in to access this area."
+    "sessionRequired": "You must be logged in to access this area.",
+    "errors": {
+      "not_guild_member": "You must be a member of the Discord server to log in.",
+      "missing_required_role": "You do not have the required Discord role to log in.",
+      "auto_login_not_configured": "Auto-login is not properly configured. Please contact an administrator.",
+      "unknown": "Login failed. Please try again."
+    }
   },
   "dashboard": {
     "title": "Member Dashboard",
@@ -895,5 +901,75 @@
     "discordRolesInfo": "{roleCount} roles will be {action} for {userCount} members",
     "noDiscordRoles": "No available Discord roles found.",
     "executeDiscordRoles": "Execute"
+  },
+  "membershipSettings": {
+    "title": "Membership",
+    "description": "Configure how users join and how member data is maintained.",
+    "applicationsRequired": "Require applications",
+    "applicationsRequiredHelp": "When disabled, the applications section is hidden and Discord members can log in directly without applying.",
+    "autoLogin": {
+      "title": "Auto-Login Settings",
+      "defaultRole": "Default community role for new members",
+      "defaultRoleHelp": "New auto-login users receive this community role.",
+      "defaultRolePlaceholder": "Select a community role",
+      "requiredDiscordRole": "Required Discord role to log in",
+      "requiredDiscordRoleHelp": "Only members with this Discord role can log in. Leave empty to allow all guild members.",
+      "nonePlaceholder": "None (all guild members)"
+    },
+    "autoSync": {
+      "title": "Automatic Synchronization",
+      "enabled": "Enable automatic sync",
+      "enabledHelp": "Periodically imports and updates users from Discord based on role mappings.",
+      "interval": "Sync interval",
+      "lastRun": "Last sync",
+      "never": "Never"
+    },
+    "autoCleanup": {
+      "title": "Automatic Cleanup",
+      "enabled": "Enable automatic cleanup",
+      "enabledHelp": "Periodically removes users who no longer meet the configured conditions.",
+      "interval": "Cleanup interval",
+      "lastRun": "Last cleanup",
+      "never": "Never",
+      "conditions": "Cleanup conditions",
+      "conditionsHelp": "Users matching the configured conditions will be removed.",
+      "perRoleHelp": "Configure cleanup rules individually per permission role. Superadmins and admins are always protected.",
+      "conditionOrphan": "Not a guild member (orphan)",
+      "conditionMissingRole": "Missing required Discord role",
+      "conditionLoginInactive": "Login inactivity",
+      "conditionVoiceInactive": "Voice inactivity",
+      "inactiveDays": "Days since last login",
+      "voiceDays": "Days since last voice session",
+      "requiredRole": "Required Discord role",
+      "operatorAnd": "AND",
+      "operatorOr": "OR",
+      "roleWhitelist": "Protected Discord roles (not removed during cleanup)",
+      "roleWhitelistHelp": "These Discord roles will not be removed from users during cleanup.",
+      "protectModerators": "Protect moderators from cleanup",
+      "protectModeratorsHelp": "Superadmins and admins are always protected."
+    },
+    "cleanupLog": {
+      "title": "Cleanup Log",
+      "empty": "No cleanup actions recorded yet.",
+      "discordId": "Discord ID",
+      "username": "Username",
+      "reason": "Reason",
+      "conditions": "Conditions",
+      "rolesRemoved": "Roles removed",
+      "date": "Date",
+      "showLog": "Show cleanup log",
+      "hideLog": "Hide cleanup log"
+    },
+    "intervals": {
+      "6": "Every 6 hours",
+      "12": "Every 12 hours",
+      "24": "Daily (24h)",
+      "72": "Every 3 days",
+      "168": "Weekly (7 days)"
+    },
+    "messages": {
+      "saved": "Membership settings saved.",
+      "saveFailed": "Failed to save membership settings."
+    }
   }
 }

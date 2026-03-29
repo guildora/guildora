@@ -134,6 +134,20 @@
       "when": 1774400000000,
       "tag": "0030_draft_flow_json",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1774500000000,
+      "tag": "0031_membership_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1774600000000,
+      "tag": "0032_fix_membership_settings_columns",
+      "breakpoints": true
     }
   ]
 }

@@ -34,6 +34,7 @@ export const users = pgTable("users", {
   avatarUrl: text("avatar_url"),
   avatarSource: text("avatar_source"),
   primaryDiscordRoleName: text("primary_discord_role_name"),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
@@ -436,6 +437,62 @@ export const applicationAccessSettings = pgTable("application_access_settings", 
   updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
 });
 
+// ─── Membership Settings & Cleanup ──────────────────────────────────────
+
+export interface CleanupCondition {
+  type: "orphan" | "missingRole" | "loginInactive" | "voiceInactive";
+  operator: "AND" | "OR";
+}
+
+/** Per-permission-role cleanup configuration */
+export interface RoleCleanupConfig {
+  permissionRoleName: string;
+  enabled: boolean;
+  conditions: CleanupCondition[];
+  cleanupRequiredRoleId?: string | null;
+  cleanupInactiveDays?: number | null;
+  cleanupNoVoiceDays?: number | null;
+}
+
+export const membershipSettings = pgTable("membership_settings", {
+  id: serial("id").primaryKey(),
+  applicationsRequired: boolean("applications_required").notNull().default(true),
+  defaultCommunityRoleId: integer("default_community_role_id").references(() => communityRoles.id, {
+    onDelete: "set null"
+  }),
+  requiredLoginRoleId: text("required_login_role_id"),
+  autoSyncEnabled: boolean("auto_sync_enabled").notNull().default(false),
+  autoSyncIntervalHours: integer("auto_sync_interval_hours").notNull().default(24),
+  autoSyncLastRun: timestamp("auto_sync_last_run", { withTimezone: true }),
+  autoCleanupEnabled: boolean("auto_cleanup_enabled").notNull().default(false),
+  autoCleanupIntervalHours: integer("auto_cleanup_interval_hours").notNull().default(24),
+  autoCleanupLastRun: timestamp("auto_cleanup_last_run", { withTimezone: true }),
+  /** Per-permission-role cleanup configs — replaces the former global conditions */
+  cleanupRoleConfigs: jsonb("cleanup_role_configs").$type<RoleCleanupConfig[]>().notNull().default([]),
+  cleanupRoleWhitelist: jsonb("cleanup_role_whitelist").$type<string[]>().notNull().default([]),
+  cleanupProtectModerators: boolean("cleanup_protect_moderators").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
+});
+
+export const cleanupLog = pgTable(
+  "cleanup_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id"),
+    discordId: text("discord_id").notNull(),
+    discordUsername: text("discord_username").notNull(),
+    reason: text("reason").notNull(),
+    conditionsMatched: jsonb("conditions_matched").$type<string[]>().notNull().default([]),
+    rolesRemoved: jsonb("roles_removed").$type<string[]>().notNull().default([]),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [index("cleanup_log_created_at_idx").on(table.createdAt.desc())]
+);
+
 // ─── Relations ────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -653,5 +710,16 @@ export const applicationAccessSettingsRelations = relations(applicationAccessSet
   updatedByUser: one(users, {
     fields: [applicationAccessSettings.updatedBy],
     references: [users.id]
+  })
+}));
+
+export const membershipSettingsRelations = relations(membershipSettings, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [membershipSettings.updatedBy],
+    references: [users.id]
+  }),
+  defaultCommunityRole: one(communityRoles, {
+    fields: [membershipSettings.defaultCommunityRoleId],
+    references: [communityRoles.id]
   })
 }));

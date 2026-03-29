@@ -1,11 +1,14 @@
 import crypto from "node:crypto";
 import { collectMappedRolesForMember } from "../../utils/admin-mirror";
 import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot, type DiscordGuildRole } from "../../utils/botSync";
-import { coerceProfileNameFromRaw } from "@guildora/shared";
+import { coerceProfileNameFromRaw, users } from "@guildora/shared";
+import { eq } from "drizzle-orm";
 import { replaceAuthSessionForUserId } from "../../utils/auth-session";
 import { ensureCommunityUser, ensureUserProfile, getUserByDiscordId, listActiveCommunityRoleMappings, upsertCommunityRoleAssignment } from "../../utils/community";
 import { replaceUserDiscordRolesSnapshotFromMember } from "../../utils/discord-roles";
 import { persistDiscordAvatarLocally } from "../../utils/avatar-storage";
+import { loadMembershipSettings } from "../../utils/membership-settings";
+import { getDb } from "../../utils/db";
 
 type DiscordUser = {
   id: string;
@@ -226,20 +229,43 @@ export default defineEventHandler(async (event) => {
     const guildRoles = guildRolesResponse.roles;
     const sourceProfileName = botMember.member?.nickname || botMember.member?.displayName || discordUser.global_name || discordUser.username || `discord-${discordUser.id}`;
     const profileName = coerceProfileNameFromRaw(sourceProfileName, `discord-${discordUser.id}`);
+    const db = getDb();
+    const membershipConfig = await loadMembershipSettings(db);
+    const applicationsRequired = membershipConfig.applicationsRequired;
     const activeMappings = await listActiveCommunityRoleMappings();
     const matchedMappings = botMember.member ? collectMappedRolesForMember(botMember.member.roleIds, activeMappings) : [];
 
+    // Determine the target community role for this login
+    let autoLoginRoleId: number | null = null;
+
     if (!isSuperadminLogin) {
-      if (!botMember.member) {
-        throw createError({ statusCode: 403, statusMessage: "Discord member is not part of the server." });
-      }
-      if (matchedMappings.length !== 1) {
-        throw createError({
-          statusCode: 403,
-          statusMessage: matchedMappings.length === 0
-            ? "No mapped community role found for this Discord account."
-            : "Multiple mapped community roles found. Please contact an administrator."
-        });
+      if (!applicationsRequired) {
+        // AUTO-LOGIN MODE: applications disabled, allow direct login for guild members
+        if (!botMember.member) {
+          return sendRedirect(event, `/login?error=not_guild_member`);
+        }
+        if (membershipConfig.requiredLoginRoleId) {
+          if (!botMember.member.roleIds.includes(membershipConfig.requiredLoginRoleId)) {
+            return sendRedirect(event, `/login?error=missing_required_role`);
+          }
+        }
+        if (!membershipConfig.defaultCommunityRoleId) {
+          return sendRedirect(event, `/login?error=auto_login_not_configured`);
+        }
+        autoLoginRoleId = membershipConfig.defaultCommunityRoleId;
+      } else {
+        // APPLICATION-BASED FLOW: unchanged behavior
+        if (!botMember.member) {
+          throw createError({ statusCode: 403, statusMessage: "Discord member is not part of the server." });
+        }
+        if (matchedMappings.length !== 1) {
+          throw createError({
+            statusCode: 403,
+            statusMessage: matchedMappings.length === 0
+              ? "No mapped community role found for this Discord account."
+              : "Multiple mapped community roles found. Please contact an administrator."
+          });
+        }
       }
     }
 
@@ -276,7 +302,13 @@ export default defineEventHandler(async (event) => {
       email: discordUser.email ?? null,
       superadminDiscordId: configuredSuperadminDiscordId
     });
-    if (matchedMappings.length === 1) {
+
+    // Assign community role based on login mode
+    if (autoLoginRoleId) {
+      // Auto-login mode: use configured default community role
+      await ensureUserProfile(dbUser.id);
+      await upsertCommunityRoleAssignment(dbUser.id, autoLoginRoleId);
+    } else if (matchedMappings.length === 1) {
       await ensureUserProfile(dbUser.id);
       await upsertCommunityRoleAssignment(dbUser.id, matchedMappings[0]!.id);
     } else if (isSuperadminLogin) {
@@ -285,6 +317,9 @@ export default defineEventHandler(async (event) => {
     if (botMember.member) {
       await replaceUserDiscordRolesSnapshotFromMember(dbUser.id, botMember.member, guildRoles);
     }
+
+    // Update last login timestamp
+    await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, dbUser.id));
 
     await replaceAuthSessionForUserId(event, dbUser.id);
 
@@ -307,7 +342,8 @@ export default defineEventHandler(async (event) => {
         statusCode: 503,
         statusMessage: "Database not ready",
         message:
-          "Community roles could not be loaded. Ensure DATABASE_URL is set and migrations are applied (pnpm db:migrate)."
+          `Community roles could not be loaded. Ensure DATABASE_URL is set and migrations are applied (pnpm db:migrate). Cause: ${msg}`,
+        cause: error
       });
     }
     return sendRedirect(event, "/login");

@@ -3,6 +3,7 @@ export type CoreNavigationOptions = {
   allowModeratorCmsAccess?: boolean;
   allowModeratorAppsAccess?: boolean;
   allowModeratorApplicationsAccess?: boolean;
+  applicationsEnabled?: boolean;
   isDev?: boolean;
   enableSideloading?: boolean;
 };
@@ -57,6 +58,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
   const allowModeratorCmsAccess = options.allowModeratorCmsAccess ?? true;
   const allowModeratorAppsAccess = options.allowModeratorAppsAccess ?? true;
   const allowModeratorApplicationsAccess = options.allowModeratorApplicationsAccess ?? true;
+  const applicationsEnabled = options.applicationsEnabled ?? true;
   const isDev = options.isDev ?? false;
   const enableSideloading = options.enableSideloading ?? false;
   const cmsRequiredRoles = allowModeratorCmsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
@@ -96,7 +98,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     { id: "dashboard", to: "/dashboard", label: labels.dashboard.label, labelKey: labels.dashboard.key, iconPath: iconNames.dashboard, order: 10, requiredRoles: [] },
     { id: "profile", to: "/profile/customize", label: labels.profile.label, labelKey: labels.profile.key, iconPath: iconNames.profile, order: 15, requiredRoles: [] },
     { id: "members", to: "/members", label: labels.members.label, labelKey: labels.members.key, iconPath: iconNames.members, order: 20, requiredRoles: [] },
-    {
+    ...(applicationsEnabled ? [{
       id: "applications",
       to: "/applications",
       label: labels.applicationsSection.label,
@@ -104,7 +106,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
       iconPath: iconNames.applications,
       order: 55,
       requiredRoles: applicationsRequiredRoles
-    },
+    }] : []),
     { id: "settings", to: "/settings", label: labels.settings.label, labelKey: labels.settings.key, iconPath: iconNames.settings, order: 60, requiredRoles: ["moderator", "admin", "superadmin"] },
     { id: "apps", to: "/apps", label: labels.appsSection.label, labelKey: labels.appsSection.key, iconPath: iconNames.apps, order: 75, requiredRoles: appsRequiredRoles },
     { id: "cms", to: "/cms", label: labels.cms.label, labelKey: labels.cms.key, iconPath: iconNames.cms, order: 80, requiredRoles: cmsRequiredRoles },
@@ -143,7 +145,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
         { id: "settings-files", label: labels.files.label, labelKey: labels.files.key, to: "/settings/files", requiredRoles: ["superadmin"] }
       ]
     },
-    {
+    ...(applicationsEnabled ? [{
       id: "applications-main",
       railItemId: "applications",
       title: labels.applicationsSection.label,
@@ -155,7 +157,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
         { id: "applications-archive", label: labels.applicationsArchive.label, labelKey: labels.applicationsArchive.key, to: "/applications/archive", requiredRoles: applicationsRequiredRoles },
         { id: "applications-config", label: labels.applicationsConfig.label, labelKey: labels.applicationsConfig.key, to: "/applications/config", requiredRoles: ["admin", "superadmin"] }
       ]
-    },
+    }] : []),
     {
       id: "apps-main",
       railItemId: "apps",

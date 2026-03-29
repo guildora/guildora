@@ -5,6 +5,7 @@ import { getLocalizedCoreNavigation, resolveNavigationLocale } from "../../utils
 import { requireSession } from "../../utils/auth";
 import { loadCmsAccessConfig } from "../../utils/cms-access";
 import { loadApplicationAccessConfig } from "../../utils/application-access";
+import { loadMembershipSettings } from "../../utils/membership-settings";
 import { getDb } from "../../utils/db";
 import {
   normalizeUserLocalePreference,
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const session = await requireSession(event);
   const db = getDb();
   const roles = session.user.permissionRoles ?? session.user.roles ?? [];
-  const [profile, communityDefaultLocale, cmsAccess, applicationAccess] = await Promise.all([
+  const [profile, communityDefaultLocale, cmsAccess, applicationAccess, membershipConfig] = await Promise.all([
     db
       .select({ localePreference: profiles.localePreference, customFields: profiles.customFields })
       .from(profiles)
@@ -26,7 +27,8 @@ export default defineEventHandler(async (event) => {
       .then((rows) => rows[0] ?? null),
     loadCommunitySettingsLocale(db),
     loadCmsAccessConfig(db),
-    loadApplicationAccessConfig(db)
+    loadApplicationAccessConfig(db),
+    loadMembershipSettings(db)
   ]);
   const userLocalePreference = normalizeUserLocalePreference(
     profile?.localePreference ?? readLegacyLocalePreferenceFromCustomFields(profile?.customFields ?? {}),
@@ -42,6 +44,7 @@ export default defineEventHandler(async (event) => {
     allowModeratorCmsAccess: cmsAccess.allowModeratorAccess,
     allowModeratorAppsAccess: cmsAccess.allowModeratorAppsAccess,
     allowModeratorApplicationsAccess: applicationAccess.allowModeratorAccess,
+    applicationsEnabled: membershipConfig.applicationsRequired,
     isDev: isDev === true,
     enableSideloading: Boolean(runtimeConfig.enableSideloading)
   });

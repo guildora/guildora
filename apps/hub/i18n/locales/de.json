@@ -45,7 +45,13 @@
   "auth": {
     "loginTitle": "Mit Discord anmelden",
     "loginDescription": "Nutze dein Discord-Konto für den Mitgliederbereich.",
-    "sessionRequired": "Du musst angemeldet sein, um diesen Bereich zu nutzen."
+    "sessionRequired": "Du musst angemeldet sein, um diesen Bereich zu nutzen.",
+    "errors": {
+      "not_guild_member": "Du musst Mitglied des Discord-Servers sein, um dich einzuloggen.",
+      "missing_required_role": "Du besitzt nicht die erforderliche Discord-Rolle, um dich einzuloggen.",
+      "auto_login_not_configured": "Auto-Login ist nicht korrekt konfiguriert. Bitte kontaktiere einen Administrator.",
+      "unknown": "Anmeldung fehlgeschlagen. Bitte versuche es erneut."
+    }
   },
   "dashboard": {
     "title": "Mitglieder-Dashboard",
@@ -895,5 +901,75 @@
     "discordRolesInfo": "{roleCount} Rollen werden bei {userCount} Mitgliedern {action}",
     "noDiscordRoles": "Keine verfügbaren Discord-Rollen gefunden.",
     "executeDiscordRoles": "Ausführen"
+  },
+  "membershipSettings": {
+    "title": "Mitgliedschaft",
+    "description": "Konfiguriere, wie Nutzer beitreten und wie Mitgliederdaten gepflegt werden.",
+    "applicationsRequired": "Bewerbungen erforderlich",
+    "applicationsRequiredHelp": "Wenn deaktiviert, wird der Bewerbungsbereich ausgeblendet und Discord-Mitglieder können sich direkt anmelden.",
+    "autoLogin": {
+      "title": "Auto-Login Einstellungen",
+      "defaultRole": "Standard-Rolle für neue Mitglieder",
+      "defaultRoleHelp": "Neue Auto-Login-Nutzer erhalten diese Community-Rolle.",
+      "defaultRolePlaceholder": "Community-Rolle auswählen",
+      "requiredDiscordRole": "Erforderliche Discord-Rolle zum Einloggen",
+      "requiredDiscordRoleHelp": "Nur Mitglieder mit dieser Discord-Rolle können sich einloggen. Leer lassen, um alle Server-Mitglieder zuzulassen.",
+      "nonePlaceholder": "Keine (alle Server-Mitglieder)"
+    },
+    "autoSync": {
+      "title": "Automatische Synchronisation",
+      "enabled": "Automatische Synchronisation aktivieren",
+      "enabledHelp": "Importiert und aktualisiert regelmäßig Nutzer aus Discord basierend auf Rollen-Zuordnungen.",
+      "interval": "Sync-Intervall",
+      "lastRun": "Letzte Synchronisation",
+      "never": "Noch nie"
+    },
+    "autoCleanup": {
+      "title": "Automatischer Cleanup",
+      "enabled": "Automatischen Cleanup aktivieren",
+      "enabledHelp": "Entfernt regelmäßig Nutzer, die die konfigurierten Bedingungen nicht mehr erfüllen.",
+      "interval": "Cleanup-Intervall",
+      "lastRun": "Letzter Cleanup",
+      "never": "Noch nie",
+      "conditions": "Cleanup-Bedingungen",
+      "conditionsHelp": "Nutzer, die die konfigurierten Bedingungen erfüllen, werden entfernt.",
+      "perRoleHelp": "Konfiguriere Cleanup-Regeln individuell pro Berechtigungsrolle. Superadmins und Admins sind immer geschützt.",
+      "conditionOrphan": "Kein Server-Mitglied mehr (Orphan)",
+      "conditionMissingRole": "Erforderliche Discord-Rolle fehlt",
+      "conditionLoginInactive": "Login-Inaktivität",
+      "conditionVoiceInactive": "Voice-Inaktivität",
+      "inactiveDays": "Tage seit letztem Login",
+      "voiceDays": "Tage seit letzter Voice-Aktivität",
+      "requiredRole": "Erforderliche Discord-Rolle",
+      "operatorAnd": "UND",
+      "operatorOr": "ODER",
+      "roleWhitelist": "Geschützte Discord-Rollen (werden beim Cleanup nicht entfernt)",
+      "roleWhitelistHelp": "Diese Discord-Rollen werden bei Nutzern während des Cleanups nicht entfernt.",
+      "protectModerators": "Moderatoren vor Cleanup schützen",
+      "protectModeratorsHelp": "Superadmins und Admins sind immer geschützt."
+    },
+    "cleanupLog": {
+      "title": "Cleanup-Protokoll",
+      "empty": "Noch keine Cleanup-Aktionen aufgezeichnet.",
+      "discordId": "Discord-ID",
+      "username": "Benutzername",
+      "reason": "Grund",
+      "conditions": "Bedingungen",
+      "rolesRemoved": "Entfernte Rollen",
+      "date": "Datum",
+      "showLog": "Cleanup-Protokoll anzeigen",
+      "hideLog": "Cleanup-Protokoll ausblenden"
+    },
+    "intervals": {
+      "6": "Alle 6 Stunden",
+      "12": "Alle 12 Stunden",
+      "24": "Täglich (24h)",
+      "72": "Alle 3 Tage",
+      "168": "Wöchentlich (7 Tage)"
+    },
+    "messages": {
+      "saved": "Mitgliedschafts-Einstellungen gespeichert.",
+      "saveFailed": "Fehler beim Speichern der Mitgliedschafts-Einstellungen."
+    }
   }
 }

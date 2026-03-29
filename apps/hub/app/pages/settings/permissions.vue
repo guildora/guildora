@@ -359,6 +359,189 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
   }
   orphanSelection.value = orphanSelection.value.filter((id) => id !== userId);
 };
+
+// ─── Membership Settings ─────────────────────────────────────────────────
+
+type CleanupCondition = {
+  type: "orphan" | "missingRole" | "loginInactive" | "voiceInactive";
+  operator: "AND" | "OR";
+};
+
+type RoleCleanupConfig = {
+  permissionRoleName: string;
+  enabled: boolean;
+  conditions: CleanupCondition[];
+  cleanupRequiredRoleId?: string | null;
+  cleanupInactiveDays?: number | null;
+  cleanupNoVoiceDays?: number | null;
+};
+
+type MembershipSettingsData = {
+  applicationsRequired: boolean;
+  defaultCommunityRoleId: number | null;
+  requiredLoginRoleId: string | null;
+  autoSyncEnabled: boolean;
+  autoSyncIntervalHours: number;
+  autoSyncLastRun: string | null;
+  autoCleanupEnabled: boolean;
+  autoCleanupIntervalHours: number;
+  autoCleanupLastRun: string | null;
+  cleanupRoleConfigs: RoleCleanupConfig[];
+  cleanupRoleWhitelist: string[];
+  cleanupProtectModerators: boolean;
+  communityRoles: Array<{ id: number; name: string }>;
+  permissionRoles: Array<{ id: number; name: string; level: number }>;
+  discordRoles: Array<{ id: string; name: string }>;
+};
+
+type CleanupLogEntry = {
+  id: string;
+  userId: string | null;
+  discordId: string;
+  discordUsername: string;
+  reason: string;
+  conditionsMatched: string[];
+  rolesRemoved: string[];
+  createdAt: string;
+};
+
+const { data: membershipData, refresh: refreshMembership } = await useFetch<MembershipSettingsData>(
+  "/api/admin/membership-settings"
+);
+
+const membershipForm = reactive({
+  applicationsRequired: true,
+  defaultCommunityRoleId: null as number | null,
+  requiredLoginRoleId: null as string | null,
+  autoSyncEnabled: false,
+  autoSyncIntervalHours: 24,
+  autoCleanupEnabled: false,
+  autoCleanupIntervalHours: 24,
+  cleanupRoleConfigs: [] as RoleCleanupConfig[],
+  cleanupRoleWhitelist: [] as string[],
+  cleanupProtectModerators: true
+});
+
+const membershipSaving = ref(false);
+const showCleanupLog = ref(false);
+const cleanupLogEntries = ref<CleanupLogEntry[]>([]);
+const cleanupLogLoading = ref(false);
+
+// Sync form from loaded data
+watch(
+  () => membershipData.value,
+  (data) => {
+    if (!data) return;
+    membershipForm.applicationsRequired = data.applicationsRequired;
+    membershipForm.defaultCommunityRoleId = data.defaultCommunityRoleId;
+    membershipForm.requiredLoginRoleId = data.requiredLoginRoleId;
+    membershipForm.autoSyncEnabled = data.autoSyncEnabled;
+    membershipForm.autoSyncIntervalHours = data.autoSyncIntervalHours;
+    membershipForm.autoCleanupEnabled = data.autoCleanupEnabled;
+    membershipForm.autoCleanupIntervalHours = data.autoCleanupIntervalHours;
+    membershipForm.cleanupRoleConfigs = data.cleanupRoleConfigs?.length
+      ? data.cleanupRoleConfigs.map((c) => ({ ...c, conditions: [...c.conditions] }))
+      : [];
+    membershipForm.cleanupRoleWhitelist = data.cleanupRoleWhitelist?.length ? [...data.cleanupRoleWhitelist] : [];
+    membershipForm.cleanupProtectModerators = data.cleanupProtectModerators;
+  },
+  { immediate: true }
+);
+
+const intervalOptions = [6, 12, 24, 72, 168];
+
+const conditionTypes = ["orphan", "missingRole", "loginInactive", "voiceInactive"] as const;
+
+// Per-role cleanup config helpers
+const getRoleConfig = (roleName: string): RoleCleanupConfig => {
+  let config = membershipForm.cleanupRoleConfigs.find((c) => c.permissionRoleName === roleName);
+  if (!config) {
+    config = { permissionRoleName: roleName, enabled: false, conditions: [] };
+    membershipForm.cleanupRoleConfigs.push(config);
+  }
+  return config;
+};
+
+const isRoleConditionEnabled = (roleName: string, type: string) =>
+  getRoleConfig(roleName).conditions.some((c) => c.type === type);
+
+const getRoleConditionOperator = (roleName: string, type: string) =>
+  getRoleConfig(roleName).conditions.find((c) => c.type === type)?.operator ?? "OR";
+
+const toggleRoleCondition = (roleName: string, type: CleanupCondition["type"], enabled: boolean) => {
+  const config = getRoleConfig(roleName);
+  if (enabled) {
+    if (!config.conditions.some((c) => c.type === type)) {
+      config.conditions.push({ type, operator: "OR" });
+    }
+  } else {
+    config.conditions = config.conditions.filter((c) => c.type !== type);
+  }
+};
+
+const setRoleConditionOperator = (roleName: string, type: string, operator: "AND" | "OR") => {
+  const condition = getRoleConfig(roleName).conditions.find((c) => c.type === type);
+  if (condition) condition.operator = operator;
+};
+
+const toggleWhitelistRole = (roleId: string, checked: boolean) => {
+  if (checked) {
+    if (!membershipForm.cleanupRoleWhitelist.includes(roleId)) {
+      membershipForm.cleanupRoleWhitelist.push(roleId);
+    }
+  } else {
+    membershipForm.cleanupRoleWhitelist = membershipForm.cleanupRoleWhitelist.filter((id) => id !== roleId);
+  }
+};
+
+const formatRelativeTime = (isoString: string | null) => {
+  if (!isoString) return t("membershipSettings.autoSync.never");
+  const date = new Date(isoString);
+  const diffMs = Date.now() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 48) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
+};
+
+const saveMembershipSettings = async () => {
+  resetMessage();
+  membershipSaving.value = true;
+  try {
+    await $fetch("/api/admin/membership-settings", {
+      method: "PUT",
+      body: { ...membershipForm }
+    });
+    await refreshMembership();
+    actionSuccess.value = t("membershipSettings.messages.saved");
+  } catch (err) {
+    console.error(err);
+    actionError.value = t("membershipSettings.messages.saveFailed");
+  } finally {
+    membershipSaving.value = false;
+  }
+};
+
+const loadCleanupLog = async () => {
+  cleanupLogLoading.value = true;
+  try {
+    const data = await $fetch<{ items: CleanupLogEntry[] }>("/api/admin/cleanup-log?limit=50");
+    cleanupLogEntries.value = data.items;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    cleanupLogLoading.value = false;
+  }
+};
+
+const toggleCleanupLog = async () => {
+  showCleanupLog.value = !showCleanupLog.value;
+  if (showCleanupLog.value && cleanupLogEntries.value.length === 0) {
+    await loadCleanupLog();
+  }
+};
 </script>
 
 <template>
@@ -371,6 +554,318 @@ const toggleOrphanSelection = (userId: string, checked: boolean) => {
     <div v-if="actionError" class="alert alert-error">{{ actionError }}</div>
     <div v-if="actionSuccess" class="alert alert-success">{{ actionSuccess }}</div>
 
+    <!-- ─── Membership Settings ────────────────────────────────────────── -->
+    <div class="card bg-base-200">
+      <div class="card-body space-y-5">
+        <div>
+          <h2 class="card-title">{{ t("membershipSettings.title") }}</h2>
+          <p class="mt-1 text-sm opacity-75">{{ t("membershipSettings.description") }}</p>
+        </div>
+
+        <!-- Applications Required Toggle -->
+        <UiCheckbox
+          v-model="membershipForm.applicationsRequired"
+          :label="t('membershipSettings.applicationsRequired')"
+          :description="t('membershipSettings.applicationsRequiredHelp')"
+        />
+
+        <!-- Auto-Login Settings (visible when applications disabled) -->
+        <div v-if="!membershipForm.applicationsRequired" class="space-y-4 rounded-2xl bg-base-100 p-4 md:p-5">
+          <h3 class="text-sm font-semibold uppercase opacity-70">{{ t("membershipSettings.autoLogin.title") }}</h3>
+
+          <UiSelect
+            v-model="membershipForm.defaultCommunityRoleId"
+            :label="t('membershipSettings.autoLogin.defaultRole')"
+            :hint="t('membershipSettings.autoLogin.defaultRoleHelp')"
+            required
+          >
+            <option :value="null" disabled>{{ t("membershipSettings.autoLogin.defaultRolePlaceholder") }}</option>
+            <option v-for="role in membershipData?.communityRoles" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </UiSelect>
+
+          <UiSelect
+            v-model="membershipForm.requiredLoginRoleId"
+            :label="t('membershipSettings.autoLogin.requiredDiscordRole')"
+            :hint="t('membershipSettings.autoLogin.requiredDiscordRoleHelp')"
+          >
+            <option :value="null">{{ t("membershipSettings.autoLogin.nonePlaceholder") }}</option>
+            <option v-for="role in membershipData?.discordRoles" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </UiSelect>
+        </div>
+
+        <!-- Auto-Sync -->
+        <div class="space-y-4 rounded-2xl bg-base-100 p-4 md:p-5">
+          <h3 class="text-sm font-semibold uppercase opacity-70">{{ t("membershipSettings.autoSync.title") }}</h3>
+
+          <UiCheckbox
+            v-model="membershipForm.autoSyncEnabled"
+            :label="t('membershipSettings.autoSync.enabled')"
+            :description="t('membershipSettings.autoSync.enabledHelp')"
+          />
+
+          <template v-if="membershipForm.autoSyncEnabled">
+            <UiSelect
+              v-model="membershipForm.autoSyncIntervalHours"
+              :label="t('membershipSettings.autoSync.interval')"
+            >
+              <option v-for="hours in intervalOptions" :key="hours" :value="hours">
+                {{ t(`membershipSettings.intervals.${hours}`) }}
+              </option>
+            </UiSelect>
+
+            <p class="text-sm opacity-70">
+              {{ t("membershipSettings.autoSync.lastRun") }}:
+              <span class="font-medium">{{ formatRelativeTime(membershipData?.autoSyncLastRun ?? null) }}</span>
+            </p>
+          </template>
+        </div>
+
+        <!-- Auto-Cleanup -->
+        <div class="space-y-4 rounded-2xl bg-base-100 p-4 md:p-5">
+          <h3 class="text-sm font-semibold uppercase opacity-70">{{ t("membershipSettings.autoCleanup.title") }}</h3>
+
+          <UiCheckbox
+            v-model="membershipForm.autoCleanupEnabled"
+            :label="t('membershipSettings.autoCleanup.enabled')"
+            :description="t('membershipSettings.autoCleanup.enabledHelp')"
+          />
+
+          <template v-if="membershipForm.autoCleanupEnabled">
+            <UiSelect
+              v-model="membershipForm.autoCleanupIntervalHours"
+              :label="t('membershipSettings.autoCleanup.interval')"
+            >
+              <option v-for="hours in intervalOptions" :key="hours" :value="hours">
+                {{ t(`membershipSettings.intervals.${hours}`) }}
+              </option>
+            </UiSelect>
+
+            <p class="text-sm opacity-70">
+              {{ t("membershipSettings.autoCleanup.lastRun") }}:
+              <span class="font-medium">{{ formatRelativeTime(membershipData?.autoCleanupLastRun ?? null) }}</span>
+            </p>
+
+            <!-- Per-Role Cleanup Configs -->
+            <div class="space-y-3">
+              <p class="text-sm font-medium">{{ t("membershipSettings.autoCleanup.conditions") }}</p>
+              <p class="text-xs opacity-70">{{ t("membershipSettings.autoCleanup.perRoleHelp") }}</p>
+
+              <div
+                v-for="permRole in (membershipData?.permissionRoles ?? []).filter(r => r.name !== 'superadmin' && r.name !== 'admin')"
+                :key="permRole.name"
+                class="rounded-xl bg-base-200 p-3 space-y-3"
+              >
+                <!-- Role header with enable toggle -->
+                <label class="flex items-center gap-2 text-sm font-semibold">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm"
+                    :checked="getRoleConfig(permRole.name).enabled"
+                    @change="getRoleConfig(permRole.name).enabled = ($event.target as HTMLInputElement).checked"
+                  >
+                  {{ permRole.name }}
+                </label>
+
+                <template v-if="getRoleConfig(permRole.name).enabled">
+                  <!-- Orphan Check -->
+                  <div class="ml-4 flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-xs"
+                        :checked="isRoleConditionEnabled(permRole.name, 'orphan')"
+                        @change="toggleRoleCondition(permRole.name, 'orphan', ($event.target as HTMLInputElement).checked)"
+                      >
+                      {{ t("membershipSettings.autoCleanup.conditionOrphan") }}
+                    </label>
+                    <select
+                      v-if="isRoleConditionEnabled(permRole.name, 'orphan')"
+                      class="select select-bordered select-xs"
+                      :value="getRoleConditionOperator(permRole.name, 'orphan')"
+                      @change="setRoleConditionOperator(permRole.name, 'orphan', ($event.target as HTMLSelectElement).value as 'AND' | 'OR')"
+                    >
+                      <option value="OR">{{ t("membershipSettings.autoCleanup.operatorOr") }}</option>
+                      <option value="AND">{{ t("membershipSettings.autoCleanup.operatorAnd") }}</option>
+                    </select>
+                  </div>
+
+                  <!-- Missing Role Check -->
+                  <div class="ml-4 flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-xs"
+                        :checked="isRoleConditionEnabled(permRole.name, 'missingRole')"
+                        @change="toggleRoleCondition(permRole.name, 'missingRole', ($event.target as HTMLInputElement).checked)"
+                      >
+                      {{ t("membershipSettings.autoCleanup.conditionMissingRole") }}
+                    </label>
+                    <select
+                      v-if="isRoleConditionEnabled(permRole.name, 'missingRole')"
+                      class="select select-bordered select-xs"
+                      :value="getRoleConditionOperator(permRole.name, 'missingRole')"
+                      @change="setRoleConditionOperator(permRole.name, 'missingRole', ($event.target as HTMLSelectElement).value as 'AND' | 'OR')"
+                    >
+                      <option value="OR">{{ t("membershipSettings.autoCleanup.operatorOr") }}</option>
+                      <option value="AND">{{ t("membershipSettings.autoCleanup.operatorAnd") }}</option>
+                    </select>
+                  </div>
+                  <div v-if="isRoleConditionEnabled(permRole.name, 'missingRole')" class="ml-8">
+                    <UiSelect
+                      v-model="getRoleConfig(permRole.name).cleanupRequiredRoleId"
+                      :label="t('membershipSettings.autoCleanup.requiredRole')"
+                      size="sm"
+                    >
+                      <option :value="null" disabled>—</option>
+                      <option v-for="dr in membershipData?.discordRoles" :key="dr.id" :value="dr.id">
+                        {{ dr.name }}
+                      </option>
+                    </UiSelect>
+                  </div>
+
+                  <!-- Login Inactivity -->
+                  <div class="ml-4 flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-xs"
+                        :checked="isRoleConditionEnabled(permRole.name, 'loginInactive')"
+                        @change="toggleRoleCondition(permRole.name, 'loginInactive', ($event.target as HTMLInputElement).checked)"
+                      >
+                      {{ t("membershipSettings.autoCleanup.conditionLoginInactive") }}
+                    </label>
+                    <select
+                      v-if="isRoleConditionEnabled(permRole.name, 'loginInactive')"
+                      class="select select-bordered select-xs"
+                      :value="getRoleConditionOperator(permRole.name, 'loginInactive')"
+                      @change="setRoleConditionOperator(permRole.name, 'loginInactive', ($event.target as HTMLSelectElement).value as 'AND' | 'OR')"
+                    >
+                      <option value="OR">{{ t("membershipSettings.autoCleanup.operatorOr") }}</option>
+                      <option value="AND">{{ t("membershipSettings.autoCleanup.operatorAnd") }}</option>
+                    </select>
+                  </div>
+                  <div v-if="isRoleConditionEnabled(permRole.name, 'loginInactive')" class="ml-8">
+                    <UiInput
+                      v-model="getRoleConfig(permRole.name).cleanupInactiveDays"
+                      :label="t('membershipSettings.autoCleanup.inactiveDays')"
+                      type="number"
+                      size="sm"
+                      placeholder="30"
+                    />
+                  </div>
+
+                  <!-- Voice Inactivity -->
+                  <div class="ml-4 flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-xs"
+                        :checked="isRoleConditionEnabled(permRole.name, 'voiceInactive')"
+                        @change="toggleRoleCondition(permRole.name, 'voiceInactive', ($event.target as HTMLInputElement).checked)"
+                      >
+                      {{ t("membershipSettings.autoCleanup.conditionVoiceInactive") }}
+                    </label>
+                    <select
+                      v-if="isRoleConditionEnabled(permRole.name, 'voiceInactive')"
+                      class="select select-bordered select-xs"
+                      :value="getRoleConditionOperator(permRole.name, 'voiceInactive')"
+                      @change="setRoleConditionOperator(permRole.name, 'voiceInactive', ($event.target as HTMLSelectElement).value as 'AND' | 'OR')"
+                    >
+                      <option value="OR">{{ t("membershipSettings.autoCleanup.operatorOr") }}</option>
+                      <option value="AND">{{ t("membershipSettings.autoCleanup.operatorAnd") }}</option>
+                    </select>
+                  </div>
+                  <div v-if="isRoleConditionEnabled(permRole.name, 'voiceInactive')" class="ml-8">
+                    <UiInput
+                      v-model="getRoleConfig(permRole.name).cleanupNoVoiceDays"
+                      :label="t('membershipSettings.autoCleanup.voiceDays')"
+                      type="number"
+                      size="sm"
+                      placeholder="14"
+                    />
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Role Whitelist -->
+            <div v-if="membershipData?.discordRoles?.length" class="space-y-2">
+              <p class="text-sm font-medium">{{ t("membershipSettings.autoCleanup.roleWhitelist") }}</p>
+              <p class="text-xs opacity-70">{{ t("membershipSettings.autoCleanup.roleWhitelistHelp") }}</p>
+              <div class="flex flex-wrap gap-2">
+                <label
+                  v-for="role in membershipData.discordRoles"
+                  :key="role.id"
+                  class="flex items-center gap-1.5 rounded-lg bg-base-200 px-2.5 py-1.5 text-xs"
+                >
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-xs"
+                    :checked="membershipForm.cleanupRoleWhitelist.includes(role.id)"
+                    @change="toggleWhitelistRole(role.id, ($event.target as HTMLInputElement).checked)"
+                  >
+                  {{ role.name }}
+                </label>
+              </div>
+            </div>
+
+            <!-- Protect Moderators -->
+            <UiCheckbox
+              v-model="membershipForm.cleanupProtectModerators"
+              :label="t('membershipSettings.autoCleanup.protectModerators')"
+              :description="t('membershipSettings.autoCleanup.protectModeratorsHelp')"
+            />
+
+            <!-- Cleanup Log Toggle -->
+            <div>
+              <button class="btn btn-ghost btn-sm" @click="toggleCleanupLog">
+                {{ showCleanupLog ? t("membershipSettings.cleanupLog.hideLog") : t("membershipSettings.cleanupLog.showLog") }}
+              </button>
+
+              <div v-if="showCleanupLog" class="mt-3">
+                <div v-if="cleanupLogLoading" class="loading loading-spinner loading-sm" />
+                <div v-else-if="cleanupLogEntries.length === 0" class="text-sm opacity-60">
+                  {{ t("membershipSettings.cleanupLog.empty") }}
+                </div>
+                <div v-else class="overflow-x-auto">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>{{ t("membershipSettings.cleanupLog.username") }}</th>
+                        <th>{{ t("membershipSettings.cleanupLog.discordId") }}</th>
+                        <th>{{ t("membershipSettings.cleanupLog.reason") }}</th>
+                        <th>{{ t("membershipSettings.cleanupLog.date") }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="entry in cleanupLogEntries" :key="entry.id">
+                        <td class="font-medium">{{ entry.discordUsername }}</td>
+                        <td class="text-xs opacity-70">{{ entry.discordId }}</td>
+                        <td class="text-xs">{{ entry.reason }}</td>
+                        <td class="text-xs opacity-70">{{ new Date(entry.createdAt).toLocaleString() }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex justify-end">
+          <UiButton :disabled="membershipSaving" @click="saveMembershipSettings">
+            {{ membershipSaving ? t("common.loading") : t("common.save") }}
+          </UiButton>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Community Role Mapping (existing) ──────────────────────────── -->
     <div class="card bg-base-200">
       <div class="card-body space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
