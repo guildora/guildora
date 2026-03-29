@@ -136,6 +136,31 @@ export function createBotClient(client: Client): BotClient {
       }
     },
 
+    async listAllChannels() {
+      try {
+        const guildId = process.env.DISCORD_GUILD_ID;
+        if (!guildId) return [];
+        const guild = client.guilds.cache.get(guildId);
+        if (!guild) return [];
+        const channels = await guild.channels.fetch();
+        const typeMap: Record<number, string> = {
+          [ChannelType.GuildText]: "text",
+          [ChannelType.GuildVoice]: "voice",
+          [ChannelType.GuildCategory]: "category",
+        };
+        const result: Array<{ id: string; name: string; type: string; parentId: string | null }> = [];
+        for (const [, channel] of channels) {
+          if (!channel) continue;
+          if (!(channel.type in typeMap)) continue;
+          result.push({ id: channel.id, name: channel.name, type: typeMap[channel.type]!, parentId: channel.parentId || null });
+        }
+        return result;
+      } catch (err) {
+        logger.error("[bot-client] Failed to list all channels", err);
+        return [];
+      }
+    },
+
     async listVoiceChannelsByCategory(categoryId: string) {
       try {
         // Derive guild from the category channel

@@ -91,6 +91,8 @@ export interface BotClient {
   listVoiceChannelsByCategory(categoryId: string): Promise<Array<{ id: string; name: string; parentId: string | null; memberCount: number | null }>>;
   /** List all text channels in the guild. */
   listTextChannels(): Promise<Array<{ id: string; name: string }>>;
+  /** List all channels (text, voice, category) in the guild. */
+  listAllChannels(): Promise<Array<{ id: string; name: string; type: string; parentId: string | null }>>;
 }
 
 // ─── Bot context ─────────────────────────────────────────────────────────────
