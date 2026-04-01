@@ -23,6 +23,11 @@
       "types": "./src/utils/application-tokens.ts",
       "import": "./src/utils/application-tokens.ts",
       "default": "./src/utils/application-tokens.ts"
+    },
+    "./db/run-migrations": {
+      "types": "./src/db/run-migrations.ts",
+      "import": "./src/db/run-migrations.ts",
+      "default": "./src/db/run-migrations.ts"
     }
   },
   "main": "./dist/index.js",

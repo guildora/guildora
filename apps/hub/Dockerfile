@@ -21,6 +21,7 @@ ENV NITRO_HOST=0.0.0.0
 ENV NITRO_PORT=3003
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=build /repo/apps/hub/.output ./.output
+COPY --from=build /repo/packages/shared/drizzle/migrations ./.output/migrations
 USER app
 EXPOSE 3003
 CMD ["node", ".output/server/index.mjs"]
