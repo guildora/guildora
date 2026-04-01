@@ -3,6 +3,7 @@ import { getBotMessages, interpolate, resolveBotLocale } from "../i18n/messages"
 import type { BotCommand } from "../types";
 import { botAppHookRegistry } from "../utils/app-hooks";
 import { handleApplicationButtonInteraction } from "../interactions/application-button";
+import { handleRolePickerButtonInteraction } from "../interactions/role-picker-button";
 import { logger } from "../utils/logger";
 
 export function registerInteractionCreateEvent(
@@ -17,6 +18,17 @@ export function registerInteractionCreateEvent(
           await handleApplicationButtonInteraction(interaction, client);
         } catch (error) {
           logger.error("Application button interaction failed.", error);
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ ephemeral: true, content: "An error occurred. Please try again." }).catch(() => {});
+          }
+        }
+        return;
+      }
+      if (interaction.customId.startsWith("role_pick_")) {
+        try {
+          await handleRolePickerButtonInteraction(interaction);
+        } catch (error) {
+          logger.error("Role picker button interaction failed.", error);
           if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({ ephemeral: true, content: "An error occurred. Please try again." }).catch(() => {});
           }

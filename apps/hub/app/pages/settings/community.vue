@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DisplayNameField } from "@guildora/shared";
+import type { DisplayNameField, RoleGroup } from "@guildora/shared";
 
 definePageMeta({
   middleware: ["settings"],
@@ -235,6 +235,212 @@ const saveSelectableRoles = async () => {
     rolesSavePending.value = false;
   }
 };
+
+// ─── Role Groups ───────────────────────────────────────────────────────
+
+type ChannelItem = { id: string; name: string; type: string; parentId: string | null };
+
+const { data: roleGroupsData, refresh: refreshRoleGroups } = await useFetch<{ groups: RoleGroup[] }>("/api/admin/role-groups");
+const { data: channelsData } = await useFetch<{ channels: ChannelItem[] }>("/api/admin/discord-channels");
+
+const textChannels = computed(() => (channelsData.value?.channels || []).filter((c) => c.type === "text"));
+
+const roleGroupMessage = ref("");
+const roleGroupMessageType = ref<"success" | "error">("success");
+
+const showGroupEditor = ref(false);
+const editingGroup = ref<RoleGroup | null>(null);
+const groupNameInput = ref("");
+const groupDescriptionInput = ref("");
+const groupChannelIdInput = ref("");
+
+// Role assignment per group
+const groupRoleAssignments = ref<Array<{ discordRoleId: string; roleName: string; emoji: string }>>([]);
+
+function openGroupEditor(group?: RoleGroup) {
+  if (group) {
+    editingGroup.value = group;
+    groupNameInput.value = group.name;
+    groupDescriptionInput.value = group.description || "";
+    groupChannelIdInput.value = group.embed?.channelId || "";
+    groupRoleAssignments.value = group.roles.map((r) => ({
+      discordRoleId: r.discordRoleId,
+      roleName: r.roleNameSnapshot,
+      emoji: r.emoji || ""
+    }));
+  } else {
+    editingGroup.value = null;
+    groupNameInput.value = "";
+    groupDescriptionInput.value = "";
+    groupChannelIdInput.value = "";
+    groupRoleAssignments.value = [];
+  }
+  showGroupEditor.value = true;
+}
+
+function closeGroupEditor() {
+  showGroupEditor.value = false;
+  editingGroup.value = null;
+}
+
+// Available selectable roles not yet in this group
+const availableRolesForGroup = computed(() => {
+  const assignedIds = new Set(groupRoleAssignments.value.map((r) => r.discordRoleId));
+  return selectableRoles.value.filter((r) => selectedRoleIds.value.includes(r.id) && !assignedIds.has(r.id));
+});
+
+function addRoleToGroup(roleId: string) {
+  const role = selectableRoles.value.find((r) => r.id === roleId);
+  if (!role) return;
+  groupRoleAssignments.value.push({
+    discordRoleId: role.id,
+    roleName: role.name,
+    emoji: ""
+  });
+}
+
+function removeRoleFromGroup(index: number) {
+  groupRoleAssignments.value.splice(index, 1);
+}
+
+const groupSavePending = ref(false);
+
+async function saveGroup() {
+  groupSavePending.value = true;
+  roleGroupMessage.value = "";
+  try {
+    if (editingGroup.value) {
+      await $fetch(`/api/admin/role-groups/${editingGroup.value.id}`, {
+        method: "PUT",
+        body: {
+          name: groupNameInput.value.trim(),
+          description: groupDescriptionInput.value.trim() || null
+        }
+      });
+      // Update roles
+      await $fetch(`/api/admin/role-groups/${editingGroup.value.id}/roles`, {
+        method: "PUT",
+        body: {
+          roles: groupRoleAssignments.value.map((r, i) => ({
+            discordRoleId: r.discordRoleId,
+            emoji: r.emoji.trim() || null,
+            sortOrder: i
+          }))
+        }
+      });
+    } else {
+      const result = await $fetch<{ group: { id: string } }>("/api/admin/role-groups", {
+        method: "POST",
+        body: {
+          name: groupNameInput.value.trim(),
+          description: groupDescriptionInput.value.trim() || null
+        }
+      });
+      // Assign roles to new group
+      if (groupRoleAssignments.value.length > 0) {
+        await $fetch(`/api/admin/role-groups/${result.group.id}/roles`, {
+          method: "PUT",
+          body: {
+            roles: groupRoleAssignments.value.map((r, i) => ({
+              discordRoleId: r.discordRoleId,
+              emoji: r.emoji.trim() || null,
+              sortOrder: i
+            }))
+          }
+        });
+      }
+    }
+    roleGroupMessage.value = t("roleGroups.saveSuccess");
+    roleGroupMessageType.value = "success";
+    closeGroupEditor();
+    await refreshRoleGroups();
+  } catch {
+    roleGroupMessage.value = t("roleGroups.saveError");
+    roleGroupMessageType.value = "error";
+  } finally {
+    groupSavePending.value = false;
+  }
+}
+
+async function deleteGroup(group: RoleGroup) {
+  if (!confirm(t("roleGroups.deleteConfirm"))) return;
+  roleGroupMessage.value = "";
+  try {
+    await $fetch(`/api/admin/role-groups/${group.id}`, { method: "DELETE" });
+    roleGroupMessage.value = t("roleGroups.deleteSuccess");
+    roleGroupMessageType.value = "success";
+    await refreshRoleGroups();
+  } catch {
+    roleGroupMessage.value = t("roleGroups.deleteError");
+    roleGroupMessageType.value = "error";
+  }
+}
+
+const deployPending = ref<string | null>(null);
+
+async function deployEmbed(group: RoleGroup) {
+  if (!groupChannelIdInput.value && !group.embed?.channelId) return;
+  deployPending.value = group.id;
+  roleGroupMessage.value = "";
+  try {
+    const channelId = group.embed?.channelId || "";
+    if (!channelId) {
+      roleGroupMessage.value = t("roleGroups.deployError");
+      roleGroupMessageType.value = "error";
+      return;
+    }
+    await $fetch(`/api/admin/role-groups/${group.id}/embed/deploy`, {
+      method: "POST",
+      body: { channelId }
+    });
+    roleGroupMessage.value = t("roleGroups.deploySuccess");
+    roleGroupMessageType.value = "success";
+    await refreshRoleGroups();
+  } catch {
+    roleGroupMessage.value = t("roleGroups.deployError");
+    roleGroupMessageType.value = "error";
+  } finally {
+    deployPending.value = null;
+  }
+}
+
+async function deployEmbedFromEditor() {
+  if (!groupChannelIdInput.value || !editingGroup.value) return;
+  const groupId = editingGroup.value.id;
+  const channelId = groupChannelIdInput.value;
+  deployPending.value = groupId;
+  roleGroupMessage.value = "";
+  try {
+    // Save first (this closes the editor and nulls editingGroup)
+    await saveGroup();
+    // Then deploy using captured values
+    await $fetch(`/api/admin/role-groups/${groupId}/embed/deploy`, {
+      method: "POST",
+      body: { channelId }
+    });
+    roleGroupMessage.value = t("roleGroups.deploySuccess");
+    roleGroupMessageType.value = "success";
+    await refreshRoleGroups();
+  } catch {
+    roleGroupMessage.value = t("roleGroups.deployError");
+    roleGroupMessageType.value = "error";
+  } finally {
+    deployPending.value = null;
+  }
+}
+
+async function removeEmbed(group: RoleGroup) {
+  roleGroupMessage.value = "";
+  try {
+    await $fetch(`/api/admin/role-groups/${group.id}/embed`, { method: "DELETE" });
+    roleGroupMessage.value = t("roleGroups.removeEmbedSuccess");
+    roleGroupMessageType.value = "success";
+    await refreshRoleGroups();
+  } catch {
+    roleGroupMessage.value = t("roleGroups.removeEmbedError");
+    roleGroupMessageType.value = "error";
+  }
+}
 </script>
 
 <template>
@@ -404,5 +610,173 @@ const saveSelectableRoles = async () => {
         <div v-if="rolesSaveSuccess" class="alert alert-success">{{ rolesSaveSuccess }}</div>
       </div>
     </div>
+
+    <!-- Role Groups -->
+    <div class="mt-8 pt-6 border-t border-line">
+      <h2 class="text-xl font-bold mb-2">{{ $t("roleGroups.title") }}</h2>
+      <p class="text-sm opacity-70 mb-4">{{ $t("roleGroups.description") }}</p>
+    </div>
+
+    <div v-if="roleGroupMessage" :class="['alert', roleGroupMessageType === 'success' ? 'alert-success' : 'alert-error']">
+      {{ roleGroupMessage }}
+    </div>
+
+    <!-- Group List -->
+    <div class="space-y-4">
+      <div v-if="!roleGroupsData?.groups?.length && !showGroupEditor" class="rounded-2xl bg-base-200 p-6 shadow-md">
+        <p class="opacity-60">{{ $t("roleGroups.noGroups") }}</p>
+      </div>
+
+      <div
+        v-for="group in roleGroupsData?.groups || []"
+        :key="group.id"
+        class="rounded-2xl bg-base-200 p-6 shadow-md"
+      >
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-semibold">{{ group.name }}</h3>
+            <p v-if="group.description" class="text-sm opacity-70 mt-1">{{ group.description }}</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span
+                v-for="role in group.roles"
+                :key="role.discordRoleId"
+                class="badge badge-outline gap-1"
+              >
+                <span v-if="role.emoji">{{ role.emoji }}</span>
+                {{ role.roleNameSnapshot }}
+              </span>
+              <span v-if="group.roles.length === 0" class="text-sm opacity-50">
+                {{ $t("roleGroups.noRolesAssigned") }}
+              </span>
+            </div>
+            <div class="mt-2">
+              <span
+                class="badge badge-sm"
+                :class="group.embed?.messageId ? 'badge-success' : 'badge-neutral'"
+              >
+                {{ group.embed?.messageId ? $t("roleGroups.embedDeployed") : $t("roleGroups.embedNotDeployed") }}
+              </span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <UiButton
+              v-if="group.embed?.messageId && group.embed?.channelId"
+              variant="secondary"
+              size="sm"
+              :disabled="deployPending === group.id"
+              @click="deployEmbed(group)"
+            >
+              {{ $t("roleGroups.updateEmbed") }}
+            </UiButton>
+            <UiButton
+              v-if="group.embed?.messageId"
+              variant="errorOutline"
+              size="sm"
+              @click="removeEmbed(group)"
+            >
+              {{ $t("roleGroups.removeEmbed") }}
+            </UiButton>
+            <UiButton variant="secondary" size="sm" @click="openGroupEditor(group)">
+              {{ $t("roleGroups.editGroup") }}
+            </UiButton>
+            <UiButton variant="errorOutline" size="sm" @click="deleteGroup(group)">
+              {{ $t("roleGroups.deleteGroup") }}
+            </UiButton>
+          </div>
+        </div>
+      </div>
+
+      <UiButton variant="secondary" @click="openGroupEditor()">
+        {{ $t("roleGroups.createGroup") }}
+      </UiButton>
+    </div>
+
+    <!-- Group Editor Modal -->
+    <dialog
+      class="modal"
+      :class="{ 'modal-open': showGroupEditor }"
+      :open="showGroupEditor"
+      @click.self="closeGroupEditor"
+    >
+      <div class="modal-box max-w-2xl">
+        <UiModalTitle :title="editingGroup ? $t('roleGroups.editGroup') : $t('roleGroups.createGroup')" @close="closeGroupEditor" />
+
+        <div class="space-y-4 mt-4">
+          <UiInput
+            v-model="groupNameInput"
+            :label="$t('roleGroups.groupName')"
+            :placeholder="$t('roleGroups.groupNamePlaceholder')"
+          />
+          <UiInput
+            v-model="groupDescriptionInput"
+            :label="$t('roleGroups.groupDescription')"
+            :placeholder="$t('roleGroups.groupDescriptionPlaceholder')"
+          />
+
+          <!-- Role Assignment -->
+          <div>
+            <label class="label font-semibold">{{ $t("roleGroups.assignRoles") }}</label>
+            <div class="space-y-2 mt-2">
+              <div
+                v-for="(assignment, index) in groupRoleAssignments"
+                :key="assignment.discordRoleId"
+                class="flex items-center gap-2 rounded-xl bg-base-300 p-3"
+              >
+                <span class="font-medium flex-1">{{ assignment.roleName }}</span>
+                <input
+                  v-model="assignment.emoji"
+                  type="text"
+                  class="input input-sm w-16 text-center"
+                  :placeholder="$t('roleGroups.emojiPlaceholder')"
+                  maxlength="4"
+                />
+                <button class="btn btn-ghost btn-sm text-error" type="button" @click="removeRoleFromGroup(index)">
+                  <Icon name="proicons:cancel" />
+                </button>
+              </div>
+            </div>
+            <div v-if="availableRolesForGroup.length > 0" class="mt-3">
+              <select
+                class="select select-sm"
+                @change="(e: Event) => { const val = (e.target as HTMLSelectElement).value; if (val) { addRoleToGroup(val); (e.target as HTMLSelectElement).value = ''; } }"
+              >
+                <option value="">+ Add role...</option>
+                <option v-for="role in availableRolesForGroup" :key="role.id" :value="role.id">
+                  {{ role.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Channel for Embed -->
+          <div v-if="editingGroup">
+            <UiSelect v-model="groupChannelIdInput" :label="$t('roleGroups.selectChannel')">
+              <option value="">—</option>
+              <option v-for="ch in textChannels" :key="ch.id" :value="ch.id">
+                #{{ ch.name }}
+              </option>
+            </UiSelect>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap gap-2 mt-4">
+            <UiButton :disabled="groupSavePending || !groupNameInput.trim()" @click="saveGroup">
+              {{ groupSavePending ? $t("common.loading") : $t("common.save") }}
+            </UiButton>
+            <UiButton
+              v-if="editingGroup && groupChannelIdInput"
+              variant="secondary"
+              :disabled="deployPending === editingGroup?.id"
+              @click="deployEmbedFromEditor"
+            >
+              {{ editingGroup?.embed?.messageId ? $t("roleGroups.updateEmbed") : $t("roleGroups.deployEmbed") }}
+            </UiButton>
+            <UiButton variant="ghost" @click="closeGroupEditor">
+              {{ $t("common.cancel") }}
+            </UiButton>
+          </div>
+        </div>
+      </div>
+    </dialog>
   </section>
 </template>

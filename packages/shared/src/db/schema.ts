@@ -107,9 +107,41 @@ export const userCommunityRoles = pgTable("user_community_roles", {
   assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull()
 });
 
+// ─── Role Groups & Selectable Roles ─────────────────────────────────────
+
+export const roleGroups = pgTable("role_groups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date())
+});
+
 export const selectableDiscordRoles = pgTable("selectable_discord_roles", {
   discordRoleId: text("discord_role_id").primaryKey(),
   roleNameSnapshot: text("role_name_snapshot").notNull(),
+  groupId: uuid("group_id").references(() => roleGroups.id, { onDelete: "set null" }),
+  emoji: text("emoji"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date())
+});
+
+export const rolePickerEmbeds = pgTable("role_picker_embeds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  groupId: uuid("group_id")
+    .notNull()
+    .references(() => roleGroups.id, { onDelete: "cascade" })
+    .unique(),
+  discordChannelId: text("discord_channel_id").notNull(),
+  discordMessageId: text("discord_message_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
@@ -346,6 +378,7 @@ export const applications = pgTable(
     rolesAssigned: jsonb("roles_assigned").$type<string[]>().default([]),
     pendingRoleAssignments: jsonb("pending_role_assignments").$type<string[]>().default([]),
     displayNameComposed: text("display_name_composed"),
+    ticketChannelId: text("ticket_channel_id"),
     reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -569,6 +602,25 @@ export const userDiscordRolesRelations = relations(userDiscordRoles, ({ one }) =
   user: one(users, {
     fields: [userDiscordRoles.userId],
     references: [users.id]
+  })
+}));
+
+export const roleGroupsRelations = relations(roleGroups, ({ many }) => ({
+  selectableRoles: many(selectableDiscordRoles),
+  embed: many(rolePickerEmbeds)
+}));
+
+export const selectableDiscordRolesRelations = relations(selectableDiscordRoles, ({ one }) => ({
+  group: one(roleGroups, {
+    fields: [selectableDiscordRoles.groupId],
+    references: [roleGroups.id]
+  })
+}));
+
+export const rolePickerEmbedsRelations = relations(rolePickerEmbeds, ({ one }) => ({
+  group: one(roleGroups, {
+    fields: [rolePickerEmbeds.groupId],
+    references: [roleGroups.id]
   })
 }));
 

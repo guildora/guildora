@@ -13,3 +13,23 @@ export const roleHierarchy: Record<string, string[]> = {
   moderator: ["moderator", "user"],
   user: ["user"]
 };
+
+export interface SelectableRoleWithEmoji {
+  discordRoleId: string;
+  roleNameSnapshot: string;
+  emoji: string | null;
+  sortOrder: number;
+}
+
+export interface RoleGroup {
+  id: string;
+  name: string;
+  description: string | null;
+  sortOrder: number;
+  roles: SelectableRoleWithEmoji[];
+  embed?: {
+    id: string;
+    channelId: string;
+    messageId: string | null;
+  } | null;
+}

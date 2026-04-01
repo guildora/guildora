@@ -155,6 +155,44 @@ async function getGuild(client: Client, guildId: string) {
   return guild;
 }
 
+function buildRolePickerEmbedAndButtons(
+  groupId: string,
+  title: string,
+  description: string | undefined,
+  color: string | undefined,
+  roles: Array<{ discordRoleId: string; emoji: string | null; roleName: string }>
+) {
+  const roleLines = roles.map((r) => {
+    const emoji = r.emoji ? `${r.emoji} ` : "";
+    return `${emoji}**${r.roleName}**`;
+  });
+
+  const embed = new EmbedBuilder()
+    .setTitle(title)
+    .setDescription(description ? `${description}\n\n${roleLines.join("\n")}` : roleLines.join("\n"))
+    .setColor(color ? (parseInt(color.replace("#", ""), 16) || 0x7C3AED) : 0x7C3AED);
+
+  // Discord allows max 5 buttons per row, max 5 rows = 25 buttons
+  const components: ActionRowBuilder<ButtonBuilder>[] = [];
+  for (let i = 0; i < roles.length && components.length < 5; i += 5) {
+    const chunk = roles.slice(i, i + 5);
+    const row = new ActionRowBuilder<ButtonBuilder>();
+    for (const role of chunk) {
+      const btn = new ButtonBuilder()
+        .setCustomId(`role_pick_${groupId}_${role.discordRoleId}`)
+        .setLabel(role.roleName)
+        .setStyle(ButtonStyle.Secondary);
+      if (role.emoji) {
+        try { btn.setEmoji(role.emoji); } catch { /* skip invalid emoji */ }
+      }
+      row.addComponents(btn);
+    }
+    components.push(row);
+  }
+
+  return { embeds: [embed], components };
+}
+
 export async function loadAndDeployAppCommands(commands: Collection<string, BotCommand>) {
   const db = getDb();
   const rows = await db.select().from(installedApps).where(eq(installedApps.status, "active"));
@@ -582,7 +620,7 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
       // PATCH /internal/applications/embed — update existing embed
       if (method === "PATCH" && pathname === "/internal/applications/embed") {
         const bodyRaw = await readBody(req);
-        let body: { channelId?: string; messageId?: string; description?: string; buttonLabel?: string; color?: string } = {};
+        let body: { channelId?: string; messageId?: string; flowId?: string; description?: string; buttonLabel?: string; color?: string } = {};
         try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
 
         if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
@@ -599,13 +637,91 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
           .setDescription(body.description || "Click the button below to apply.")
           .setColor(body.color ? (parseInt(body.color.replace("#", ""), 16) || 0x7C3AED) : 0x7C3AED);
 
-        await (msg as { edit: Function }).edit({ embeds: [embed] });
+        const editPayload: { embeds: EmbedBuilder[]; components?: ActionRowBuilder<ButtonBuilder>[] } = { embeds: [embed] };
+
+        if (body.flowId) {
+          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`application_apply_${body.flowId}`)
+              .setLabel(body.buttonLabel || "Apply")
+              .setStyle(ButtonStyle.Primary)
+          );
+          editPayload.components = [row];
+        }
+
+        await (msg as { edit: Function }).edit(editPayload);
         json(res, 200, { ok: true });
         return;
       }
 
       // DELETE /internal/applications/embed — delete embed message
       if (method === "DELETE" && pathname === "/internal/applications/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { channelId?: string; messageId?: string } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.messageId) { jsonError(res, 400, "MISSING_MESSAGE_ID", "Missing messageId"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (channel && "messages" in channel) {
+          const ch = channel as { messages: { fetch: Function } };
+          const msg = await ch.messages.fetch(body.messageId).catch(() => null);
+          if (msg && "delete" in msg) {
+            await (msg as { delete: Function }).delete().catch(() => {});
+          }
+        }
+
+        json(res, 200, { ok: true });
+        return;
+      }
+
+      // ─── Role Picker Embed Endpoints ──────────────────────────────
+
+      // POST /internal/role-picker/embed — post role picker embed with buttons
+      if (method === "POST" && pathname === "/internal/role-picker/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { groupId?: string; channelId?: string; title?: string; description?: string; color?: string; roles?: Array<{ discordRoleId: string; emoji: string | null; roleName: string }> } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.groupId) { jsonError(res, 400, "INVALID_JSON_BODY", "Missing groupId"); return; }
+        if (!body.roles || body.roles.length === 0) { jsonError(res, 400, "INVALID_JSON_BODY", "Missing roles"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (!channel || !("send" in channel)) { jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found or not text-based"); return; }
+
+        const { embeds, components } = buildRolePickerEmbedAndButtons(body.groupId, body.title || "Role Selection", body.description, body.color, body.roles);
+        const message = await (channel as { send: Function }).send({ embeds, components });
+        json(res, 200, { ok: true, messageId: (message as { id: string }).id });
+        return;
+      }
+
+      // PATCH /internal/role-picker/embed — update existing role picker embed
+      if (method === "PATCH" && pathname === "/internal/role-picker/embed") {
+        const bodyRaw = await readBody(req);
+        let body: { channelId?: string; messageId?: string; groupId?: string; title?: string; description?: string; color?: string; roles?: Array<{ discordRoleId: string; emoji: string | null; roleName: string }> } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.channelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channelId"); return; }
+        if (!body.messageId) { jsonError(res, 400, "MISSING_MESSAGE_ID", "Missing messageId"); return; }
+        if (!body.groupId) { jsonError(res, 400, "INVALID_JSON_BODY", "Missing groupId"); return; }
+
+        const channel = await client.channels.fetch(body.channelId).catch(() => null);
+        if (!channel || !("messages" in channel)) { jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found"); return; }
+
+        const ch = channel as { messages: { fetch: Function } };
+        const msg = await ch.messages.fetch(body.messageId).catch(() => null);
+        if (!msg || !("edit" in msg)) { jsonError(res, 404, "NOT_FOUND", "Message not found"); return; }
+
+        const { embeds, components } = buildRolePickerEmbedAndButtons(body.groupId, body.title || "Role Selection", body.description, body.color, body.roles || []);
+        await (msg as { edit: Function }).edit({ embeds, components });
+        json(res, 200, { ok: true });
+        return;
+      }
+
+      // DELETE /internal/role-picker/embed — delete role picker embed
+      if (method === "DELETE" && pathname === "/internal/role-picker/embed") {
         const bodyRaw = await readBody(req);
         let body: { channelId?: string; messageId?: string } = {};
         try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
@@ -859,7 +975,7 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
       // POST /internal/guild/channels/create
       if (method === "POST" && pathname === "/internal/guild/channels/create") {
         const bodyRaw = await readBody(req);
-        let body: { name?: string; type?: string; parentId?: string; topic?: string; permissionOverwrites?: Array<{ id: string; type: number; allow: string; deny: string }> } = {};
+        let body: { name?: string; type?: string; parentId?: string; topic?: string; denyEveryone?: boolean; permissionOverwrites?: Array<{ id: string; type: number; allow: string; deny: string }> } = {};
         try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
 
         if (!body.name || typeof body.name !== "string") {
@@ -876,6 +992,12 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
         };
         const channelType = (typeMap[body.type || "text"] || ChannelType.GuildText) as GuildChannelTypes;
 
+        // Auto-inject @everyone deny if requested
+        const overwrites = [...(body.permissionOverwrites || [])];
+        if (body.denyEveryone && guildId) {
+          overwrites.unshift({ id: guildId, type: 0, allow: "0", deny: "1024" }); // deny ViewChannel
+        }
+
         const guild = await getGuild(client, guildId);
         try {
           const channel = await guild.channels.create({
@@ -883,12 +1005,55 @@ export function startInternalSyncServer(client: Client, commands: Collection<str
             type: channelType,
             parent: body.parentId || undefined,
             topic: body.topic || undefined,
-            permissionOverwrites: body.permissionOverwrites || undefined
+            permissionOverwrites: overwrites.length > 0 ? overwrites.map((o) => ({ id: o.id, type: o.type, allow: BigInt(o.allow), deny: BigInt(o.deny) })) : undefined
           });
           json(res, 200, { ok: true, channelId: channel.id, channelName: channel.name });
         } catch (error) {
           if (isMissingPermissionsError(error)) {
             jsonError(res, 403, "SYNC_FAILED", "Missing permissions to create channel");
+          } else {
+            throw error;
+          }
+        }
+        return;
+      }
+
+      // POST /internal/guild/channels/:channelId/threads/create
+      const threadCreateMatch = pathname.match(/^\/internal\/guild\/channels\/([^/]+)\/threads\/create$/);
+      if (method === "POST" && threadCreateMatch) {
+        const parentChannelId = decodeURIComponent(threadCreateMatch[1] || "");
+        if (!parentChannelId) { jsonError(res, 400, "MISSING_CHANNEL_ID", "Missing channel ID"); return; }
+
+        const bodyRaw = await readBody(req);
+        let body: { name?: string; type?: string; memberUserIds?: string[] } = {};
+        try { body = JSON.parse(bodyRaw); } catch { jsonError(res, 400, "INVALID_JSON_BODY", "Invalid JSON body"); return; }
+
+        if (!body.name) { jsonError(res, 400, "INVALID_JSON_BODY", "Missing thread name"); return; }
+
+        const channel = await client.channels.fetch(parentChannelId).catch(() => null);
+        if (!channel || !("threads" in channel)) {
+          jsonError(res, 404, "CHANNEL_NOT_FOUND", "Channel not found or does not support threads");
+          return;
+        }
+
+        try {
+          const threadType = body.type === "public" ? ChannelType.PublicThread : ChannelType.PrivateThread;
+          const thread = await (channel as { threads: { create: Function } }).threads.create({
+            name: body.name.slice(0, 100),
+            autoArchiveDuration: 10080,
+            type: threadType,
+            reason: "Application ticket"
+          });
+
+          // Add members to the thread
+          for (const userId of (body.memberUserIds || [])) {
+            await (thread as { members: { add: Function } }).members.add(userId).catch(() => {});
+          }
+
+          json(res, 200, { ok: true, threadId: (thread as { id: string }).id, threadName: (thread as { name: string }).name });
+        } catch (error) {
+          if (isMissingPermissionsError(error)) {
+            jsonError(res, 403, "SYNC_FAILED", "Missing permissions to create thread");
           } else {
             throw error;
           }

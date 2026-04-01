@@ -148,6 +148,20 @@
       "when": 1774600000000,
       "tag": "0032_fix_membership_settings_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1774886892484,
+      "tag": "0033_bumpy_xavin",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1774900000000,
+      "tag": "0034_role_groups_and_picker",
+      "breakpoints": true
     }
   ]
 }

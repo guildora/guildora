@@ -134,6 +134,17 @@ export async function fetchDiscordGuildRolesFromBot() {
   return requestBotInternal<{ roles: DiscordGuildRole[] }>("/internal/guild/roles");
 }
 
+export type DiscordGuildChannel = {
+  id: string;
+  name: string;
+  type: string;
+  parentId: string | null;
+};
+
+export async function fetchDiscordGuildChannelsFromBot() {
+  return requestBotInternal<{ channels: DiscordGuildChannel[] }>("/internal/guild/channels/list");
+}
+
 export async function fetchDiscordGuildMembersByRoleFromBot(roleId: string) {
   const encodedRoleId = encodeURIComponent(roleId);
   return requestBotInternal<{ members: DiscordGuildMember[] }>(`/internal/guild/roles/${encodedRoleId}/members`);
@@ -205,6 +216,7 @@ export async function postApplicationEmbed(
 export async function patchApplicationEmbed(
   channelId: string,
   messageId: string,
+  flowId: string,
   embed: EmbedConfig
 ): Promise<void> {
   const { baseUrl } = getBotRequestConfig();
@@ -212,7 +224,7 @@ export async function patchApplicationEmbed(
 
   await requestBotInternal<{ ok: boolean }>("/internal/applications/embed", {
     method: "PATCH",
-    body: { channelId, messageId, ...embed }
+    body: { channelId, messageId, flowId, ...embed }
   });
 }
 
@@ -274,6 +286,58 @@ export async function sendDiscordDm(
   }
 }
 
+// ─── Role Picker Embed Bridge Functions ──────────────────────────────────
+
+export type RolePickerEmbedPayload = {
+  groupId: string;
+  channelId: string;
+  title: string;
+  description?: string;
+  color?: string;
+  roles: Array<{ discordRoleId: string; emoji: string | null; roleName: string }>;
+};
+
+export async function postRolePickerEmbed(
+  payload: RolePickerEmbedPayload
+): Promise<{ messageId: string } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  try {
+    return await requestBotInternal<{ messageId: string }>("/internal/role-picker/embed", {
+      method: "POST",
+      body: payload
+    });
+  } catch (error) {
+    console.error("[botSync] Failed to post role picker embed:", error);
+    throw error;
+  }
+}
+
+export async function patchRolePickerEmbed(
+  channelId: string,
+  messageId: string,
+  payload: Omit<RolePickerEmbedPayload, "channelId">
+): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+
+  await requestBotInternal<{ ok: boolean }>("/internal/role-picker/embed", {
+    method: "PATCH",
+    body: { channelId, messageId, ...payload }
+  });
+}
+
+export async function deleteRolePickerEmbed(channelId: string, messageId: string): Promise<void> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return;
+
+  await requestBotInternal<{ ok: boolean }>("/internal/role-picker/embed", {
+    method: "DELETE",
+    body: { channelId, messageId }
+  });
+}
+
 // ─── GuildAI Action Bridge Functions ──────────────────────────────────────
 
 export async function kickDiscordMember(
@@ -308,14 +372,30 @@ export async function banDiscordMember(
 export async function createDiscordChannel(
   name: string,
   type?: string,
-  parentId?: string
+  parentId?: string,
+  options?: { denyEveryone?: boolean; permissionOverwrites?: Array<{ id: string; type: number; allow: string; deny: string }> }
 ): Promise<{ ok: boolean; channelId: string; channelName: string } | null> {
   const { baseUrl } = getBotRequestConfig();
   if (!baseUrl) return null;
 
   return requestBotInternal<{ ok: boolean; channelId: string; channelName: string }>(
     "/internal/guild/channels/create",
-    { method: "POST", body: { name, type, parentId } }
+    { method: "POST", body: { name, type, parentId, ...options } }
+  );
+}
+
+export async function createDiscordThread(
+  parentChannelId: string,
+  name: string,
+  options?: { type?: "public" | "private"; memberUserIds?: string[] }
+): Promise<{ ok: boolean; threadId: string; threadName: string } | null> {
+  const { baseUrl } = getBotRequestConfig();
+  if (!baseUrl) return null;
+
+  const encodedChannelId = encodeURIComponent(parentChannelId);
+  return requestBotInternal<{ ok: boolean; threadId: string; threadName: string }>(
+    `/internal/guild/channels/${encodedChannelId}/threads/create`,
+    { method: "POST", body: { name, type: options?.type || "private", memberUserIds: options?.memberUserIds || [] } }
   );
 }
 
