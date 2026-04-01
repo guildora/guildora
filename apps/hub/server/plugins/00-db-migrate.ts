@@ -9,13 +9,12 @@ export default defineNitroPlugin(async () => {
     return;
   }
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  // In production (.output/server/plugins/), migrations are at ../../migrations
-  // In development, resolve from the shared package
+  // In production the Dockerfile copies migrations to /app/.output/migrations.
+  // In development, resolve from the shared package relative to this source file.
   const migrationsFolder =
     process.env.NODE_ENV === "production"
-      ? path.resolve(__dirname, "../../migrations")
-      : path.resolve(__dirname, "../../../../packages/shared/drizzle/migrations");
+      ? "/app/.output/migrations"
+      : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../packages/shared/drizzle/migrations");
 
   try {
     console.log("[db-migrate] Running database migrations...");
