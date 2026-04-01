@@ -2,10 +2,11 @@ import {
   parseProfileName,
   permissionRoles,
   userPermissionRoles,
+  userDiscordRoles,
   users,
   voiceSessions
 } from "@guildora/shared";
-import { and, eq, gte, ilike, or, sql } from "drizzle-orm";
+import { and, eq, gte, ilike, inArray, or, sql } from "drizzle-orm";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
 import { parsePaginationQuery, paginateArray } from "../../utils/http";
@@ -19,6 +20,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const search = typeof query.search === "string" ? query.search.trim() : "";
   const roleFilter = typeof query.communityRole === "string" ? query.communityRole : "";
+  const discordRoleIdsParam = typeof query.discordRoleIds === "string" ? query.discordRoleIds : "";
+  const discordRoleIds = discordRoleIdsParam ? discordRoleIdsParam.split(",").map((id) => id.trim()).filter(Boolean) : [];
   const sort = typeof query.sort === "string" ? query.sort : "name";
   const voiceActivityDays = Number.parseInt(typeof query.voiceActivityDays === "string" ? query.voiceActivityDays : "7", 10);
   const days = [7, 14, 28].includes(voiceActivityDays) ? voiceActivityDays : 7;
@@ -51,6 +54,16 @@ export default defineEventHandler(async (event) => {
 
   // Load voice sessions only for the relevant time window
   const voiceSince = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  // If discord role filter is active, find matching user IDs first
+  let discordRoleUserIds: Set<string> | null = null;
+  if (discordRoleIds.length > 0) {
+    const matchingRows = await db
+      .select({ userId: userDiscordRoles.userId })
+      .from(userDiscordRoles)
+      .where(inArray(userDiscordRoles.discordRoleId, discordRoleIds));
+    discordRoleUserIds = new Set(matchingRows.map((r) => r.userId));
+  }
 
   const [userRows, communityMap, permissionRows, sessions] = await Promise.all([
     userQuery,
@@ -123,6 +136,11 @@ export default defineEventHandler(async (event) => {
       }
     };
   });
+
+  // Discord role filter (applied in-memory from pre-fetched set)
+  if (discordRoleUserIds) {
+    items = items.filter((item) => discordRoleUserIds!.has(item.id));
+  }
 
   // Community role filter (applied in-memory since it's a joined table)
   if (roleFilter) {

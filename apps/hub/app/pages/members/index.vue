@@ -50,6 +50,7 @@ interface MemberProfileResponse {
   rufname: string | null;
   permissionRoles: string[];
   communityRole: string | null;
+  editableDiscordRoles?: Array<{ discordRoleId: string; name: string; selected: boolean }>;
   voiceSummary?: {
     minutes7d: number;
     minutes14d: number;
@@ -59,12 +60,19 @@ interface MemberProfileResponse {
   };
 }
 
+type SelectableRoleOption = {
+  discordRoleId: string;
+  roleNameSnapshot: string;
+  groupName: string | null;
+};
+
 const search = ref("");
 const communityRole = ref("");
+const discordRoleFilter = ref("");
 const sort = ref("name");
 const page = ref(1);
 
-watch([search, communityRole, sort], () => {
+watch([search, communityRole, discordRoleFilter, sort], () => {
   page.value = 1;
 });
 
@@ -72,12 +80,15 @@ const { data, pending, error } = await useFetch<MembersResponse>("/api/members",
   query: computed(() => ({
     search: search.value || undefined,
     communityRole: communityRole.value || undefined,
+    discordRoleIds: discordRoleFilter.value || undefined,
     voiceActivityDays: 7,
     sort: sort.value,
     page: page.value,
     limit: 50
   }))
 });
+
+const { data: selectableRolesForFilter } = await useFetch<{ roles: SelectableRoleOption[] }>("/api/members/selectable-roles");
 
 const roleOptions = computed(() => {
   const values = new Set<string>();
@@ -222,16 +233,26 @@ watch(
       </UiButton>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <UiInput
         v-model="search"
         :label="$t('members.searchPlaceholder')"
         :placeholder="$t('members.searchPlaceholder')"
-       
+
       />
       <UiSelect v-model="communityRole" :label="$t('members.allRoles')">
         <option value="">{{ $t("members.allRoles") }}</option>
         <option v-for="role in roleOptions" :key="role" :value="role">{{ role }}</option>
+      </UiSelect>
+      <UiSelect v-model="discordRoleFilter" :label="$t('members.discordRoleFilter')">
+        <option value="">{{ $t("members.allDiscordRoles") }}</option>
+        <option
+          v-for="role in selectableRolesForFilter?.roles || []"
+          :key="role.discordRoleId"
+          :value="role.discordRoleId"
+        >
+          {{ role.roleNameSnapshot }}{{ role.groupName ? ` (${role.groupName})` : '' }}
+        </option>
       </UiSelect>
       <UiSelect v-model="sort" :label="$t('members.sortLabel')">
         <option value="name">{{ $t("members.sortName") }}</option>

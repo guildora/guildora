@@ -12,6 +12,12 @@ function formatVoiceDuration(minutes: number | null | undefined) {
   return t("profile.voiceDuration", { hours, minutes: remainingMinutes });
 }
 
+type DiscordRoleEntry = {
+  discordRoleId: string;
+  name: string;
+  selected: boolean;
+};
+
 const props = defineProps<{
   profile: {
     profileName: string;
@@ -19,6 +25,7 @@ const props = defineProps<{
     rufname: string | null;
     permissionRoles: string[];
     communityRole: string | null;
+    editableDiscordRoles?: DiscordRoleEntry[];
     voiceSummary?: {
       minutes7d: number;
       minutes14d: number;
@@ -28,6 +35,10 @@ const props = defineProps<{
     };
   };
 }>();
+
+const activeDiscordRoles = computed(() =>
+  (props.profile.editableDiscordRoles || []).filter((r) => r.selected)
+);
 
 </script>
 
@@ -54,6 +65,20 @@ const props = defineProps<{
         </template>
         <span v-if="!profile.communityRole && !profile.permissionRoles?.length" class="profile-card__no-roles">
           {{ $t("profile.noRoles") }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Discord Roles Section -->
+    <div v-if="activeDiscordRoles.length > 0" class="profile-card__section">
+      <span class="profile-card__section-title">{{ $t("profile.discordRolesSection") }}</span>
+      <div class="profile-card__roles">
+        <span
+          v-for="role in activeDiscordRoles"
+          :key="role.discordRoleId"
+          class="badge badge-outline badge-sm"
+        >
+          {{ role.name }}
         </span>
       </div>
     </div>

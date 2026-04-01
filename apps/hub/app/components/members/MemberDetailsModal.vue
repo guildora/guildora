@@ -13,6 +13,7 @@ const props = defineProps<{
     rufname: string | null;
     permissionRoles: string[];
     communityRole: string | null;
+    editableDiscordRoles?: Array<{ discordRoleId: string; name: string; selected: boolean }>;
     voiceSummary?: {
       minutes7d: number;
       minutes14d: number;

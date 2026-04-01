@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
     effectiveLocale: effectiveLocale.locale,
     localeSource: effectiveLocale.source,
     customFields: profile.customFields || {},
-    editableDiscordRoles: requestedUserId === session.user.id ? await buildEditableDiscordRolesForUser(requestedUserId) : [],
+    editableDiscordRoles: await buildEditableDiscordRolesForUser(requestedUserId),
     voiceSummary: {
       minutes7d,
       minutes14d,
