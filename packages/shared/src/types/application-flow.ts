@@ -146,8 +146,12 @@ export interface ApplicationFlowSettings {
   roles: {
     /** Discord role IDs assigned when the applicant submits the form */
     onSubmission: string[];
+    /** Discord role IDs removed when the applicant submits the form */
+    removeOnSubmission: string[];
     /** Discord role IDs assigned when a moderator approves the application */
     onApproval: string[];
+    /** Discord role IDs removed when a moderator approves the application */
+    removeOnApproval: string[];
   };
   /** Template composing Display Name fields, e.g. "{vorname} | {clan-tag}" */
   displayNameTemplate?: string;
@@ -178,6 +182,21 @@ export interface ApplicationFlowSettings {
     dmToModsOnSubmission?: string;
     /** Confirmation shown after successful submission */
     submissionConfirmation?: string;
+  };
+  ticket?: {
+    enabled: boolean;
+    /** "thread" creates a thread in a channel; "channel" creates a new text channel */
+    type: "thread" | "channel";
+    /** For type "thread": the parent channel ID where the thread is created */
+    parentChannelId?: string;
+    /** For type "channel": the parent category ID where the channel is created */
+    parentCategoryId?: string;
+    /** Template for the ticket name, e.g. "{username}-bewerbung" */
+    nameTemplate?: string;
+    /** Role IDs that get read+write access to the ticket (besides the applicant) */
+    accessRoleIds: string[];
+    /** Optional initial message posted in the ticket */
+    initialMessage?: string;
   };
 }
 
@@ -239,7 +258,7 @@ export function createDefaultFlowGraph(): ApplicationFlowGraph {
 export function createDefaultFlowSettings(): ApplicationFlowSettings {
   return {
     embed: {},
-    roles: { onSubmission: [], onApproval: [] },
+    roles: { onSubmission: [], removeOnSubmission: [], onApproval: [], removeOnApproval: [] },
     welcome: {},
     concurrency: {
       allowReapplyToSameFlow: false,
@@ -248,6 +267,7 @@ export function createDefaultFlowSettings(): ApplicationFlowSettings {
     archiveRetentionDays: 0,
     testMode: false,
     tokenExpiryMinutes: 60,
-    messages: {}
+    messages: {},
+    ticket: { enabled: false, type: "thread", accessRoleIds: [] }
   };
 }

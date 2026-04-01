@@ -74,9 +74,14 @@ function onSubmitted(result: { applicationId: string; message: string }) {
       v-else-if="error"
       class="apply-card"
     >
-      <div class="text-center py-8">
-        <Icon name="proicons:clock" class="text-4xl mb-4" style="color: var(--color-warning)" />
-        <p class="text-lg font-medium mb-2" style="color: var(--color-base-content)">
+      <div class="apply-status-container">
+        <div class="apply-status-icon apply-status-icon--warning">
+          <Icon name="proicons:clock" class="text-2xl" />
+        </div>
+        <h2 class="apply-status-title">
+          {{ t("applications.applyExpiredTitle") }}
+        </h2>
+        <p class="apply-status-message">
           {{ error }}
         </p>
       </div>
@@ -87,10 +92,15 @@ function onSubmitted(result: { applicationId: string; message: string }) {
       v-else-if="submitted"
       class="apply-card"
     >
-      <div class="text-center py-8">
-        <Icon name="proicons:checkmark-circle" class="text-4xl mb-4" style="color: var(--color-success)" />
-        <p class="text-lg font-medium mb-2" style="color: var(--color-base-content)">
+      <div class="apply-status-container">
+        <div class="apply-status-icon apply-status-icon--success">
+          <Icon name="proicons:checkmark-circle" class="text-3xl" />
+        </div>
+        <h2 class="apply-status-title">
           {{ submittedMessage || t("applications.applySuccess") }}
+        </h2>
+        <p class="apply-status-message">
+          {{ t("applications.applySuccessHint") }}
         </p>
       </div>
     </div>
@@ -166,5 +176,48 @@ function onSubmitted(result: { applicationId: string; message: string }) {
   color: var(--color-accent-content);
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.apply-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 2rem;
+  gap: 1rem;
+}
+
+.apply-status-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.apply-status-icon--success {
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+}
+
+.apply-status-icon--warning {
+  background: color-mix(in srgb, var(--color-warning) 15%, transparent);
+  color: var(--color-warning);
+}
+
+.apply-status-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-base-content);
+  text-align: center;
+}
+
+.apply-status-message {
+  font-size: 0.9375rem;
+  color: var(--color-base-content-secondary);
+  text-align: center;
+  max-width: 28rem;
+  line-height: 1.5;
 }
 </style>

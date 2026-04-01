@@ -212,7 +212,7 @@ export async function handleEmbedFieldUpdate(
 
   try {
     const { patchApplicationEmbed } = await import("./botSync");
-    await patchApplicationEmbed(embed.discordChannelId, embed.discordMessageId, {
+    await patchApplicationEmbed(embed.discordChannelId, embed.discordMessageId, flowId, {
       description: settings.embed.description,
       buttonLabel: settings.embed.buttonLabel,
       color: settings.embed.color

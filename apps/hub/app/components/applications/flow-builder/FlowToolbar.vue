@@ -217,6 +217,11 @@ function confirmDiscard() {
   border: 1px solid var(--color-line);
 }
 
+.flow-toolbar__publish .btn {
+  white-space: normal;
+  word-break: break-word;
+}
+
 .flow-toolbar__unpublished-badge {
   font-size: 0.6875rem;
   font-weight: 600;

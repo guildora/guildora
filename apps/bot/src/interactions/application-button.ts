@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type ButtonInteraction, type Client } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, type ButtonInteraction, type Client } from "discord.js";
 import { eq, and } from "drizzle-orm";
 import { applicationFlows, applications, applicationTokens } from "@guildora/shared";
 import type { ApplicationFlowSettings } from "@guildora/shared";
@@ -18,6 +18,9 @@ export async function handleApplicationButtonInteraction(
   const customId = interaction.customId;
   if (!customId.startsWith("application_apply_")) return;
 
+  // Acknowledge immediately to avoid 3-second timeout
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
   const flowId = customId.replace("application_apply_", "");
   const db = getDb();
 
@@ -29,7 +32,7 @@ export async function handleApplicationButtonInteraction(
     .limit(1);
 
   if (!flow || flow.status !== "active") {
-    await interaction.reply({ ephemeral: true, content: "This application is currently not available." });
+    await interaction.editReply({ content: "This application is currently not available." });
     return;
   }
 
@@ -41,7 +44,7 @@ export async function handleApplicationButtonInteraction(
   if (!settings.testMode) {
     // Check guild membership
     if (!guildId || !interaction.member) {
-      await interaction.reply({ ephemeral: true, content: "You must be in the server to apply." });
+      await interaction.editReply({ content: "You must be in the server to apply." });
       return;
     }
 
@@ -52,7 +55,7 @@ export async function handleApplicationButtonInteraction(
       if (roleCache) {
         const hasApprovalRole = settings.roles.onApproval.some((roleId) => roleCache.has(roleId));
         if (hasApprovalRole) {
-          await interaction.reply({ ephemeral: true, content: "You are already a member." });
+          await interaction.editReply({ content: "You are already a member." });
           return;
         }
       }
@@ -74,7 +77,7 @@ export async function handleApplicationButtonInteraction(
       .limit(1);
 
     if (existingSameFlow) {
-      await interaction.reply({ ephemeral: true, content: "You already have an open application for this flow." });
+      await interaction.editReply({ content: "You already have an open application for this flow." });
       return;
     }
   }
@@ -90,7 +93,7 @@ export async function handleApplicationButtonInteraction(
       .limit(1);
 
     if (existingAnyFlow) {
-      await interaction.reply({ ephemeral: true, content: "You already have an open application." });
+      await interaction.editReply({ content: "You already have an open application." });
       return;
     }
   }
@@ -101,7 +104,7 @@ export async function handleApplicationButtonInteraction(
 
   if (!tokenSecret || !hubUrl) {
     logger.error("APPLICATION_TOKEN_SECRET or NUXT_PUBLIC_HUB_URL not configured.");
-    await interaction.reply({ ephemeral: true, content: "The application system is currently being set up. Please try again later or contact a server moderator." });
+    await interaction.editReply({ content: "The application system is currently being set up. Please try again later or contact a server moderator." });
     return;
   }
 
@@ -133,8 +136,7 @@ export async function handleApplicationButtonInteraction(
       .setURL(applyUrl)
   );
 
-  await interaction.reply({
-    ephemeral: true,
+  await interaction.editReply({
     content: ephemeralText,
     components: [row]
   });

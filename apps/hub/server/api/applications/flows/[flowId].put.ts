@@ -95,14 +95,21 @@ export default defineEventHandler(async (event) => {
     .set(updateData)
     .where(eq(applicationFlows.id, flowId));
 
-  if (newStatus === "active" && body.settingsJson && !body.status) {
+  if (newStatus === "active" && body.settingsJson && newStatus === oldStatus) {
     const oldSettings = flow.settingsJson as ApplicationFlowSettings;
+    const channelChanged = oldSettings.embed.channelId !== newSettings.embed.channelId;
     const embedFieldsChanged =
       oldSettings.embed.description !== newSettings.embed.description ||
       oldSettings.embed.buttonLabel !== newSettings.embed.buttonLabel ||
       oldSettings.embed.color !== newSettings.embed.color;
 
-    if (embedFieldsChanged) {
+    if (channelChanged && newSettings.embed.channelId) {
+      // Channel changed: delete old embed, post new one
+      const result = await handleFlowStatusChange(db, flowId, "active", "inactive", oldSettings);
+      if (!result.error) {
+        await handleFlowStatusChange(db, flowId, "inactive", "active", newSettings);
+      }
+    } else if (embedFieldsChanged) {
       await handleEmbedFieldUpdate(db, flowId, newSettings);
     }
   }

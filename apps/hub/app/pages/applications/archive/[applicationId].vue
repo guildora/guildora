@@ -40,6 +40,35 @@ const linearized = computed(() => {
   if (!data.value?.flow?.flowJson || !data.value?.application?.answersJson) return null;
   return linearizeFlowGraph(data.value.flow.flowJson, data.value.application.answersJson);
 });
+
+function formatAnswerValue(field: { inputType: string; options?: Array<{ id: string; label: string }> }, rawValue: unknown): string {
+  if (rawValue == null) return '—';
+
+  // Yes/No fields: translate the stored "yes"/"no" value
+  if (field.inputType === 'yes_no') {
+    if (rawValue === 'yes') return t('applications.form.yes');
+    if (rawValue === 'no') return t('applications.form.no');
+    return String(rawValue);
+  }
+
+  const opts = field.options;
+  if (!opts?.length) return String(rawValue);
+
+  // Single select: value is an option ID string
+  if (field.inputType === 'single_select_radio' || field.inputType === 'single_select_dropdown') {
+    const match = opts.find((o) => o.id === rawValue);
+    return match ? match.label : String(rawValue);
+  }
+
+  // Multi select: value is an array of option IDs
+  if (field.inputType === 'multi_select' && Array.isArray(rawValue)) {
+    return rawValue
+      .map((id) => opts.find((o) => o.id === id)?.label ?? String(id))
+      .join(', ');
+  }
+
+  return String(rawValue);
+}
 </script>
 
 <template>
@@ -94,7 +123,7 @@ const linearized = computed(() => {
               <template v-if="step.type === 'input' || step.type === 'input_group'">
                 <div v-for="field in step.fields" :key="field.nodeId" class="answer-row">
                   <p class="answer-row__label">{{ field.label }}</p>
-                  <p class="answer-row__value">{{ data.application.answersJson[field.nodeId] ?? '—' }}</p>
+                  <p class="answer-row__value">{{ formatAnswerValue(field, data.application.answersJson[field.nodeId]) }}</p>
                 </div>
               </template>
             </div>

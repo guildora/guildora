@@ -14,7 +14,11 @@ import { requireRouterParam, readBodyWithSchema } from "../../../utils/http";
 import { getDb } from "../../../utils/db";
 import {
   addDiscordRolesToMember,
-  sendDiscordDm
+  removeDiscordRolesFromBot,
+  sendDiscordDm,
+  createDiscordChannel,
+  createDiscordThread,
+  sendChannelMessage
 } from "../../../utils/botSync";
 
 const bodySchema = z.object({
@@ -137,10 +141,72 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Remove roles on submission
+  const removeOnSubmission = settings.roles.removeOnSubmission || [];
+  if (removeOnSubmission.length > 0) {
+    try {
+      await removeDiscordRolesFromBot(verified.discordId, { roleIds: removeOnSubmission });
+    } catch {
+      // Non-blocking
+    }
+  }
+
   // Update application with role results
   await db.update(applications)
     .set({ rolesAssigned: assignedRoleIds, pendingRoleAssignments })
     .where(eq(applications.id, application.id));
+
+  // Create ticket channel/thread if enabled
+  if (settings.ticket?.enabled) {
+    const ticketName = (settings.ticket.nameTemplate || "{username}-bewerbung")
+      .replace("{username}", verified.discordUsername)
+      .replace("{applicationId}", application.id.substring(0, 8))
+      .slice(0, 100);
+
+    let ticketChannelId: string | null = null;
+
+    try {
+      if (settings.ticket.type === "thread" && settings.ticket.parentChannelId) {
+        const result = await createDiscordThread(
+          settings.ticket.parentChannelId,
+          ticketName,
+          { type: "private", memberUserIds: [verified.discordId] }
+        );
+        ticketChannelId = result?.threadId ?? null;
+      } else if (settings.ticket.type === "channel" && settings.ticket.parentCategoryId) {
+        // Build permission overwrites: allow applicant + access roles
+        const VIEW_SEND = "3072"; // ViewChannel (1024) + SendMessages (2048)
+        const overwrites: Array<{ id: string; type: number; allow: string; deny: string }> = [
+          { id: verified.discordId, type: 1, allow: VIEW_SEND, deny: "0" }
+        ];
+        for (const roleId of (settings.ticket.accessRoleIds || [])) {
+          overwrites.push({ id: roleId, type: 0, allow: VIEW_SEND, deny: "0" });
+        }
+        const result = await createDiscordChannel(
+          ticketName,
+          "text",
+          settings.ticket.parentCategoryId,
+          { denyEveryone: true, permissionOverwrites: overwrites }
+        );
+        ticketChannelId = result?.channelId ?? null;
+      }
+
+      if (ticketChannelId) {
+        await db.update(applications)
+          .set({ ticketChannelId })
+          .where(eq(applications.id, application.id));
+
+        if (settings.ticket.initialMessage) {
+          const msg = settings.ticket.initialMessage
+            .replace("{discordId}", `<@${verified.discordId}>`)
+            .replace("{username}", verified.discordUsername);
+          sendChannelMessage(ticketChannelId, msg).catch(() => {});
+        }
+      }
+    } catch {
+      // Ticket creation is non-blocking
+    }
+  }
 
   // Send moderator DM notifications (fire-and-forget, don't block response)
   const modNotifications = await db

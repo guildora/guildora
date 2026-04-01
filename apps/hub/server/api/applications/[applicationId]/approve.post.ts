@@ -6,6 +6,7 @@ import { requireRouterParam } from "../../../utils/http";
 import { getDb } from "../../../utils/db";
 import {
   addDiscordRolesToMember,
+  removeDiscordRolesFromBot,
   setDiscordNickname,
   sendDiscordDm,
   sendChannelMessage
@@ -46,6 +47,16 @@ export default defineEventHandler(async (event) => {
       await addDiscordRolesToMember(app.discordId, settings.roles.onApproval);
     } catch {
       warnings.push("Failed to assign approval roles.");
+    }
+  }
+
+  // Remove "on approval" roles
+  const removeOnApproval = settings?.roles.removeOnApproval || [];
+  if (removeOnApproval.length > 0) {
+    try {
+      await removeDiscordRolesFromBot(app.discordId, { roleIds: removeOnApproval });
+    } catch {
+      warnings.push("Failed to remove approval roles.");
     }
   }
 

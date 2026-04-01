@@ -107,6 +107,35 @@ function getAnswerLabel(nodeId: string): string {
   }
   return nodeId;
 }
+
+function formatAnswerValue(field: { inputType: string; options?: Array<{ id: string; label: string }> }, rawValue: unknown): string {
+  if (rawValue == null) return '—';
+
+  // Yes/No fields: translate the stored "yes"/"no" value
+  if (field.inputType === 'yes_no') {
+    if (rawValue === 'yes') return t('applications.form.yes');
+    if (rawValue === 'no') return t('applications.form.no');
+    return String(rawValue);
+  }
+
+  const opts = field.options;
+  if (!opts?.length) return String(rawValue);
+
+  // Single select: value is an option ID string
+  if (field.inputType === 'single_select_radio' || field.inputType === 'single_select_dropdown') {
+    const match = opts.find((o) => o.id === rawValue);
+    return match ? match.label : String(rawValue);
+  }
+
+  // Multi select: value is an array of option IDs
+  if (field.inputType === 'multi_select' && Array.isArray(rawValue)) {
+    return rawValue
+      .map((id) => opts.find((o) => o.id === id)?.label ?? String(id))
+      .join(', ');
+  }
+
+  return String(rawValue);
+}
 </script>
 
 <template>
@@ -211,7 +240,7 @@ function getAnswerLabel(nodeId: string): string {
                 >
                   <p class="answer-row__label">{{ field.label }}</p>
                   <p class="answer-row__value">
-                    {{ data.application.answersJson[field.nodeId] ?? '—' }}
+                    {{ formatAnswerValue(field, data.application.answersJson[field.nodeId]) }}
                   </p>
                 </div>
               </template>
