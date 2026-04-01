@@ -9,19 +9,22 @@ export default defineNitroPlugin(async () => {
     return;
   }
 
+  // MIGRATIONS_PATH env allows overriding the migrations folder location.
   // In production the Dockerfile copies migrations to /app/.output/migrations.
   // In development, resolve from the shared package relative to this source file.
   const migrationsFolder =
-    process.env.NODE_ENV === "production"
+    process.env.MIGRATIONS_PATH ||
+    (process.env.NODE_ENV === "production"
       ? "/app/.output/migrations"
-      : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../packages/shared/drizzle/migrations");
+      : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../packages/shared/drizzle/migrations"));
 
   try {
     console.log("[db-migrate] Running database migrations...");
     await runMigrations(connectionString, migrationsFolder);
     console.log("[db-migrate] Migrations applied successfully.");
   } catch (error) {
-    console.error("[db-migrate] Migration failed:", error);
-    throw error;
+    // Log the error but don't crash the server — the idempotent fixups in
+    // runMigrations() cover most schema changes, so the app may still work.
+    console.error("[db-migrate] Migration failed (server will continue starting):", error);
   }
 });

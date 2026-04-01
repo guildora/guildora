@@ -1,7 +1,75 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+
+/**
+ * If the database already has tables but no Drizzle migration journal,
+ * seed the journal so that `migrate()` doesn't try to re-run old migrations.
+ */
+async function seedJournalIfNeeded(db: ReturnType<typeof drizzle>, migrationsFolder: string) {
+  // Check if the DB has been set up (users table exists) but has no Drizzle journal
+  const [{ exists: hasUsersTable }] = await db.execute<{ exists: boolean }>(sql`
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'users'
+    )
+  `);
+
+  if (!hasUsersTable) {
+    // Fresh DB — let migrate() handle everything from scratch
+    return;
+  }
+
+  // Ensure the drizzle schema and journal table exist
+  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS "drizzle"`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "drizzle"."__drizzle_migrations" (
+      id SERIAL PRIMARY KEY,
+      hash text NOT NULL,
+      created_at bigint
+    )
+  `);
+
+  const [{ count }] = await db.execute<{ count: string }>(sql`
+    SELECT count(*)::text AS count FROM "drizzle"."__drizzle_migrations"
+  `);
+
+  if (Number(count) > 0) {
+    // Journal already populated — nothing to do
+    return;
+  }
+
+  // Read the _journal.json to get all migration entries
+  const journalPath = path.join(migrationsFolder, "meta", "_journal.json");
+  if (!fs.existsSync(journalPath)) {
+    return;
+  }
+
+  const journal = JSON.parse(fs.readFileSync(journalPath, "utf-8")) as {
+    entries: Array<{ tag: string; when: number }>;
+  };
+
+  console.log(`[db-migrate] Seeding Drizzle journal with ${journal.entries.length} existing migrations...`);
+
+  for (const entry of journal.entries) {
+    const sqlFile = path.join(migrationsFolder, `${entry.tag}.sql`);
+    if (!fs.existsSync(sqlFile)) continue;
+
+    const content = fs.readFileSync(sqlFile, "utf-8");
+    const hash = crypto.createHash("sha256").update(content).digest("hex");
+
+    await db.execute(sql`
+      INSERT INTO "drizzle"."__drizzle_migrations" (hash, created_at)
+      VALUES (${hash}, ${entry.when})
+    `);
+  }
+
+  console.log("[db-migrate] Journal seeded successfully.");
+}
 
 /**
  * Runs all Drizzle migrations + idempotent schema fixups.
@@ -20,6 +88,7 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
   const db = drizzle(client);
 
   try {
+    await seedJournalIfNeeded(db, migrationsFolder);
     await migrate(db, { migrationsFolder });
 
     // ── Idempotent fixups ──────────────────────────────────────────────
