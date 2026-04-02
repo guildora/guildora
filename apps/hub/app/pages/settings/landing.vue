@@ -10,7 +10,9 @@ lastPath.value = "/settings/landing";
 
 const { t } = useI18n();
 const { user } = useAuth();
-const isDev = useRuntimeConfig().public.isDev;
+const runtimeConfig = useRuntimeConfig();
+const isDev = runtimeConfig.public.isDev;
+const landingUrl = String(runtimeConfig.public.landingUrl || runtimeConfig.public.appUrl || "http://localhost:3000").replace(/\/+$/, "");
 
 interface LandingSection {
   id: string;
@@ -60,6 +62,22 @@ const editingSection = ref<LandingSection | null>(null);
 const editLocale = ref<"en" | "de">("en");
 
 const draggedIndex = ref<number | null>(null);
+const showPreview = ref(false);
+const previewIframe = ref<HTMLIFrameElement | null>(null);
+
+function sendPreviewUpdate() {
+  if (!previewIframe.value?.contentWindow) return;
+  const localizedSections = sections.value.map((s) => {
+    const content = s.content as Record<string, unknown>;
+    const loc = (content[editLocale.value] ?? content.en ?? content) as Record<string, unknown>;
+    return { id: s.id, blockType: s.blockType, sortOrder: s.sortOrder, config: s.config, content: loc };
+  });
+  previewIframe.value.contentWindow.postMessage({
+    type: "landing-preview-update",
+    sections: localizedSections,
+    customCss: pageConfig.value.customCss
+  }, "*");
+}
 
 // ─── Onboarding Tour ──────────────────────────────────────────────────────
 
@@ -241,6 +259,7 @@ function flashSuccess() {
   saveSuccess.value = t("landingEditor.saved");
   saveError.value = "";
   setTimeout(() => { saveSuccess.value = ""; }, 3000);
+  nextTick(() => sendPreviewUpdate());
 }
 
 function blockName(type: string): string {
@@ -284,7 +303,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="['space-y-6', showPreview ? 'grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6' : '']">
+    <!-- Editor column -->
+    <div class="space-y-6 min-w-0">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
@@ -329,6 +350,9 @@ onMounted(() => {
         <button class="landing-template-switch rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showTemplatePicker = !showTemplatePicker">{{ t("landingEditor.templateSwitch") }}</button>
         <button class="landing-seo-settings rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showSeoSettings = !showSeoSettings">{{ t("landingEditor.seoSettings") }}</button>
         <button class="landing-custom-css rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showCssEditor = !showCssEditor">{{ t("landingEditor.customCss") }}</button>
+        <button class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors hidden lg:inline-flex" @click="showPreview = !showPreview">
+          {{ showPreview ? 'Hide Preview' : 'Preview' }}
+        </button>
         <button class="landing-reset ml-auto rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors" @click="resetToTemplate">{{ t("landingEditor.resetToTemplate") }}</button>
       </div>
 
@@ -478,6 +502,21 @@ onMounted(() => {
         </div>
       </div>
     </template>
+
+    </div><!-- /editor column -->
+
+    <!-- Preview iframe column -->
+    <div v-if="showPreview" class="hidden lg:block sticky top-4 self-start">
+      <div class="rounded-xl border border-white/10 overflow-hidden bg-black" style="height: calc(100vh - 8rem);">
+        <iframe
+          ref="previewIframe"
+          :src="`${landingUrl}?preview=true`"
+          class="w-full h-full border-0"
+          title="Landing page preview"
+          @load="sendPreviewUpdate()"
+        />
+      </div>
+    </div>
 
     <!-- Tour overlay -->
     <OnboardingTour
