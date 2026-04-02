@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { applicationFlows } from "@guildora/shared";
-import { createDefaultFlowGraph, createDefaultFlowSettings } from "@guildora/shared";
+import { createDefaultFlowGraph, createDefaultSimpleFlowGraph, createDefaultFlowSettings } from "@guildora/shared";
+import type { EditorMode } from "@guildora/shared";
 import { requireModeratorSession } from "../../../utils/auth";
 import { readBodyWithSchema } from "../../../utils/http";
 import { getDb } from "../../../utils/db";
 
 const createFlowSchema = z.object({
-  name: z.string().min(1).max(200)
+  name: z.string().min(1).max(200),
+  editorMode: z.enum(["simple", "advanced"]).optional().default("simple")
 });
 
 export default defineEventHandler(async (event) => {
@@ -14,12 +16,18 @@ export default defineEventHandler(async (event) => {
   const body = await readBodyWithSchema(event, createFlowSchema, "Invalid flow name.");
   const db = getDb();
 
+  const editorMode: EditorMode = body.editorMode;
+  const flowJson = editorMode === "simple"
+    ? createDefaultSimpleFlowGraph()
+    : createDefaultFlowGraph();
+
   const [flow] = await db
     .insert(applicationFlows)
     .values({
       name: body.name,
       status: "draft",
-      flowJson: createDefaultFlowGraph(),
+      flowJson,
+      editorMode,
       settingsJson: createDefaultFlowSettings(),
       createdBy: session.user.id
     })

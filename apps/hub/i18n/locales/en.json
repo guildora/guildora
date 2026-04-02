@@ -681,6 +681,26 @@
         "unpublishedChanges": "Unpublished changes",
         "redoTooltip": "Redo (Ctrl+Shift+Z)"
       },
+      "simpleMode": {
+        "sectionTitle": "Section",
+        "addSection": "Add Section",
+        "addField": "Add Field",
+        "deleteSection": "Delete Section",
+        "deleteSectionConfirm": "Delete this section and all its fields?",
+        "emptySection": "No fields yet. Add your first field.",
+        "untitledSection": "Untitled Section",
+        "fieldGroups": {
+          "text": "Text Fields",
+          "selection": "Selection Fields",
+          "special": "Special Fields",
+          "other": "Other"
+        }
+      },
+      "modeSwitch": {
+        "simple": "Simple",
+        "advanced": "Advanced",
+        "incompatible": "This flow contains branches or advanced elements that are not supported in Simple Mode. Remove them in the Advanced editor to switch back."
+      },
       "sidebar": {
         "inputType": "Input Type",
         "label": "Label",

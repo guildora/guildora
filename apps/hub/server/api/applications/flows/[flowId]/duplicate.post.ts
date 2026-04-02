@@ -1,5 +1,5 @@
 import { applicationFlows } from "@guildora/shared";
-import type { ApplicationFlowGraph, ApplicationFlowSettings } from "@guildora/shared";
+import type { ApplicationFlowGraph, ApplicationFlowSettings, EditorMode } from "@guildora/shared";
 import { requireModeratorSession } from "../../../../utils/auth";
 import { requireRouterParam } from "../../../../utils/http";
 import { getDb } from "../../../../utils/db";
@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
       status: "draft",
       flowJson: flow.flowJson as ApplicationFlowGraph,
       settingsJson: flow.settingsJson as ApplicationFlowSettings,
+      editorMode: (flow.editorMode as EditorMode) ?? "advanced",
       createdBy: session.user.id
     })
     .returning();

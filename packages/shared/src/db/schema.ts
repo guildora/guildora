@@ -24,6 +24,7 @@ export const appInstallSourceEnum = pgEnum("app_install_source", ["marketplace",
 export const appSubmissionStatusEnum = pgEnum("app_submission_status", ["pending", "approved", "rejected"]);
 export const applicationFlowStatusEnum = pgEnum("application_flow_status", ["draft", "active", "inactive"]);
 export const applicationStatusEnum = pgEnum("application_status", ["pending", "approved", "rejected"]);
+export const editorModeEnum = pgEnum("editor_mode", ["simple", "advanced"]);
 export type ThemeContentTone = "light" | "dark";
 
 export const users = pgTable("users", {
@@ -319,6 +320,7 @@ export const applicationFlows = pgTable("application_flows", {
   flowJson: jsonb("flow_json").$type<ApplicationFlowGraph>().notNull(),
   draftFlowJson: jsonb("draft_flow_json").$type<ApplicationFlowGraph>(),
   settingsJson: jsonb("settings_json").$type<ApplicationFlowSettings>().notNull(),
+  editorMode: editorModeEnum("editor_mode").notNull().default("simple"),
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })

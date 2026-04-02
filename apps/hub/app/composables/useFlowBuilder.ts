@@ -1,5 +1,6 @@
 import { ref, watch, computed } from "vue";
-import type { ApplicationFlowGraph, FlowNode, FlowEdge } from "@guildora/shared";
+import type { ApplicationFlowGraph, FlowNode, FlowEdge, EditorMode, SimpleFormSection } from "@guildora/shared";
+import { flowGraphToSections, sectionsToFlowGraph, canConvertToSimple } from "@guildora/shared";
 import type { Node, Edge } from "@vue-flow/core";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -16,6 +17,10 @@ export function useFlowBuilder(flowId: string) {
   const redoStack = ref<string[]>([]);
   let saveTimeout: ReturnType<typeof setTimeout> | null = null;
   let skipSnapshot = false;
+
+  // ─── Simple Mode State ──────────────────────────────────────────────
+  const editorMode = ref<EditorMode>("simple");
+  const sections = ref<SimpleFormSection[]>([]);
 
   function flowNodesToVueFlowNodes(flowNodes: FlowNode[]): Node[] {
     return flowNodes.map((n) => ({
@@ -195,6 +200,71 @@ export function useFlowBuilder(flowId: string) {
     return `e_${source}_${target}_${Math.random().toString(36).slice(2, 6)}`;
   }
 
+  // ─── Simple Mode Operations ─────────────────────────────────────────
+
+  function loadSimpleMode(graph: ApplicationFlowGraph) {
+    const result = flowGraphToSections(graph);
+    if (result) {
+      sections.value = result;
+    } else {
+      // Fallback: create a single empty section
+      sections.value = [{
+        id: `group_${Date.now()}`,
+        title: "Section 1",
+        items: []
+      }];
+    }
+  }
+
+  function onSimpleSectionsChange() {
+    // Convert sections to graph, update nodes/edges, then trigger save
+    const graph = sectionsToFlowGraph(sections.value);
+    skipSnapshot = true;
+    nodes.value = flowNodesToVueFlowNodes(graph.nodes);
+    edges.value = flowEdgesToVueFlowEdges(graph.edges);
+    skipSnapshot = false;
+    pushSnapshot();
+    scheduleSave();
+  }
+
+  const simpleCompatibility = computed(() => {
+    const graph = toFlowGraph();
+    return canConvertToSimple(graph);
+  });
+
+  async function switchToAdvanced() {
+    editorMode.value = "advanced";
+    try {
+      await $fetch(`/api/applications/flows/${flowId}`, {
+        method: "PUT",
+        body: { editorMode: "advanced" }
+      });
+    } catch (err) {
+      console.error("[flow-builder] Failed to persist editor mode:", err);
+    }
+  }
+
+  async function switchToSimple() {
+    const graph = toFlowGraph();
+    const check = canConvertToSimple(graph);
+    if (!check.compatible) return false;
+
+    const result = flowGraphToSections(graph);
+    if (!result) return false;
+
+    sections.value = result;
+    editorMode.value = "simple";
+    try {
+      await $fetch(`/api/applications/flows/${flowId}`, {
+        method: "PUT",
+        body: { editorMode: "simple" }
+      });
+    } catch (err) {
+      console.error("[flow-builder] Failed to persist editor mode:", err);
+    }
+    return true;
+  }
+
   return {
     nodes,
     edges,
@@ -213,6 +283,14 @@ export function useFlowBuilder(flowId: string) {
     publishChanges,
     discardChanges,
     generateNodeId,
-    generateEdgeId
+    generateEdgeId,
+    // Simple Mode
+    editorMode,
+    sections,
+    loadSimpleMode,
+    onSimpleSectionsChange,
+    simpleCompatibility,
+    switchToAdvanced,
+    switchToSimple
   };
 }

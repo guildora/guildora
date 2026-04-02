@@ -9,22 +9,17 @@ import type {
   FlowConditionalBranchNodeData,
   FlowInputType
 } from "@guildora/shared";
-
-type GuildRole = {
-  id: string;
-  name: string;
-  position: number;
-  managed: boolean;
-  editable: boolean;
-  color: number;
-  unicodeEmoji: string | null;
-};
+import { useFieldEditor } from "~/composables/useFieldEditor";
 
 const { t } = useI18n();
-
-// Fetch Discord guild roles for role_assignment multiselect
-const guildRoles = ref<GuildRole[]>([]);
-const rolesLoading = ref(true);
+const fieldEditor = useFieldEditor();
+const {
+  guildRoles,
+  rolesLoading,
+  fetchGuildRoles,
+  inputTypeOptions,
+  roleColorHex
+} = fieldEditor;
 
 // Role multiselect dropdown state
 const roleDropdownOpen = ref(false);
@@ -33,25 +28,13 @@ function toggleRoleDropdown() {
   roleDropdownOpen.value = !roleDropdownOpen.value;
 }
 
-function toggleRole(roleId: string) {
-  const d = localData.value as FlowRoleAssignmentNodeData;
-  if (!d.roleIds) d.roleIds = [];
-  if (!d.roleNameSnapshots) d.roleNameSnapshots = [];
-
-  const idx = d.roleIds.indexOf(roleId);
-  if (idx >= 0) {
-    d.roleIds.splice(idx, 1);
-    d.roleNameSnapshots.splice(idx, 1);
-  } else {
-    const role = guildRoles.value.find((r) => r.id === roleId);
-    d.roleIds.push(roleId);
-    d.roleNameSnapshots.push(role?.name ?? roleId);
-  }
+function handleToggleRole(roleId: string) {
+  fieldEditor.toggleRole(localData.value as FlowRoleAssignmentNodeData, roleId);
   commitChanges();
 }
 
 function roleName(roleId: string): string {
-  return guildRoles.value.find((r) => r.id === roleId)?.name ?? roleId;
+  return fieldEditor.roleName(roleId);
 }
 
 // Discord role input field dropdown state (separate from role_assignment dropdown)
@@ -61,33 +44,9 @@ function toggleDiscordRoleInputDropdown() {
   discordRoleInputDropdownOpen.value = !discordRoleInputDropdownOpen.value;
 }
 
-function toggleDiscordRoleOption(roleId: string) {
-  const d = localData.value as FlowInputNodeData;
-  if (!d.discordRoleOptions) d.discordRoleOptions = [];
-
-  const idx = d.discordRoleOptions.findIndex((r) => r.roleId === roleId);
-  if (idx >= 0) {
-    d.discordRoleOptions.splice(idx, 1);
-  } else {
-    const role = guildRoles.value.find((r) => r.id === roleId);
-    if (role) {
-      d.discordRoleOptions.push({
-        roleId: role.id,
-        name: role.name,
-        color: role.color,
-        unicodeEmoji: role.unicodeEmoji
-      });
-    }
-  }
+function handleToggleDiscordRoleOption(roleId: string) {
+  fieldEditor.toggleDiscordRoleOption(localData.value as FlowInputNodeData, roleId);
   commitChanges();
-}
-
-function discordRoleOptionName(roleId: string): string {
-  return guildRoles.value.find((r) => r.id === roleId)?.name ?? roleId;
-}
-
-function roleColorHex(color: number): string {
-  return color === 0 ? "#99aab5" : `#${color.toString(16).padStart(6, "0")}`;
 }
 
 function onClickOutsideRoles(e: MouseEvent) {
@@ -100,14 +59,7 @@ function onClickOutsideRoles(e: MouseEvent) {
 
 onMounted(async () => {
   document.addEventListener("click", onClickOutsideRoles);
-  try {
-    const result = await $fetch<{ guildRoles: GuildRole[] }>("/api/admin/discord-roles");
-    guildRoles.value = result.guildRoles.filter((r) => !r.managed).sort((a, b) => b.position - a.position);
-  } catch {
-    // silently fail – roles dropdown will be empty
-  } finally {
-    rolesLoading.value = false;
-  }
+  await fetchGuildRoles();
 });
 
 onUnmounted(() => {
@@ -126,22 +78,6 @@ const emit = defineEmits<{
   (e: "close"): void;
 }>();
 
-const inputTypeOptions = computed<{ value: FlowInputType; label: string }[]>(() => [
-  { value: "short_text", label: t("applications.flowBuilder.inputTypes.shortText") },
-  { value: "long_text", label: t("applications.flowBuilder.inputTypes.longText") },
-  { value: "number", label: t("applications.flowBuilder.inputTypes.number") },
-  { value: "email", label: t("applications.flowBuilder.inputTypes.email") },
-  { value: "single_select_radio", label: t("applications.flowBuilder.inputTypes.radioSelect") },
-  { value: "single_select_dropdown", label: t("applications.flowBuilder.inputTypes.dropdownSelect") },
-  { value: "multi_select", label: t("applications.flowBuilder.inputTypes.multiSelectCheckboxes") },
-  { value: "yes_no", label: t("applications.flowBuilder.inputTypes.yesNo") },
-  { value: "date", label: t("applications.flowBuilder.inputTypes.date") },
-  { value: "file_upload", label: t("applications.flowBuilder.inputTypes.fileUpload") },
-  { value: "discord_username", label: t("applications.flowBuilder.inputTypes.discordUsername") },
-  { value: "discord_role_single", label: t("applications.flowBuilder.inputTypes.discordRoleSingle") },
-  { value: "discord_role_multi", label: t("applications.flowBuilder.inputTypes.discordRoleMulti") },
-]);
-
 // Reactive local copy of data for editing
 const localData = ref<Record<string, unknown>>({});
 
@@ -158,14 +94,11 @@ function commitChanges() {
 }
 
 function addOption() {
-  const d = localData.value as FlowInputNodeData;
-  if (!d.options) d.options = [];
-  d.options.push({ id: `opt_${Date.now()}`, label: "" });
+  fieldEditor.addOption(localData.value as FlowInputNodeData);
 }
 
 function removeOption(index: number) {
-  const d = localData.value as FlowInputNodeData;
-  d.options?.splice(index, 1);
+  fieldEditor.removeOption(localData.value as FlowInputNodeData, index);
 }
 
 function addBranch() {
@@ -363,7 +296,7 @@ function onSourceNodeChange(newSourceNodeId: string) {
                     <span class="role-color-dot" :style="{ backgroundColor: roleColorHex(opt.color) }" />
                     <span v-if="opt.unicodeEmoji">{{ opt.unicodeEmoji }}</span>
                     {{ opt.name }}
-                    <button type="button" class="role-multiselect__tag-remove" @click.stop="toggleDiscordRoleOption(opt.roleId)">&times;</button>
+                    <button type="button" class="role-multiselect__tag-remove" @click.stop="handleToggleDiscordRoleOption(opt.roleId)">&times;</button>
                   </span>
                 </span>
                 <span v-else class="role-multiselect__placeholder">{{ t("applications.flowBuilder.sidebar.selectRoles") }}</span>
@@ -371,7 +304,7 @@ function onSourceNodeChange(newSourceNodeId: string) {
               </button>
               <div v-if="discordRoleInputDropdownOpen" class="role-multiselect__dropdown">
                 <label v-for="role in guildRoles" :key="role.id" class="role-multiselect__option">
-                  <input type="checkbox" :checked="((localData as FlowInputNodeData).discordRoleOptions || []).some((r) => r.roleId === role.id)" @change="toggleDiscordRoleOption(role.id)" />
+                  <input type="checkbox" :checked="((localData as FlowInputNodeData).discordRoleOptions || []).some((r) => r.roleId === role.id)" @change="handleToggleDiscordRoleOption(role.id)" />
                   <span class="role-color-dot" :style="{ backgroundColor: roleColorHex(role.color) }" />
                   <span v-if="role.unicodeEmoji">{{ role.unicodeEmoji }}</span>
                   {{ role.name }}
@@ -437,7 +370,7 @@ function onSourceNodeChange(newSourceNodeId: string) {
               <span v-if="((localData as FlowRoleAssignmentNodeData).roleIds || []).length" class="role-multiselect__tags">
                 <span v-for="id in (localData as FlowRoleAssignmentNodeData).roleIds" :key="id" class="role-multiselect__tag">
                   {{ roleName(id) }}
-                  <button type="button" class="role-multiselect__tag-remove" @click.stop="toggleRole(id)">&times;</button>
+                  <button type="button" class="role-multiselect__tag-remove" @click.stop="handleToggleRole(id)">&times;</button>
                 </span>
               </span>
               <span v-else class="role-multiselect__placeholder">{{ t("applications.flowBuilder.sidebar.selectRoles") }}</span>
@@ -445,7 +378,7 @@ function onSourceNodeChange(newSourceNodeId: string) {
             </button>
             <div v-if="roleDropdownOpen" class="role-multiselect__dropdown">
               <label v-for="role in guildRoles" :key="role.id" class="role-multiselect__option">
-                <input type="checkbox" :checked="((localData as FlowRoleAssignmentNodeData).roleIds || []).includes(role.id)" @change="toggleRole(role.id)" />
+                <input type="checkbox" :checked="((localData as FlowRoleAssignmentNodeData).roleIds || []).includes(role.id)" @change="handleToggleRole(role.id)" />
                 {{ role.name }}
               </label>
               <div v-if="guildRoles.length === 0" class="text-xs p-2" style="color: var(--color-base-content-secondary)">

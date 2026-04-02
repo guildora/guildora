@@ -17,6 +17,7 @@ type FlowItem = {
   id: string;
   name: string;
   status: "draft" | "active" | "inactive";
+  editorMode?: "simple" | "advanced";
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -152,6 +153,9 @@ const deleteFlow = async (flowId: string) => {
               <span class="flow-badge" :class="statusBadgeClass(flow.status)">
                 {{ t(`applications.status.${flow.status}`) }}
               </span>
+              <span class="flow-badge flow-badge--mode">
+                {{ flow.editorMode === "advanced" ? t("applications.flowBuilder.modeSwitch.advanced") : t("applications.flowBuilder.modeSwitch.simple") }}
+              </span>
             </div>
             <div v-if="flow.warnings.length > 0" class="flow-warnings">
               <div v-for="warning in flow.warnings" :key="warning.key" class="flow-warning">
@@ -227,6 +231,12 @@ const deleteFlow = async (flowId: string) => {
 .flow-badge--inactive {
   background: color-mix(in srgb, var(--color-warning) 15%, transparent);
   color: var(--color-warning);
+}
+
+.flow-badge--mode {
+  background: var(--color-surface-3);
+  color: var(--color-base-content-secondary);
+  font-size: 0.6875rem;
 }
 
 .flow-warnings {

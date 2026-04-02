@@ -681,6 +681,26 @@
         "confirmDiscard": "Alle unveröffentlichten Änderungen gehen verloren. Bist du sicher?",
         "unpublishedChanges": "Unveröffentlichte Änderungen"
       },
+      "simpleMode": {
+        "sectionTitle": "Abschnitt",
+        "addSection": "Abschnitt hinzufügen",
+        "addField": "Feld hinzufügen",
+        "deleteSection": "Abschnitt löschen",
+        "deleteSectionConfirm": "Diesen Abschnitt und alle seine Felder löschen?",
+        "emptySection": "Noch keine Felder. Füge dein erstes Feld hinzu.",
+        "untitledSection": "Unbenannter Abschnitt",
+        "fieldGroups": {
+          "text": "Textfelder",
+          "selection": "Auswahlfelder",
+          "special": "Spezialfelder",
+          "other": "Sonstiges"
+        }
+      },
+      "modeSwitch": {
+        "simple": "Einfach",
+        "advanced": "Erweitert",
+        "incompatible": "Dieser Flow enthält Verzweigungen oder erweiterte Elemente, die im einfachen Modus nicht unterstützt werden. Entferne diese im erweiterten Editor, um zurückzuwechseln."
+      },
       "sidebar": {
         "inputType": "Eingabetyp",
         "label": "Bezeichnung",

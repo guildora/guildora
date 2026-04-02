@@ -17,7 +17,8 @@ const updateFlowSchema = z.object({
   status: z.enum(["draft", "active", "inactive"]).optional(),
   flowJson: z.any().optional(),
   settingsJson: z.any().optional(),
-  action: z.enum(["publish", "discard"]).optional()
+  action: z.enum(["publish", "discard"]).optional(),
+  editorMode: z.enum(["simple", "advanced"]).optional()
 });
 
 export default defineEventHandler(async (event) => {
@@ -82,6 +83,7 @@ export default defineEventHandler(async (event) => {
   if (body.name !== undefined) updateData.name = body.name;
   if (body.status !== undefined) updateData.status = body.status;
   if (body.settingsJson !== undefined) updateData.settingsJson = newSettings;
+  if (body.editorMode !== undefined) updateData.editorMode = body.editorMode;
 
   if (body.flowJson !== undefined && !body.status) {
     updateData.draftFlowJson = newFlowJson;

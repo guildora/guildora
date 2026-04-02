@@ -6,6 +6,7 @@ export * from "./types/profile";
 export * from "./types/roles";
 export * from "./types/user";
 export * from "./utils/flow-linearize";
+export * from "./utils/flow-simple-convert";
 export * from "./utils/profile-name";
 
 // Server-only (use subpath imports instead of barrel):

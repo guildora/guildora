@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationFlowGraph } from "@guildora/shared";
+import type { ApplicationFlowGraph, EditorMode } from "@guildora/shared";
 import type { Node, Edge } from "@vue-flow/core";
 import { useFlowBuilder } from "~/composables/useFlowBuilder";
 
@@ -18,6 +18,7 @@ type FlowResponse = {
     status: string;
     flowJson: ApplicationFlowGraph;
     draftFlowJson: ApplicationFlowGraph | null;
+    editorMode?: EditorMode;
   };
 };
 
@@ -36,19 +37,33 @@ const {
   undo,
   redo,
   publishChanges,
-  discardChanges
+  discardChanges,
+  // Simple Mode
+  editorMode,
+  sections,
+  loadSimpleMode,
+  onSimpleSectionsChange,
+  simpleCompatibility,
+  switchToAdvanced,
+  switchToSimple
 } = useFlowBuilder(flowId);
 
 // Load graph when data arrives — prefer draftFlowJson over flowJson
 watch(data, (d) => {
   if (d?.flow) {
     const graph = d.flow.draftFlowJson ?? d.flow.flowJson;
+    editorMode.value = d.flow.editorMode ?? "advanced";
     loadGraph(graph);
     hasUnpublishedChanges.value = d.flow.draftFlowJson !== null;
+
+    // If simple mode, also parse into sections
+    if (editorMode.value === "simple") {
+      loadSimpleMode(graph);
+    }
   }
 }, { immediate: true });
 
-// Selected node for sidebar / selected edge for deletion
+// Selected node for sidebar / selected edge for deletion (Advanced Mode only)
 const selectedNode = ref<Node | null>(null);
 const selectedEdge = ref<Edge | null>(null);
 
@@ -97,8 +112,43 @@ function onDeleteNode(nodeId: string) {
   onGraphChange();
 }
 
-// Keyboard shortcuts
+// Mode switching
+async function handleSwitchToSimple() {
+  await switchToSimple();
+  selectedNode.value = null;
+  selectedEdge.value = null;
+}
+
+async function handleSwitchToAdvanced() {
+  await switchToAdvanced();
+}
+
+// Simple Mode handlers
+function onSimpleSectionsUpdate(newSections: typeof sections.value) {
+  sections.value = newSections;
+}
+
+function onSimpleChange() {
+  onSimpleSectionsChange();
+}
+
+function onSimpleUndo() {
+  undo();
+  // Re-parse sections from the restored graph
+  const graph = { nodes: nodes.value.map((n) => ({ id: n.id, type: n.type as string, position: n.position, data: n.data, parentNode: n.parentNode, extent: n.extent as "parent" | undefined })), edges: edges.value.map((e) => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle })), version: 1 } as ApplicationFlowGraph;
+  loadSimpleMode(graph);
+}
+
+function onSimpleRedo() {
+  redo();
+  const graph = { nodes: nodes.value.map((n) => ({ id: n.id, type: n.type as string, position: n.position, data: n.data, parentNode: n.parentNode, extent: n.extent as "parent" | undefined })), edges: edges.value.map((e) => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle })), version: 1 } as ApplicationFlowGraph;
+  loadSimpleMode(graph);
+}
+
+// Keyboard shortcuts (Advanced Mode only)
 function onKeydown(event: KeyboardEvent) {
+  if (editorMode.value !== "advanced") return;
+
   if (event.key === "z" && (event.ctrlKey || event.metaKey)) {
     if (event.shiftKey) {
       redo();
@@ -141,6 +191,27 @@ onUnmounted(() => {
         &larr; {{ t("applications.flows") }}
       </NuxtLink>
       <span class="text-lg font-semibold ml-3">{{ data?.flow?.name }}</span>
+
+      <!-- Mode toggle -->
+      <div class="mode-toggle">
+        <button
+          class="mode-toggle__btn"
+          :class="{ 'mode-toggle__btn--active': editorMode === 'simple' }"
+          :disabled="editorMode === 'advanced' && !simpleCompatibility.compatible"
+          :title="editorMode === 'advanced' && !simpleCompatibility.compatible ? t('applications.flowBuilder.modeSwitch.incompatible') : ''"
+          @click="editorMode === 'simple' ? undefined : handleSwitchToSimple()"
+        >
+          {{ t("applications.flowBuilder.modeSwitch.simple") }}
+        </button>
+        <button
+          class="mode-toggle__btn"
+          :class="{ 'mode-toggle__btn--active': editorMode === 'advanced' }"
+          @click="editorMode === 'advanced' ? undefined : handleSwitchToAdvanced()"
+        >
+          {{ t("applications.flowBuilder.modeSwitch.advanced") }}
+        </button>
+      </div>
+
       <NuxtLink
         :to="`/applications/flows/${flowId}/settings`"
         class="btn btn-outline btn-sm ml-auto"
@@ -151,7 +222,26 @@ onUnmounted(() => {
 
     <!-- Builder body (client-only to avoid Vue Flow SSR hydration mismatches) -->
     <ClientOnly>
-      <div class="flow-builder__body">
+      <!-- Simple Mode -->
+      <div v-if="editorMode === 'simple'" class="flow-builder__body">
+        <ApplicationsFlowBuilderSimpleFormBuilder
+          :sections="sections"
+          :save-status="saveStatus"
+          :publish-status="publishStatus"
+          :has-unpublished-changes="hasUnpublishedChanges"
+          :can-undo="canUndo"
+          :can-redo="canRedo"
+          @update:sections="onSimpleSectionsUpdate"
+          @change="onSimpleChange"
+          @undo="onSimpleUndo"
+          @redo="onSimpleRedo"
+          @publish="publishChanges"
+          @discard="discardChanges"
+        />
+      </div>
+
+      <!-- Advanced Mode -->
+      <div v-else class="flow-builder__body">
         <ApplicationsFlowBuilderFlowToolbar
           :save-status="saveStatus"
           :publish-status="publishStatus"
@@ -184,6 +274,7 @@ onUnmounted(() => {
           @close="onCloseSidebar"
         />
       </div>
+
       <template #fallback>
         <div class="flow-builder__body flex items-center justify-center">
           <span class="loading loading-spinner loading-md" />
@@ -207,11 +298,46 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--color-line);
   background: var(--color-surface-1);
   flex-shrink: 0;
+  gap: 0.75rem;
 }
 
 .flow-builder__body {
   display: flex;
   flex: 1;
   min-height: 0;
+}
+
+/* Mode toggle */
+.mode-toggle {
+  display: flex;
+  border-radius: 0.5rem;
+  background: var(--color-surface-2);
+  padding: 0.125rem;
+  gap: 0.125rem;
+}
+
+.mode-toggle__btn {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: var(--color-base-content-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-toggle__btn:hover:not(:disabled) {
+  color: var(--color-base-content);
+}
+
+.mode-toggle__btn--active {
+  background: var(--color-surface-1);
+  color: var(--color-base-content);
+  box-shadow: var(--shadow-sm);
+}
+
+.mode-toggle__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

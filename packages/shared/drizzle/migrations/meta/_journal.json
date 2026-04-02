@@ -162,6 +162,13 @@
       "when": 1774900000000,
       "tag": "0034_role_groups_and_picker",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1743552000000,
+      "tag": "0035_add_editor_mode",
+      "breakpoints": true
     }
   ]
 }
