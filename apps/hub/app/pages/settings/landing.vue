@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { TourStep } from "~/composables/useOnboardingTour";
+
 definePageMeta({
   middleware: ["settings"],
 });
@@ -7,6 +9,8 @@ const lastPath = useCookie<string | null>("guildora_settings_last_path", { sameS
 lastPath.value = "/settings/landing";
 
 const { t } = useI18n();
+const { user } = useAuth();
+const isDev = useRuntimeConfig().public.isDev;
 
 interface LandingSection {
   id: string;
@@ -56,6 +60,28 @@ const editingSection = ref<LandingSection | null>(null);
 const editLocale = ref<"en" | "de">("en");
 
 const draggedIndex = ref<number | null>(null);
+
+// ─── Onboarding Tour ──────────────────────────────────────────────────────
+
+const tourSteps = computed<TourStep[]>(() => [
+  { target: ".landing-block-list", title: t("landingEditor.tour.sectionsTitle"), description: t("landingEditor.tour.sectionsDesc"), placement: "bottom" },
+  { target: ".landing-block-item", title: t("landingEditor.tour.blockItemTitle"), description: t("landingEditor.tour.blockItemDesc"), placement: "right" },
+  { target: ".landing-add-block", title: t("landingEditor.tour.addBlockTitle"), description: t("landingEditor.tour.addBlockDesc"), placement: "bottom" },
+  { target: ".landing-locale-switcher", title: t("landingEditor.tour.localeTitle"), description: t("landingEditor.tour.localeDesc"), placement: "bottom" },
+  { target: ".landing-template-switch", title: t("landingEditor.tour.templateTitle"), description: t("landingEditor.tour.templateDesc"), placement: "bottom" },
+  { target: ".landing-seo-settings", title: t("landingEditor.tour.seoTitle"), description: t("landingEditor.tour.seoDesc"), placement: "bottom" },
+  { target: ".landing-custom-css", title: t("landingEditor.tour.cssTitle"), description: t("landingEditor.tour.cssDesc"), placement: "bottom" },
+  { target: ".landing-reset", title: t("landingEditor.tour.resetTitle"), description: t("landingEditor.tour.resetDesc"), placement: "bottom" }
+]);
+
+const tour = useOnboardingTour("landing_editor", tourSteps.value, user.value?.id);
+
+function resetTour() {
+  tour.reset();
+  tour.start();
+}
+
+// ─── Data Loading ──────────────────────────────────────────────────────────
 
 async function loadData() {
   loading.value = true;
@@ -251,178 +277,185 @@ function setLocaleContent(section: LandingSection, key: string, value: unknown) 
   c[editLocale.value][key] = value;
 }
 
-onMounted(() => loadData());
+onMounted(() => {
+  loadData();
+  nextTick(() => tour.startIfNotSeen(800));
+});
 </script>
 
 <template>
   <div class="space-y-6">
+    <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold">{{ t("landingEditor.title") }}</h1>
         <p class="text-sm opacity-60">{{ t("landingEditor.description") }}</p>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="btn-group">
-          <button :class="['btn btn-sm', editLocale === 'en' ? 'btn-active' : '']" @click="editLocale = 'en'">EN</button>
-          <button :class="['btn btn-sm', editLocale === 'de' ? 'btn-active' : '']" @click="editLocale = 'de'">DE</button>
+      <div class="landing-locale-switcher flex items-center gap-2">
+        <button
+          v-if="isDev"
+          class="rounded px-3 py-1.5 text-sm font-medium text-amber-400 hover:bg-white/5 transition-colors"
+          title="Reset Tutorial (Dev)"
+          @click="resetTour"
+        >
+          Reset Tour
+        </button>
+        <button
+          class="rounded px-2 py-1 text-xs font-medium hover:bg-white/5 transition-colors"
+          :title="t('landingEditor.tour.help')"
+          @click="tour.start()"
+        >
+          ?
+        </button>
+        <div class="inline-flex rounded-lg border border-white/10 overflow-hidden">
+          <button :class="['px-3 py-1.5 text-sm font-medium transition-colors', editLocale === 'en' ? 'bg-white/10' : 'hover:bg-white/5']" @click="editLocale = 'en'">EN</button>
+          <button :class="['px-3 py-1.5 text-sm font-medium transition-colors', editLocale === 'de' ? 'bg-white/10' : 'hover:bg-white/5']" @click="editLocale = 'de'">DE</button>
         </div>
       </div>
     </div>
 
     <!-- Status messages -->
-    <div v-if="saveSuccess" class="alert alert-success text-sm">{{ saveSuccess }}</div>
-    <div v-if="saveError" class="alert alert-error text-sm">{{ saveError }}</div>
+    <div v-if="saveSuccess" class="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-sm text-emerald-400">{{ saveSuccess }}</div>
+    <div v-if="saveError" class="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">{{ saveError }}</div>
 
     <div v-if="loading" class="flex justify-center py-12">
-      <span class="loading loading-spinner loading-lg" />
+      <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
     </div>
 
     <template v-else>
       <!-- Action bar -->
       <div class="flex flex-wrap gap-2">
-        <button class="btn btn-primary btn-sm" @click="showBlockCatalog = true">{{ t("landingEditor.addBlock") }}</button>
-        <button class="btn btn-outline btn-sm" @click="showTemplatePicker = !showTemplatePicker">{{ t("landingEditor.templateSwitch") }}</button>
-        <button class="btn btn-outline btn-sm" @click="showSeoSettings = !showSeoSettings">{{ t("landingEditor.seoSettings") }}</button>
-        <button class="btn btn-outline btn-sm" @click="showCssEditor = !showCssEditor">{{ t("landingEditor.customCss") }}</button>
-        <button class="btn btn-error btn-outline btn-sm ml-auto" @click="resetToTemplate">{{ t("landingEditor.resetToTemplate") }}</button>
+        <button class="landing-add-block rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity" @click="showBlockCatalog = true">{{ t("landingEditor.addBlock") }}</button>
+        <button class="landing-template-switch rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showTemplatePicker = !showTemplatePicker">{{ t("landingEditor.templateSwitch") }}</button>
+        <button class="landing-seo-settings rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showSeoSettings = !showSeoSettings">{{ t("landingEditor.seoSettings") }}</button>
+        <button class="landing-custom-css rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 transition-colors" @click="showCssEditor = !showCssEditor">{{ t("landingEditor.customCss") }}</button>
+        <button class="landing-reset ml-auto rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors" @click="resetToTemplate">{{ t("landingEditor.resetToTemplate") }}</button>
       </div>
 
       <!-- Template picker -->
-      <div v-if="showTemplatePicker" class="card bg-base-200">
-        <div class="card-body">
-          <h3 class="card-title text-lg">{{ t("landingEditor.templateSwitch") }}</h3>
-          <div class="grid gap-3 sm:grid-cols-3">
-            <button
-              v-for="tmpl in templates"
-              :key="tmpl.id"
-              :class="['card bg-base-100 cursor-pointer transition-all', pageConfig.activeTemplate === tmpl.id ? 'ring-2 ring-accent' : 'hover:ring-1 hover:ring-base-content/20']"
-              @click="switchTemplate(tmpl.id)"
-            >
-              <div class="card-body p-4">
-                <h4 class="font-bold">{{ tmpl.name }}</h4>
-                <p v-if="tmpl.description" class="text-xs opacity-60">{{ tmpl.description }}</p>
-              </div>
-            </button>
-          </div>
+      <div v-if="showTemplatePicker" class="rounded-xl bg-white/5 p-5">
+        <h3 class="text-lg font-semibold mb-4">{{ t("landingEditor.templateSwitch") }}</h3>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <button
+            v-for="tmpl in templates"
+            :key="tmpl.id"
+            :class="['rounded-xl bg-white/5 p-4 text-left cursor-pointer transition-all', pageConfig.activeTemplate === tmpl.id ? 'ring-2 ring-[var(--color-accent)]' : 'hover:ring-1 hover:ring-white/20']"
+            @click="switchTemplate(tmpl.id)"
+          >
+            <h4 class="font-bold">{{ tmpl.name }}</h4>
+            <p v-if="tmpl.description" class="text-xs opacity-60 mt-1">{{ tmpl.description }}</p>
+          </button>
         </div>
       </div>
 
       <!-- SEO settings -->
-      <div v-if="showSeoSettings" class="card bg-base-200">
-        <div class="card-body">
-          <h3 class="card-title text-lg">{{ t("landingEditor.seoSettings") }}</h3>
-          <div class="form-control">
-            <label class="label"><span class="label-text">{{ t("landingEditor.metaTitle") }}</span></label>
-            <input v-model="pageConfig.metaTitle" type="text" class="input input-bordered" />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text">{{ t("landingEditor.metaDescription") }}</span></label>
-            <textarea v-model="pageConfig.metaDescription" class="textarea textarea-bordered" rows="3" />
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-primary btn-sm" :disabled="saving" @click="savePageConfig">
-              {{ saving ? t("landingEditor.saving") : t("landingEditor.seoSettings") }}
-            </button>
-          </div>
+      <div v-if="showSeoSettings" class="rounded-xl bg-white/5 p-5 space-y-4">
+        <h3 class="text-lg font-semibold">{{ t("landingEditor.seoSettings") }}</h3>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 opacity-70">{{ t("landingEditor.metaTitle") }}</label>
+          <input v-model="pageConfig.metaTitle" type="text" class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 opacity-70">{{ t("landingEditor.metaDescription") }}</label>
+          <textarea v-model="pageConfig.metaDescription" class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors" rows="3" />
+        </div>
+        <div class="flex justify-end">
+          <button class="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50" :disabled="saving" @click="savePageConfig">
+            {{ saving ? t("landingEditor.saving") : t("landingEditor.seoSettings") }}
+          </button>
         </div>
       </div>
 
       <!-- Custom CSS -->
-      <div v-if="showCssEditor" class="card bg-base-200">
-        <div class="card-body">
-          <h3 class="card-title text-lg">{{ t("landingEditor.customCss") }}</h3>
-          <textarea
-            v-model="pageConfig.customCss"
-            class="textarea textarea-bordered font-mono text-sm"
-            rows="10"
-            placeholder="/* Custom CSS for your landing page */"
-          />
-          <div class="card-actions justify-end">
-            <button class="btn btn-primary btn-sm" :disabled="saving" @click="savePageConfig">
-              {{ saving ? t("landingEditor.saving") : t("landingEditor.customCss") }}
-            </button>
-          </div>
+      <div v-if="showCssEditor" class="rounded-xl bg-white/5 p-5 space-y-4">
+        <h3 class="text-lg font-semibold">{{ t("landingEditor.customCss") }}</h3>
+        <textarea
+          v-model="pageConfig.customCss"
+          class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+          rows="10"
+          placeholder="/* Custom CSS for your landing page */"
+        />
+        <div class="flex justify-end">
+          <button class="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50" :disabled="saving" @click="savePageConfig">
+            {{ saving ? t("landingEditor.saving") : t("landingEditor.customCss") }}
+          </button>
         </div>
       </div>
 
-      <!-- Block catalog modal -->
-      <div v-if="showBlockCatalog" class="card bg-base-200">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <h3 class="card-title text-lg">{{ t("landingEditor.blockCatalog") }}</h3>
-            <button class="btn btn-ghost btn-sm btn-circle" @click="showBlockCatalog = false">&times;</button>
-          </div>
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <button
-              v-for="block in blockTypes"
-              :key="block.type"
-              class="card bg-base-100 cursor-pointer hover:ring-1 hover:ring-accent transition-all text-left"
-              @click="addBlock(block.type)"
-            >
-              <div class="card-body p-4">
-                <h4 class="font-bold text-sm">{{ editLocale === 'de' ? block.name.de : block.name.en }}</h4>
-                <p class="text-xs opacity-60">{{ editLocale === 'de' ? block.description.de : block.description.en }}</p>
-              </div>
-            </button>
-          </div>
+      <!-- Block catalog -->
+      <div v-if="showBlockCatalog" class="landing-block-catalog rounded-xl bg-white/5 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold">{{ t("landingEditor.blockCatalog") }}</h3>
+          <button class="rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-white/10 transition-colors" @click="showBlockCatalog = false">&times;</button>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <button
+            v-for="block in blockTypes"
+            :key="block.type"
+            class="rounded-xl bg-white/5 p-4 text-left cursor-pointer hover:ring-1 hover:ring-[var(--color-accent)] transition-all"
+            @click="addBlock(block.type)"
+          >
+            <h4 class="font-bold text-sm">{{ editLocale === 'de' ? block.name.de : block.name.en }}</h4>
+            <p class="text-xs opacity-60 mt-1">{{ editLocale === 'de' ? block.description.de : block.description.en }}</p>
+          </button>
         </div>
       </div>
 
       <!-- Section list -->
-      <div v-if="sections.length === 0" class="alert">
+      <div v-if="sections.length === 0" class="rounded-lg bg-white/5 border border-white/10 px-4 py-8 text-center text-sm opacity-60">
         {{ t("landingEditor.noSections") }}
       </div>
 
-      <div class="space-y-3">
+      <div class="landing-block-list space-y-3">
         <div
           v-for="(section, index) in sections"
           :key="section.id"
-          :class="['card bg-base-200 transition-all', !section.visible && 'opacity-50', draggedIndex === index && 'ring-2 ring-accent']"
+          :class="['landing-block-item rounded-xl bg-white/5 transition-all', !section.visible && 'opacity-50', draggedIndex === index && 'ring-2 ring-[var(--color-accent)]']"
           draggable="true"
           @dragstart="onDragStart(index)"
           @dragover="(e) => onDragOver(e, index)"
           @dragend="onDragEnd"
         >
-          <div class="card-body p-4">
+          <div class="p-4">
             <div class="flex items-center gap-3">
               <!-- Drag handle -->
-              <div class="cursor-grab text-lg opacity-40 hover:opacity-70">&#x2630;</div>
+              <div class="cursor-grab text-lg opacity-40 hover:opacity-70 select-none">&#x2630;</div>
 
               <!-- Block info -->
-              <div class="flex-1">
+              <div class="flex-1 min-w-0">
                 <span class="font-bold text-sm">{{ blockName(section.blockType) }}</span>
-                <span class="badge badge-ghost badge-sm ml-2">{{ section.blockType }}</span>
+                <span class="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-xs">{{ section.blockType }}</span>
               </div>
 
               <!-- Actions -->
               <div class="flex items-center gap-1">
                 <button
-                  :class="['btn btn-ghost btn-xs', section.visible ? 'opacity-70' : 'opacity-40']"
+                  :class="['rounded p-1.5 hover:bg-white/10 transition-colors text-sm', section.visible ? 'opacity-70' : 'opacity-40']"
                   :title="section.visible ? 'Hide' : 'Show'"
                   @click="toggleVisibility(section)"
                 >
                   {{ section.visible ? '&#x1F441;' : '&#x1F576;' }}
                 </button>
                 <button
-                  class="btn btn-ghost btn-xs"
+                  class="rounded p-1.5 hover:bg-white/10 transition-colors text-sm"
                   @click="editingSection = editingSection?.id === section.id ? null : section"
                 >
                   &#x270E;
                 </button>
-                <button class="btn btn-ghost btn-xs text-error" @click="removeSection(section.id)">
+                <button class="rounded p-1.5 hover:bg-red-500/20 transition-colors text-sm text-red-400" @click="removeSection(section.id)">
                   &#x2716;
                 </button>
               </div>
             </div>
 
             <!-- Inline editor -->
-            <div v-if="editingSection?.id === section.id" class="mt-4 space-y-3 border-t border-base-300 pt-4">
-              <div v-for="(value, key) in getLocaleContent(section)" :key="String(key)" class="form-control">
-                <label class="label"><span class="label-text text-xs font-medium">{{ key }}</span></label>
+            <div v-if="editingSection?.id === section.id" class="mt-4 space-y-3 border-t border-white/10 pt-4">
+              <div v-for="(value, key) in getLocaleContent(section)" :key="String(key)">
+                <label class="block text-xs font-medium mb-1 opacity-60">{{ key }}</label>
                 <textarea
                   v-if="typeof value === 'string' && value.length > 80"
                   :value="String(value)"
-                  class="textarea textarea-bordered textarea-sm"
+                  class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                   rows="3"
                   @input="(e) => setLocaleContent(section, String(key), (e.target as HTMLTextAreaElement).value)"
                 />
@@ -430,13 +463,13 @@ onMounted(() => loadData());
                   v-else-if="typeof value === 'string'"
                   :value="String(value)"
                   type="text"
-                  class="input input-bordered input-sm"
+                  class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                   @input="(e) => setLocaleContent(section, String(key), (e.target as HTMLInputElement).value)"
                 />
-                <pre v-else class="bg-base-300 rounded p-2 text-xs overflow-auto max-h-40">{{ JSON.stringify(value, null, 2) }}</pre>
+                <pre v-else class="rounded-lg bg-white/5 p-3 text-xs overflow-auto max-h-40">{{ JSON.stringify(value, null, 2) }}</pre>
               </div>
               <div class="flex justify-end">
-                <button class="btn btn-primary btn-sm" :disabled="saving" @click="saveSection(section)">
+                <button class="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50" :disabled="saving" @click="saveSection(section)">
                   {{ saving ? t("landingEditor.saving") : "Save" }}
                 </button>
               </div>
@@ -445,5 +478,15 @@ onMounted(() => loadData());
         </div>
       </div>
     </template>
+
+    <!-- Tour overlay -->
+    <OnboardingTour
+      :state="tour.state.value"
+      :skip-label="t('landingEditor.tour.skip')"
+      :next-label="t('landingEditor.tour.next')"
+      :done-label="t('landingEditor.tour.done')"
+      @next="tour.next()"
+      @skip="tour.skip()"
+    />
   </div>
 </template>

@@ -450,7 +450,29 @@
     "blockCatalog": "Block catalog",
     "noSections": "No sections yet. Add a block to get started.",
     "saving": "Saving…",
-    "saved": "Changes saved."
+    "saved": "Changes saved.",
+    "tour": {
+      "skip": "Skip",
+      "next": "Next",
+      "done": "Done",
+      "help": "Show guided tour",
+      "sectionsTitle": "Your Sections",
+      "sectionsDesc": "These are the content blocks on your landing page. Drag them to reorder, or click the edit icon to change content.",
+      "blockItemTitle": "Edit, Reorder, Hide",
+      "blockItemDesc": "Use the drag handle to reorder blocks. Toggle visibility to hide a block without deleting it. Click the pencil to edit content.",
+      "addBlockTitle": "Add Blocks",
+      "addBlockDesc": "Open the block catalog to browse all available block types and add them to your page.",
+      "localeTitle": "Switch Language",
+      "localeDesc": "Edit content separately for English and German. Use these buttons to switch between locales.",
+      "templateTitle": "Templates",
+      "templateDesc": "Switch between design templates. Your content is preserved — only the layout and styling change.",
+      "seoTitle": "SEO Settings",
+      "seoDesc": "Set the meta title and description for search engines.",
+      "cssTitle": "Custom CSS",
+      "cssDesc": "Inject custom CSS to fine-tune the landing page design beyond what templates offer.",
+      "resetTitle": "Reset to Template",
+      "resetDesc": "Reset all sections back to the template defaults. Warning: this removes all your custom content."
+    }
   },
   "language": {
     "label": "Language",

@@ -450,7 +450,29 @@
     "blockCatalog": "Block-Katalog",
     "noSections": "Noch keine Sektionen vorhanden. Füge einen Block hinzu.",
     "saving": "Speichern…",
-    "saved": "Änderungen gespeichert."
+    "saved": "Änderungen gespeichert.",
+    "tour": {
+      "skip": "Überspringen",
+      "next": "Weiter",
+      "done": "Fertig",
+      "help": "Geführte Tour anzeigen",
+      "sectionsTitle": "Deine Sektionen",
+      "sectionsDesc": "Das sind die Inhaltsblöcke auf deiner Landing-Seite. Ziehe sie zum Umordnen oder klicke auf den Stift zum Bearbeiten.",
+      "blockItemTitle": "Bearbeiten, Umordnen, Ausblenden",
+      "blockItemDesc": "Nutze den Ziehgriff zum Umordnen. Schalte die Sichtbarkeit um, ohne den Block zu löschen. Klicke den Stift zum Bearbeiten.",
+      "addBlockTitle": "Blöcke hinzufügen",
+      "addBlockDesc": "Öffne den Block-Katalog, um alle verfügbaren Blocktypen zu durchsuchen und zur Seite hinzuzufügen.",
+      "localeTitle": "Sprache wechseln",
+      "localeDesc": "Bearbeite Inhalte separat für Englisch und Deutsch. Nutze diese Buttons zum Umschalten.",
+      "templateTitle": "Templates",
+      "templateDesc": "Wechsle zwischen Design-Templates. Dein Inhalt bleibt erhalten — nur Layout und Styling ändern sich.",
+      "seoTitle": "SEO-Einstellungen",
+      "seoDesc": "Setze Meta-Titel und Beschreibung für Suchmaschinen.",
+      "cssTitle": "Benutzerdefiniertes CSS",
+      "cssDesc": "Füge eigenes CSS ein, um das Landing-Page-Design über die Templates hinaus anzupassen.",
+      "resetTitle": "Auf Template zurücksetzen",
+      "resetDesc": "Alle Sektionen auf die Template-Standards zurücksetzen. Achtung: Alle benutzerdefinierten Inhalte gehen verloren."
+    }
   },
   "language": {
     "label": "Sprache",
