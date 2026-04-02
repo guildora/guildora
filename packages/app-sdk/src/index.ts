@@ -106,6 +106,8 @@ export interface BotContext {
   bot: BotClient;
   /** The bot's own Discord user ID. */
   botUserId: string;
+  /** The Discord guild ID this bot instance is bound to. */
+  guildId: string;
 }
 
 // ─── Hub context (injected into event.context.guildora) ──────────────────
