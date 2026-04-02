@@ -25,6 +25,7 @@ Use the shared schema and domain concepts correctly when changing persistence, j
 - singleton-like settings tables are still regular tables and should be handled consistently
 - `communityCustomFields` is a separate table from `profiles.customFields` — do not confuse admin-managed field definitions with per-user extension data
 - `applicationFlows` and `applications` are the current application system; the old `profiles.customFields.applicationStatus` is deprecated
+- `applicationFlows.editorMode` (`editor_mode` enum: `simple` | `advanced`) tracks which editor was used; it is a frontend concern stored in DB for persistence — all flows produce the same `flow_json` regardless of mode
 - `applicationAccessSettings` is a singleton that controls moderator access to the applications section
 - `communityTags` are moderator-managed labels distinct from Discord roles
 

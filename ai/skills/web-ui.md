@@ -30,6 +30,7 @@ Extend or modify the Nuxt frontend in a way that matches the existing internal U
 - all new user-facing text must use i18n keys in both `en` and `de`
 - page middleware is a UX aid only; real authorization still belongs on the server
 - keep landing public and separate from hub-only flows
+- the flow editor page (`/applications/flows/[flowId]`) has two modes: Simple (section-based, `SimpleFormBuilder`) and Advanced (Vue Flow graph, `FlowCanvas`). Mode is toggled in the header bar. Key composables: `useFlowBuilder` (graph + sections state, mode switching), `useFieldEditor` (shared field editing logic), `useOnboardingTour` (spotlight tour engine)
 
 ## Step-By-Step Orientation
 
