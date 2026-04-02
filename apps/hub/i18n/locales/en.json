@@ -12,7 +12,7 @@
     "login": "Login with Discord",
     "logout": "Logout",
     "apps": "Apps",
-    "cms": "Landing page",
+    "landing": "Landing page",
     "applications": "Applications",
     "settings": "Settings",
     "dev": "DEV",
@@ -434,14 +434,23 @@
     "rolesUpdated": "Roles updated.",
     "rolesUpdateError": "Failed to update roles."
   },
-  "cmsPage": {
+  "landingEditor": {
     "title": "Landing page",
-    "description": "The landing page opens as an embedded admin area.",
-    "notConfigured": "Landing page is not configured correctly.",
-    "forbidden": "You currently have no access to the landing page.",
-    "iframeTitle": "Landing page Admin",
-    "refreshSession": "Refresh session",
-    "loading": "Loading CMS…"
+    "description": "Manage the content, layout, and design of your landing page.",
+    "addBlock": "Add block",
+    "removeBlock": "Remove block",
+    "removeBlockConfirm": "Are you sure you want to remove this block?",
+    "resetToTemplate": "Reset to template",
+    "resetConfirm": "This will reset all sections to the template defaults. This action cannot be undone.",
+    "templateSwitch": "Switch template",
+    "customCss": "Custom CSS",
+    "seoSettings": "SEO Settings",
+    "metaTitle": "Meta title",
+    "metaDescription": "Meta description",
+    "blockCatalog": "Block catalog",
+    "noSections": "No sections yet. Add a block to get started.",
+    "saving": "Saving…",
+    "saved": "Changes saved."
   },
   "language": {
     "label": "Language",
@@ -514,7 +523,7 @@
       "deleteConfirmMessage": "Do you really want to delete this community role?",
       "deleteConfirmLabel": "Delete"
     },
-    "cms": {
+    "landing": {
       "title": "Page access",
       "description": "Admin and superadmin always keep access. Control who can edit the landing page content and access the Apps area.",
       "allowModeratorAccess": "Allow moderators to edit landing page content",
@@ -564,7 +573,7 @@
       "roleCreated": "Community role created.",
       "roleSaved": "Community role saved.",
       "roleDeleted": "Community role deleted.",
-      "cmsSaved": "Page access saved.",
+      "landingSaved": "Page access saved.",
       "importDone": "Import completed.",
       "orphansDeleted": "Orphaned profiles deleted.",
       "userProcessed": "User processed.",
@@ -575,7 +584,7 @@
       "roleCreate": "Failed to create community role.",
       "roleSave": "Failed to save community role.",
       "roleDelete": "Failed to delete community role.",
-      "cmsSave": "Failed to save page access.",
+      "landingSave": "Failed to save page access.",
       "importRun": "Import failed.",
       "orphanDelete": "Failed to delete orphaned profiles.",
       "userProcess": "Failed to process user.",
@@ -989,7 +998,7 @@
       "avatars": "Avatars",
       "theme": "Theme Assets",
       "applications": "Application Uploads",
-      "cms": "CMS Media",
+      "landing": "Landing Page Media",
       "other": "Other"
     },
     "dangerZone": "Danger Zone",

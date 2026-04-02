@@ -67,7 +67,6 @@ const fallbackRail = computed(() => {
     { id: "members", to: localePath("/members"), label: t("nav.members"), labelKey: "nav.members", iconPath: iconNames.members, visible: true },
     { id: "settings", to: localePath("/settings"), label: t("nav.settings"), labelKey: "nav.settings", iconPath: iconNames.settings, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "apps", to: localePath("/apps"), label: t("nav.apps"), labelKey: "nav.apps", iconPath: iconNames.apps, visible: hasAnyRole("moderator", "admin", "superadmin") },
-    { id: "cms", to: localePath("/cms"), label: t("nav.cms"), labelKey: "nav.cms", iconPath: iconNames.cms, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "dev", to: localePath("/dev"), label: t("nav.dev"), labelKey: "nav.dev", iconPath: iconNames.dev, visible: useRuntimeConfig().public.isDev === true }
   ];
 

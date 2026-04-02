@@ -279,7 +279,7 @@ export const themeSettings = pgTable("theme_settings", {
   updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
 });
 
-export const cmsAccessSettings = pgTable("cms_access_settings", {
+export const moderationSettings = pgTable("moderation_settings", {
   id: serial("id").primaryKey(),
   allowModeratorAccess: boolean("allow_moderator_access").notNull().default(true),
   allowModeratorAppsAccess: boolean("allow_moderator_apps_access").notNull().default(true),
@@ -297,6 +297,50 @@ export const cmsAccessSettings = pgTable("cms_access_settings", {
     .$onUpdateFn(() => new Date()),
   updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
 });
+
+// ─── Landing Page Tables ──────────────────────────────────────────────────
+
+export const landingTemplates = pgTable("landing_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  previewUrl: text("preview_url"),
+  isBuiltin: boolean("is_builtin").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+export const landingPages = pgTable("landing_pages", {
+  id: serial("id").primaryKey(),
+  activeTemplate: text("active_template")
+    .notNull()
+    .references(() => landingTemplates.id, { onDelete: "set default" })
+    .default("default"),
+  customCss: text("custom_css"),
+  locale: text("locale").notNull().default("en"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
+});
+
+export const landingSections = pgTable("landing_sections", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  blockType: text("block_type").notNull(),
+  sortOrder: integer("sort_order").notNull(),
+  visible: boolean("visible").notNull().default(true),
+  config: jsonb("config").notNull().default({}),
+  content: jsonb("content").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
+});
+
+// ─── Community Settings ───────────────────────────────────────────────────
 
 export const communitySettings = pgTable("community_settings", {
   id: serial("id").primaryKey(),
@@ -550,7 +594,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reviewedAppSubmissions: many(appMarketplaceSubmissions, {
     relationName: "app_submission_reviewer"
   }),
-  updatedCmsAccessSettings: many(cmsAccessSettings),
+  updatedModerationSettings: many(moderationSettings),
+  updatedLandingPages: many(landingPages),
+  updatedLandingSections: many(landingSections),
   createdApplicationFlows: many(applicationFlows),
   reviewedApplications: many(applications, { relationName: "application_reviewer" }),
   applicationModeratorNotifications: many(applicationModeratorNotifications),
@@ -671,9 +717,31 @@ export const themeSettingsRelations = relations(themeSettings, ({ one }) => ({
   })
 }));
 
-export const cmsAccessSettingsRelations = relations(cmsAccessSettings, ({ one }) => ({
+export const moderationSettingsRelations = relations(moderationSettings, ({ one }) => ({
   updatedByUser: one(users, {
-    fields: [cmsAccessSettings.updatedBy],
+    fields: [moderationSettings.updatedBy],
+    references: [users.id]
+  })
+}));
+
+export const landingTemplatesRelations = relations(landingTemplates, ({ many }) => ({
+  pages: many(landingPages)
+}));
+
+export const landingPagesRelations = relations(landingPages, ({ one }) => ({
+  template: one(landingTemplates, {
+    fields: [landingPages.activeTemplate],
+    references: [landingTemplates.id]
+  }),
+  updatedByUser: one(users, {
+    fields: [landingPages.updatedBy],
+    references: [users.id]
+  })
+}));
+
+export const landingSectionsRelations = relations(landingSections, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [landingSections.updatedBy],
     references: [users.id]
   })
 }));

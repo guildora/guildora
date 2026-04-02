@@ -3,7 +3,7 @@ import { profiles } from "@guildora/shared";
 import { buildAppNavigation, hasRequiredRoles } from "../../utils/apps";
 import { getLocalizedCoreNavigation, resolveNavigationLocale } from "../../utils/core-navigation";
 import { requireSession } from "../../utils/auth";
-import { loadCmsAccessConfig } from "../../utils/cms-access";
+import { loadLandingAccessConfig } from "../../utils/landing-access";
 import { loadApplicationAccessConfig } from "../../utils/application-access";
 import { loadMembershipSettings } from "../../utils/membership-settings";
 import { getDb } from "../../utils/db";
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const session = await requireSession(event);
   const db = getDb();
   const roles = session.user.permissionRoles ?? session.user.roles ?? [];
-  const [profile, communityDefaultLocale, cmsAccess, applicationAccess, membershipConfig] = await Promise.all([
+  const [profile, communityDefaultLocale, landingAccess, applicationAccess, membershipConfig] = await Promise.all([
     db
       .select({ localePreference: profiles.localePreference, customFields: profiles.customFields })
       .from(profiles)
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
       .limit(1)
       .then((rows) => rows[0] ?? null),
     loadCommunitySettingsLocale(db),
-    loadCmsAccessConfig(db),
+    loadLandingAccessConfig(db),
     loadApplicationAccessConfig(db),
     loadMembershipSettings(db)
   ]);
@@ -41,8 +41,8 @@ export default defineEventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig();
   const isDev = runtimeConfig.public.isDev;
   const { coreRailItems, corePanelGroups } = getLocalizedCoreNavigation(locale, {
-    allowModeratorCmsAccess: cmsAccess.allowModeratorAccess,
-    allowModeratorAppsAccess: cmsAccess.allowModeratorAppsAccess,
+    allowModeratorCmsAccess: landingAccess.allowModeratorAccess,
+    allowModeratorAppsAccess: landingAccess.allowModeratorAppsAccess,
     allowModeratorApplicationsAccess: applicationAccess.allowModeratorAccess,
     applicationsEnabled: membershipConfig.applicationsRequired,
     isDev: isDev === true,

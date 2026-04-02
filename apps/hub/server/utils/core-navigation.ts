@@ -40,7 +40,6 @@ const iconNames = {
   profile: "proicons:person",
   settings: "proicons:settings",
   applications: "proicons:checkmark-circle",
-  cms: "proicons:document",
   apps: "proicons:grid",
   dev: "proicons:code"
 } as const;
@@ -61,7 +60,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
   const applicationsEnabled = options.applicationsEnabled ?? true;
   const isDev = options.isDev ?? false;
   const enableSideloading = options.enableSideloading ?? false;
-  const cmsRequiredRoles = allowModeratorCmsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
+  const landingRequiredRoles = allowModeratorCmsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
   const appsRequiredRoles = allowModeratorAppsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
   const applicationsRequiredRoles = allowModeratorApplicationsAccess ? ["moderator", "admin", "superadmin"] : ["admin", "superadmin"];
   void locale;
@@ -71,7 +70,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     members: { label: "Members", key: "nav.members" },
     profile: { label: "Profile", key: "nav.profile" },
     settings: { label: "Settings", key: "nav.settings" },
-    cms: { label: "Landing page", key: "nav.cms" },
+    landing: { label: "Landing page", key: "nav.landing" },
     overview: { label: "Overview", key: "dashboard.title" },
     memberList: { label: "Member list", key: "members.title" },
     community: { label: "Community", key: "settings.communityTitle" },
@@ -109,7 +108,6 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     }] : []),
     { id: "settings", to: "/settings", label: labels.settings.label, labelKey: labels.settings.key, iconPath: iconNames.settings, order: 60, requiredRoles: ["moderator", "admin", "superadmin"] },
     { id: "apps", to: "/apps", label: labels.appsSection.label, labelKey: labels.appsSection.key, iconPath: iconNames.apps, order: 75, requiredRoles: appsRequiredRoles },
-    { id: "cms", to: "/cms", label: labels.cms.label, labelKey: labels.cms.key, iconPath: iconNames.cms, order: 80, requiredRoles: cmsRequiredRoles },
     ...(isDev ? [{ id: "dev", to: "/dev", label: labels.devSection.label, labelKey: labels.devSection.key, iconPath: iconNames.dev, order: 999, requiredRoles: [] as string[] }] : [])
   ];
 
@@ -141,6 +139,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
         { id: "settings-custom-fields", label: labels.customFields.label, labelKey: labels.customFields.key, to: "/settings/custom-fields", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-permissions", label: labels.permissions.label, labelKey: labels.permissions.key, to: "/settings/permissions", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-moderation-rights", label: labels.moderationRights.label, labelKey: labels.moderationRights.key, to: "/settings/moderation-rights", requiredRoles: ["admin", "superadmin"] },
+        { id: "settings-landing", label: labels.landing.label, labelKey: labels.landing.key, to: "/settings/landing", requiredRoles: landingRequiredRoles },
         { id: "settings-design", label: labels.design.label, labelKey: labels.design.key, to: "/settings/design", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-files", label: labels.files.label, labelKey: labels.files.key, to: "/settings/files", requiredRoles: ["superadmin"] }
       ]
@@ -168,14 +167,6 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
         { id: "apps-overview", label: labels.appsOverview.label, labelKey: labels.appsOverview.key, to: "/apps/overview", requiredRoles: appsRequiredRoles },
         ...((isDev || enableSideloading) ? [{ id: "apps-sideload", label: labels.appsSideload.label, labelKey: labels.appsSideload.key, to: "/apps/sideload", requiredRoles: ["superadmin"] as string[] }] : [])
       ]
-    },
-    {
-      id: "cms-main",
-      railItemId: "cms",
-      title: labels.cms.label,
-      titleKey: labels.cms.key,
-      order: 10,
-      items: [{ id: "cms-admin", label: labels.cms.label, labelKey: labels.cms.key, to: "/cms", requiredRoles: cmsRequiredRoles }]
     },
     ...(isDev ? [{
       id: "dev-main",

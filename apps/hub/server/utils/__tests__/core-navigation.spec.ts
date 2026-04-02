@@ -30,14 +30,12 @@ describe("core navigation localization", () => {
     expect(en.corePanelGroups.some((group) => group.items.some((item) => item.to === "/profile/roles"))).toBe(true);
   });
 
-  it("limits cms route to admin when moderator access is disabled", () => {
+  it("limits landing route to admin when moderator access is disabled", () => {
     const result = getLocalizedCoreNavigation("en", { allowModeratorCmsAccess: false });
-    const cmsRail = result.coreRailItems.find((item) => item.id === "cms");
-    const cmsPanelItem = result.corePanelGroups
-      .find((group) => group.id === "cms-main")
-      ?.items.find((item) => item.id === "cms-admin");
+    const landingPanelItem = result.corePanelGroups
+      .find((group) => group.id === "settings-main")
+      ?.items.find((item) => item.id === "settings-landing");
 
-    expect(cmsRail?.requiredRoles).toEqual(["admin", "superadmin"]);
-    expect(cmsPanelItem?.requiredRoles).toEqual(["admin", "superadmin"]);
+    expect(landingPanelItem?.requiredRoles).toEqual(["admin", "superadmin"]);
   });
 });

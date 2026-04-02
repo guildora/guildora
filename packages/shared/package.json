@@ -28,6 +28,11 @@
       "types": "./src/db/run-migrations.ts",
       "import": "./src/db/run-migrations.ts",
       "default": "./src/db/run-migrations.ts"
+    },
+    "./db/seeds/landing-templates": {
+      "types": "./src/db/seeds/landing-templates.ts",
+      "import": "./src/db/seeds/landing-templates.ts",
+      "default": "./src/db/seeds/landing-templates.ts"
     }
   },
   "main": "./dist/index.js",

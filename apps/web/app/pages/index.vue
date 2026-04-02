@@ -1,9 +1,7 @@
 <script setup lang="ts">
 const config = useRuntimeConfig();
 const { locale } = useI18n();
-const { fetchLandingPage, cmsBaseUrl } = usePayload();
-const { data: branding } = await useCommunityName();
-const communityName = computed(() => branding.value?.communityName ?? null);
+const { fetchLandingPage } = useLanding();
 const landingPage = await fetchLandingPage(locale.value === "de" ? "de" : "en");
 
 const hubLoginUrl = computed(() => {
@@ -18,26 +16,31 @@ const hubLoginUrl = computed(() => {
   }
 });
 
-if (landingPage?.seo?.title) {
+if (landingPage?.meta?.title) {
   useSeoMeta({
-    title: landingPage.seo.title,
-    description: landingPage.seo.description,
-    keywords: landingPage.seo.keywords
+    title: landingPage.meta.title,
+    description: landingPage.meta.description
   });
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <div v-if="!landingPage" class="alert alert-info flex flex-col gap-3">
+    <div v-if="!landingPage || landingPage.sections.length === 0" class="alert alert-info flex flex-col gap-3">
       <span>{{ $t("landing.fallbackText") }}</span>
       <a :href="hubLoginUrl" class="link link-primary font-semibold">{{ $t("nav.login") }}</a>
     </div>
     <template v-else>
-      <CmsBlockRenderer v-for="(block, idx) in landingPage.layout || []" :key="idx" :block="block" :cms-base-url="cmsBaseUrl" :community-name="communityName ?? undefined" />
+      <LandingBlockRenderer
+        v-for="section in landingPage.sections"
+        :key="section.id"
+        :section="section"
+      />
       <div class="pt-2">
         <a :href="hubLoginUrl" class="btn btn-primary">{{ $t("nav.login") }}</a>
       </div>
     </template>
+
+    <component v-if="landingPage?.customCss" :is="'style'" v-text="landingPage.customCss" />
   </div>
 </template>

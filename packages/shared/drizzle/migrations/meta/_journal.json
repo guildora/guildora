@@ -169,6 +169,20 @@
       "when": 1743552000000,
       "tag": "0035_add_editor_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1775000000000,
+      "tag": "0036_landing_page_system",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1775100000000,
+      "tag": "0037_drop_payload_schema",
+      "breakpoints": true
     }
   ]
 }

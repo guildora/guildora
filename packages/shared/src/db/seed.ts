@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createDb } from "./client";
-import { communityCustomFields, communityRoles, permissionRoles } from "./schema";
+import { communityCustomFields, communityRoles, permissionRoles, landingTemplates, landingPages, landingSections } from "./schema";
+import { templates, defaultSections } from "./seeds/landing-templates";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
@@ -116,6 +117,41 @@ async function run() {
     } else {
       console.log(`Default custom field already exists: ${field.key}`);
     }
+  }
+
+  // ─── Landing Page Templates & Default Sections ──────────────────────────
+  for (const tmpl of templates) {
+    const existing = await db.select().from(landingTemplates).where(eq(landingTemplates.id, tmpl.id)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(landingTemplates).values(tmpl);
+      console.log(`Inserted landing template: ${tmpl.id}`);
+    } else {
+      console.log(`Landing template already exists: ${tmpl.id}`);
+    }
+  }
+
+  const existingPages = await db.select().from(landingPages).limit(1);
+  if (existingPages.length === 0) {
+    await db.insert(landingPages).values({
+      activeTemplate: "default",
+      locale: "en",
+      metaTitle: "Build Your Legacy",
+      metaDescription: "A competitive multi-game community for serious players."
+    });
+    console.log("Inserted landing page config (en).");
+
+    for (const section of defaultSections) {
+      await db.insert(landingSections).values({
+        blockType: section.blockType,
+        sortOrder: section.sortOrder,
+        visible: section.visible,
+        config: section.config,
+        content: section.content
+      });
+    }
+    console.log(`Inserted ${defaultSections.length} default landing sections.`);
+  } else {
+    console.log("Landing page already exists, skipping section seed.");
   }
 }
 

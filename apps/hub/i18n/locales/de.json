@@ -12,7 +12,7 @@
     "login": "Mit Discord anmelden",
     "logout": "Abmelden",
     "apps": "Apps",
-    "cms": "Landing-Seite",
+    "landing": "Landing-Seite",
     "applications": "Bewerbungen",
     "settings": "Einstellungen",
     "dev": "DEV",
@@ -434,14 +434,23 @@
     "rolesUpdated": "Rollen aktualisiert.",
     "rolesUpdateError": "Rollen konnten nicht aktualisiert werden."
   },
-  "cmsPage": {
+  "landingEditor": {
     "title": "Landing-Seite",
-    "description": "Die Landing-Seite wird als eingebetteter Admin-Bereich geöffnet.",
-    "notConfigured": "Landing-Seite ist nicht korrekt konfiguriert.",
-    "forbidden": "Du hast aktuell keinen Zugriff auf die Landing-Seite.",
-    "iframeTitle": "Landing-Seite Admin",
-    "refreshSession": "Session aktualisieren",
-    "loading": "CMS wird geladen…"
+    "description": "Verwalte den Inhalt, das Layout und das Design deiner Landing-Seite.",
+    "addBlock": "Block hinzufügen",
+    "removeBlock": "Block entfernen",
+    "removeBlockConfirm": "Möchtest du diesen Block wirklich entfernen?",
+    "resetToTemplate": "Auf Template zurücksetzen",
+    "resetConfirm": "Alle Sektionen werden auf die Template-Standards zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "templateSwitch": "Template wechseln",
+    "customCss": "Benutzerdefiniertes CSS",
+    "seoSettings": "SEO-Einstellungen",
+    "metaTitle": "Meta-Titel",
+    "metaDescription": "Meta-Beschreibung",
+    "blockCatalog": "Block-Katalog",
+    "noSections": "Noch keine Sektionen vorhanden. Füge einen Block hinzu.",
+    "saving": "Speichern…",
+    "saved": "Änderungen gespeichert."
   },
   "language": {
     "label": "Sprache",
@@ -514,7 +523,7 @@
       "deleteConfirmMessage": "Möchtest du diese Community-Rolle wirklich löschen?",
       "deleteConfirmLabel": "Löschen"
     },
-    "cms": {
+    "landing": {
       "title": "Seiten-Zugriffe",
       "description": "Admin und Superadmin behalten immer Zugriff. Lege fest, wer die Landing-Page bearbeiten und den Apps-Bereich nutzen darf.",
       "allowModeratorAccess": "Moderatoren dürfen Landing-Page-Inhalte bearbeiten",
@@ -564,7 +573,7 @@
       "roleCreated": "Community-Rolle angelegt.",
       "roleSaved": "Community-Rolle gespeichert.",
       "roleDeleted": "Community-Rolle gelöscht.",
-      "cmsSaved": "Seiten-Zugriffe gespeichert.",
+      "landingSaved": "Seiten-Zugriffe gespeichert.",
       "importDone": "Import abgeschlossen.",
       "orphansDeleted": "Verwaiste Profile gelöscht.",
       "userProcessed": "Nutzer verarbeitet.",
@@ -575,7 +584,7 @@
       "roleCreate": "Community-Rolle konnte nicht angelegt werden.",
       "roleSave": "Community-Rolle konnte nicht gespeichert werden.",
       "roleDelete": "Community-Rolle konnte nicht gelöscht werden.",
-      "cmsSave": "Seiten-Zugriffe konnten nicht gespeichert werden.",
+      "landingSave": "Seiten-Zugriffe konnten nicht gespeichert werden.",
       "importRun": "Import fehlgeschlagen.",
       "orphanDelete": "Verwaiste Profile konnten nicht gelöscht werden.",
       "userProcess": "Nutzer konnte nicht verarbeitet werden.",
@@ -989,7 +998,7 @@
       "avatars": "Avatare",
       "theme": "Theme-Assets",
       "applications": "Bewerbungs-Uploads",
-      "cms": "CMS-Medien",
+      "landing": "Landing-Seite-Medien",
       "other": "Sonstiges"
     },
     "dangerZone": "Gefahrenzone",

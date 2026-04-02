@@ -1,0 +1,57 @@
+import { asc, eq } from "drizzle-orm";
+import { landingPages, landingSections, landingTemplates } from "@guildora/shared";
+import { getDb } from "../../utils/db";
+
+export default defineEventHandler(async (event) => {
+  setResponseHeader(event, "Cache-Control", "public, max-age=30, stale-while-revalidate=120");
+
+  const query = getQuery(event);
+  const locale = query.locale === "de" ? "de" : "en";
+
+  const db = getDb();
+
+  const [page] = await db
+    .select()
+    .from(landingPages)
+    .limit(1);
+
+  if (!page) {
+    return { sections: [], template: null, customCss: null, meta: {} };
+  }
+
+  const [template] = await db
+    .select()
+    .from(landingTemplates)
+    .where(eq(landingTemplates.id, page.activeTemplate))
+    .limit(1);
+
+  const sections = await db
+    .select()
+    .from(landingSections)
+    .where(eq(landingSections.visible, true))
+    .orderBy(asc(landingSections.sortOrder));
+
+  const localizedSections = sections.map((section) => {
+    const content = section.content as Record<string, unknown>;
+    const localizedContent = (content[locale] ?? content.en ?? content) as Record<string, unknown>;
+    return {
+      id: section.id,
+      blockType: section.blockType,
+      sortOrder: section.sortOrder,
+      config: section.config,
+      content: localizedContent
+    };
+  });
+
+  return {
+    sections: localizedSections,
+    template: template
+      ? { id: template.id, name: template.name }
+      : null,
+    customCss: page.customCss ?? null,
+    meta: {
+      title: page.metaTitle,
+      description: page.metaDescription
+    }
+  };
+});

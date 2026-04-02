@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { cmsAccessSettings } from "@guildora/shared";
+import { moderationSettings } from "@guildora/shared";
 import type { GuildoraDatabase } from "@guildora/shared/db/client";
 import { requireSession } from "./auth";
 
@@ -70,19 +70,19 @@ export async function loadModerationRights(db: GuildoraDatabase): Promise<Modera
   try {
     const [row] = await db
       .select({
-        modDeleteUsers: cmsAccessSettings.modDeleteUsers,
-        modManageApplications: cmsAccessSettings.modManageApplications,
-        modAccessCommunitySettings: cmsAccessSettings.modAccessCommunitySettings,
-        modAccessDesign: cmsAccessSettings.modAccessDesign,
-        modAccessApps: cmsAccessSettings.modAccessApps,
-        modAccessDiscordRoles: cmsAccessSettings.modAccessDiscordRoles,
-        modAccessCustomFields: cmsAccessSettings.modAccessCustomFields,
-        modAccessPermissions: cmsAccessSettings.modAccessPermissions,
-        allowModeratorAccess: cmsAccessSettings.allowModeratorAccess,
-        allowModeratorAppsAccess: cmsAccessSettings.allowModeratorAppsAccess
+        modDeleteUsers: moderationSettings.modDeleteUsers,
+        modManageApplications: moderationSettings.modManageApplications,
+        modAccessCommunitySettings: moderationSettings.modAccessCommunitySettings,
+        modAccessDesign: moderationSettings.modAccessDesign,
+        modAccessApps: moderationSettings.modAccessApps,
+        modAccessDiscordRoles: moderationSettings.modAccessDiscordRoles,
+        modAccessCustomFields: moderationSettings.modAccessCustomFields,
+        modAccessPermissions: moderationSettings.modAccessPermissions,
+        allowModeratorAccess: moderationSettings.allowModeratorAccess,
+        allowModeratorAppsAccess: moderationSettings.allowModeratorAppsAccess
       })
-      .from(cmsAccessSettings)
-      .orderBy(desc(cmsAccessSettings.updatedAt))
+      .from(moderationSettings)
+      .orderBy(desc(moderationSettings.updatedAt))
       .limit(1);
 
     if (!row) {

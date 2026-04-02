@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { cmsAccessSettings } from "@guildora/shared";
+import { moderationSettings } from "@guildora/shared";
 import { z } from "zod";
 import { requireAdminSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
@@ -26,9 +26,9 @@ export default defineEventHandler(async (event) => {
   const db = getDb();
 
   const [existing] = await db
-    .select({ id: cmsAccessSettings.id })
-    .from(cmsAccessSettings)
-    .orderBy(desc(cmsAccessSettings.updatedAt))
+    .select({ id: moderationSettings.id })
+    .from(moderationSettings)
+    .orderBy(desc(moderationSettings.updatedAt))
     .limit(1);
 
   const updateValues: Record<string, unknown> = { updatedBy: session.user.id };
@@ -45,11 +45,11 @@ export default defineEventHandler(async (event) => {
 
   if (existing) {
     await db
-      .update(cmsAccessSettings)
+      .update(moderationSettings)
       .set(updateValues)
-      .where(eq(cmsAccessSettings.id, existing.id));
+      .where(eq(moderationSettings.id, existing.id));
   } else {
-    await db.insert(cmsAccessSettings).values({
+    await db.insert(moderationSettings).values({
       ...updateValues,
       allowModeratorAccess: true,
       allowModeratorAppsAccess: true

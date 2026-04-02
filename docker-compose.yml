@@ -31,10 +31,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
       NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
-      NUXT_PUBLIC_CMS_URL: ${NUXT_PUBLIC_CMS_URL}
     depends_on:
-      cms:
-        condition: service_started
       db:
         condition: service_healthy
     healthcheck:
@@ -73,11 +70,9 @@ services:
       NUXT_SUPERADMIN_DISCORD_ID: ${SUPERADMIN_DISCORD_ID:-}
       NUXT_BOT_INTERNAL_URL: http://bot:3050
       NUXT_BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN:-}
-      NUXT_CMS_SSO_SECRET: ${CMS_SSO_SECRET:-}
-      NUXT_PAYLOAD_INTERNAL_URL: http://cms:3001
+      NUXT_MCP_INTERNAL_TOKEN: ${MCP_INTERNAL_TOKEN:-}
       NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
       NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
-      NUXT_PUBLIC_CMS_URL: ${NUXT_PUBLIC_CMS_URL}
       NUXT_SESSION_PASSWORD: ${NUXT_SESSION_PASSWORD}
       BUCKET_PROVIDER: ${BUCKET_PROVIDER:-}
       BUCKET_ENDPOINT: ${BUCKET_ENDPOINT:-}
@@ -88,8 +83,6 @@ services:
       BUCKET_PUBLIC_URL: ${BUCKET_PUBLIC_URL:-}
       BUCKET_PATH_PREFIX: ${BUCKET_PATH_PREFIX:-}
     depends_on:
-      cms:
-        condition: service_started
       db:
         condition: service_healthy
     healthcheck:
@@ -101,49 +94,6 @@ services:
     labels:
       caddy: ${HUB_HOST}
       caddy.reverse_proxy: "{{upstreams 3003}}"
-    networks:
-      - internal
-      - caddy
-
-  cms:
-    build:
-      context: .
-      dockerfile: apps/cms/Dockerfile
-    image: guildora-cms:latest
-    restart: unless-stopped
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: "3001"
-      HOSTNAME: "0.0.0.0"
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/guildora
-      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
-      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL}
-      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
-      NUXT_PUBLIC_HUB_URL: ${NUXT_PUBLIC_HUB_URL}
-      BUCKET_PROVIDER: ${BUCKET_PROVIDER:-}
-      BUCKET_ENDPOINT: ${BUCKET_ENDPOINT:-}
-      BUCKET_REGION: ${BUCKET_REGION:-}
-      BUCKET_NAME: ${BUCKET_NAME:-}
-      BUCKET_ACCESS_KEY_ID: ${BUCKET_ACCESS_KEY_ID:-}
-      BUCKET_SECRET_ACCESS_KEY: ${BUCKET_SECRET_ACCESS_KEY:-}
-      BUCKET_PUBLIC_URL: ${BUCKET_PUBLIC_URL:-}
-      BUCKET_PATH_PREFIX: ${BUCKET_PATH_PREFIX:-}
-    volumes:
-      - cms_media:/app/apps/cms/media
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/admin').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      caddy: ${CMS_HOST}
-      caddy.reverse_proxy: "{{upstreams 3001}}"
     networks:
       - internal
       - caddy
@@ -173,7 +123,6 @@ services:
 
 volumes:
   db_data:
-  cms_media:
 
 networks:
   internal:

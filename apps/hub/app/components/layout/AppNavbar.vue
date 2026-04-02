@@ -14,7 +14,7 @@ const hasRole = (role: string) => {
 
 const navItems = computed(() => {
   const items = [
-    { to: "/cms", label: t("nav.cms"), visible: hasRole("moderator") || hasRole("admin") || hasRole("superadmin") },
+    { to: "/settings/landing", label: t("nav.landing"), visible: hasRole("moderator") || hasRole("admin") || hasRole("superadmin") },
     { to: "/dashboard", label: t("nav.dashboard"), visible: loggedIn.value },
     { to: "/members", label: t("nav.members"), visible: loggedIn.value },
     { to: "/profile", label: t("nav.profile"), visible: loggedIn.value },

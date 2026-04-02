@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { userCommunityRoles } from "@guildora/shared";
 import { requireAdminSession } from "../../utils/auth";
-import { loadCmsAccessConfig } from "../../utils/cms-access";
+import { loadLandingAccessConfig } from "../../utils/landing-access";
 import { listCommunityRoles, listPermissionRoles } from "../../utils/community";
 import { getDb } from "../../utils/db";
 
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   await requireAdminSession(event);
 
   const db = getDb();
-  const cmsAccess = await loadCmsAccessConfig(db);
+  const landingAccess = await loadLandingAccessConfig(db);
   const [community, permission] = await Promise.all([listCommunityRoles(), listPermissionRoles()]);
   const assignmentRows = await Promise.all(
     community.map(async (role) => {
@@ -29,6 +29,6 @@ export default defineEventHandler(async (event) => {
     })),
     permissionRoles: permission,
     hasActiveMappings: community.some((role) => typeof role.discordRoleId === "string" && role.discordRoleId.length > 0),
-    cmsAccess
+    landingAccess
   };
 });

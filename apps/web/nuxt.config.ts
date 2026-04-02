@@ -16,8 +16,7 @@ export default defineNuxtConfig({
     public: {
       appName: "Guildora",
       appUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3000",
-      hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003",
-      cmsUrl: process.env.NUXT_PUBLIC_CMS_URL || "http://localhost:3002"
+      hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003"
     }
   },
   i18n: {

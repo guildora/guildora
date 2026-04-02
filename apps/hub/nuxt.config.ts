@@ -36,15 +36,13 @@ export default defineNuxtConfig({
     botInternalUrl: process.env.BOT_INTERNAL_URL || "http://bot:3050",
     botInternalToken: process.env.BOT_INTERNAL_TOKEN || "",
     authDevBypass: process.env.NUXT_AUTH_DEV_BYPASS === "true",
-    cmsSsoSecret: process.env.CMS_SSO_SECRET || "",
-    payloadInternalUrl: process.env.PAYLOAD_INTERNAL_URL || "http://cms:3002",
+    mcpInternalToken: process.env.MCP_INTERNAL_TOKEN || "",
     enableSideloading: process.env.NUXT_ENABLE_SIDELOADING === "true",
     public: {
       isDev: process.env.NODE_ENV === "development",
       appName: "Guildora",
       hubUrl: process.env.NUXT_PUBLIC_HUB_URL || "http://localhost:3003",
       landingUrl: process.env.NUXT_PUBLIC_APP_URL || "http://localhost:3000",
-      cmsUrl: process.env.NUXT_PUBLIC_CMS_URL || "http://localhost:3002",
       enablePerformanceDebug: process.env.NUXT_PUBLIC_ENABLE_PERFORMANCE_DEBUG === "true"
     }
   },

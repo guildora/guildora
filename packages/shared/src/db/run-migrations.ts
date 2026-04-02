@@ -89,7 +89,14 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
 
   try {
     await seedJournalIfNeeded(db, migrationsFolder);
-    await migrate(db, { migrationsFolder });
+
+    try {
+      await migrate(db, { migrationsFolder });
+    } catch (migrateError) {
+      // Log but continue — the idempotent fixups below can often bootstrap
+      // missing tables so that subsequent runs of migrate() succeed.
+      console.warn("[db-migrate] migrate() failed (continuing with fixups):", migrateError);
+    }
 
     // ── Idempotent fixups ──────────────────────────────────────────────
 
@@ -210,9 +217,18 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
       WHERE "ended_at" IS NULL
     `);
 
+    // Rename cms_access_settings → moderation_settings (idempotent)
+    await db.execute(sql`
+      DO $$ BEGIN
+        ALTER TABLE IF EXISTS "cms_access_settings" RENAME TO "moderation_settings";
+      EXCEPTION WHEN undefined_table THEN NULL;
+                WHEN duplicate_table THEN NULL;
+      END $$
+    `);
+
     // Apps access setting
     await db.execute(sql`
-      ALTER TABLE "cms_access_settings" ADD COLUMN IF NOT EXISTS "allow_moderator_apps_access" boolean NOT NULL DEFAULT true
+      ALTER TABLE "moderation_settings" ADD COLUMN IF NOT EXISTS "allow_moderator_apps_access" boolean NOT NULL DEFAULT true
     `);
 
     // Users: local avatar + primary Discord role
@@ -260,16 +276,31 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
     `);
 
     await db.execute(sql`
+      DO $$ BEGIN
+        CREATE TYPE "editor_mode" AS ENUM ('simple', 'advanced');
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$
+    `);
+
+    await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "application_flows" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
         "name" text NOT NULL,
         "status" "application_flow_status" NOT NULL DEFAULT 'draft',
         "flow_json" jsonb NOT NULL,
+        "draft_flow_json" jsonb,
         "settings_json" jsonb NOT NULL,
+        "editor_mode" "editor_mode" NOT NULL DEFAULT 'simple',
         "created_by" uuid REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL
       )
+    `);
+    await db.execute(sql`
+      ALTER TABLE "application_flows" ADD COLUMN IF NOT EXISTS "draft_flow_json" jsonb
+    `);
+    await db.execute(sql`
+      ALTER TABLE "application_flows" ADD COLUMN IF NOT EXISTS "editor_mode" "editor_mode" NOT NULL DEFAULT 'simple'
     `);
 
     await db.execute(sql`
@@ -318,9 +349,13 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
         "display_name_composed" text,
         "reviewed_by" uuid REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action,
         "reviewed_at" timestamp with time zone,
+        "ticket_channel_id" text,
         "created_at" timestamp with time zone DEFAULT now() NOT NULL,
         "updated_at" timestamp with time zone DEFAULT now() NOT NULL
       )
+    `);
+    await db.execute(sql`
+      ALTER TABLE "applications" ADD COLUMN IF NOT EXISTS "ticket_channel_id" text
     `);
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS "applications_flow_id_idx" ON "applications" ("flow_id")
@@ -368,6 +403,33 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
     `);
     await db.execute(sql`
       INSERT INTO "application_access_settings" ("id", "allow_moderator_access", "updated_at") VALUES (1, true, now())
+      ON CONFLICT ("id") DO NOTHING
+    `);
+
+    // ─── Landing Page Templates (idempotent) ──────────────────────────────
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "landing_templates" (
+        "id" text PRIMARY KEY NOT NULL,
+        "name" text NOT NULL,
+        "description" text,
+        "preview_url" text,
+        "is_builtin" boolean NOT NULL DEFAULT true,
+        "created_at" timestamp with time zone DEFAULT now() NOT NULL
+      )
+    `);
+    await db.execute(sql`
+      INSERT INTO "landing_templates" ("id", "name", "description", "is_builtin")
+      VALUES ('default', 'Default', 'A clean, minimal landing page suitable for any community.', true)
+      ON CONFLICT ("id") DO NOTHING
+    `);
+    await db.execute(sql`
+      INSERT INTO "landing_templates" ("id", "name", "description", "is_builtin")
+      VALUES ('gaming', 'Gaming', 'Bold and energetic — designed for gaming communities.', true)
+      ON CONFLICT ("id") DO NOTHING
+    `);
+    await db.execute(sql`
+      INSERT INTO "landing_templates" ("id", "name", "description", "is_builtin")
+      VALUES ('esports', 'eSports', 'Professional eSports layout with team showcase and stats.', true)
       ON CONFLICT ("id") DO NOTHING
     `);
   } finally {
