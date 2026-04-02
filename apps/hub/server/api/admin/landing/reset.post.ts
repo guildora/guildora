@@ -1,17 +1,26 @@
 import { eq } from "drizzle-orm";
 import { landingPages, landingSections } from "@guildora/shared";
+import { z } from "zod";
 import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
-import { defaultSections } from "@guildora/shared/db/seeds/landing-templates";
+import { readBodyWithSchema } from "../../../utils/http";
+import { templateSections, defaultSections } from "@guildora/shared/db/seeds/landing-templates";
+
+const resetSchema = z.object({
+  templateId: z.string().optional()
+}).optional();
 
 export default defineEventHandler(async (event) => {
   const session = await requireAdminSession(event);
+  const body = await readBodyWithSchema(event, resetSchema ?? z.object({}), "Invalid reset payload.").catch(() => undefined);
+  const templateId = body?.templateId || "default";
+  const sections = templateSections[templateId] ?? defaultSections;
 
   const db = getDb();
 
   await db.delete(landingSections);
 
-  for (const section of defaultSections) {
+  for (const section of sections) {
     await db.insert(landingSections).values({
       blockType: section.blockType,
       sortOrder: section.sortOrder,
@@ -27,7 +36,7 @@ export default defineEventHandler(async (event) => {
     await db
       .update(landingPages)
       .set({
-        activeTemplate: "default",
+        activeTemplate: templateId,
         customCss: null,
         updatedBy: session.user.id
       })

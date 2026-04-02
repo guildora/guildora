@@ -170,3 +170,233 @@ export const defaultSections: SectionSeed[] = [
     }
   }
 ];
+
+export const gamingSections: SectionSeed[] = [
+  {
+    blockType: "hero",
+    sortOrder: 0,
+    visible: true,
+    config: { layoutVariant: "gaming" },
+    content: {
+      en: {
+        eyebrowLabel: "Season 4 Now Live",
+        heading: "Level Up Your Game",
+        subheading: "Join the most competitive gaming community. Weekly tournaments, ranked scrims, and a crew that plays to win.",
+        ctaText: "Join the Fight",
+        ctaLink: "/apply",
+        ctaExploreLabel: "See Our Games"
+      },
+      de: {
+        eyebrowLabel: "Season 4 jetzt live",
+        heading: "Level Up dein Game",
+        subheading: "Tritt der kompetitivsten Gaming-Community bei. Wöchentliche Turniere, Ranked Scrims und ein Team, das spielt um zu gewinnen.",
+        ctaText: "Mach mit",
+        ctaLink: "/apply",
+        ctaExploreLabel: "Unsere Games"
+      }
+    }
+  },
+  {
+    blockType: "stats",
+    sortOrder: 1,
+    visible: true,
+    config: { layoutVariant: "gaming" },
+    content: {
+      en: {
+        sectionTitle: "By the Numbers",
+        stats: [
+          { value: "300+", label: "Active Members" },
+          { value: "6", label: "Game Titles" },
+          { value: "50+", label: "Weekly Matches" },
+          { value: "12", label: "Tournament Wins" }
+        ]
+      },
+      de: {
+        sectionTitle: "In Zahlen",
+        stats: [
+          { value: "300+", label: "Aktive Mitglieder" },
+          { value: "6", label: "Game-Titel" },
+          { value: "50+", label: "Matches pro Woche" },
+          { value: "12", label: "Turnier-Siege" }
+        ]
+      }
+    }
+  },
+  {
+    blockType: "features",
+    sortOrder: 2,
+    visible: true,
+    config: { columns: 3, layoutVariant: "gaming" },
+    content: {
+      en: {
+        sectionTitle: "Why We're Different",
+        features: [
+          { icon: "trophy", title: "Weekly Tournaments", description: "Compete in organized brackets every week with real prizes and rankings." },
+          { icon: "swords", title: "Ranked Scrims", description: "Structured practice against other top guilds to sharpen your skills." },
+          { icon: "graduation-cap", title: "Free Coaching", description: "Get reviewed by veterans who've hit the highest ranks." },
+          { icon: "gamepad-2", title: "Multi-Title", description: "FPS, MOBA, Battle Royale — we play it all competitively." },
+          { icon: "video", title: "Clip Culture", description: "Our content team highlights the best plays every week." },
+          { icon: "party-popper", title: "Game Nights", description: "Casual sessions where the whole community hangs out." }
+        ]
+      },
+      de: {
+        sectionTitle: "Was uns anders macht",
+        features: [
+          { icon: "trophy", title: "Wöchentliche Turniere", description: "Tritt jede Woche in organisierten Brackets mit echten Preisen an." },
+          { icon: "swords", title: "Ranked Scrims", description: "Strukturiertes Training gegen andere Top-Guilds." },
+          { icon: "graduation-cap", title: "Kostenloses Coaching", description: "Lass dich von Veteranen reviewen, die die höchsten Ränge erreicht haben." },
+          { icon: "gamepad-2", title: "Multi-Titel", description: "FPS, MOBA, Battle Royale — wir spielen alles kompetitiv." },
+          { icon: "video", title: "Clip-Kultur", description: "Unser Content-Team hebt die besten Plays jede Woche hervor." },
+          { icon: "party-popper", title: "Spieleabende", description: "Casual Sessions, bei denen die ganze Community zusammenkommt." }
+        ]
+      }
+    }
+  },
+  {
+    blockType: "discord-invite",
+    sortOrder: 3,
+    visible: true,
+    config: { layoutVariant: "gaming" },
+    content: {
+      en: { heading: "Join the Server", description: "Our Discord is where everything happens — matchmaking, strategy talks, and epic highlights." },
+      de: { heading: "Tritt dem Server bei", description: "Unser Discord ist der Ort, wo alles passiert — Matchmaking, Strategie-Talks und epische Highlights." }
+    }
+  },
+  {
+    blockType: "cta",
+    sortOrder: 4,
+    visible: true,
+    config: { variant: "accent", layoutVariant: "gaming" },
+    content: {
+      en: { heading: "Ready to Compete?", description: "Applications are open. Show us what you've got.", buttonText: "Apply Now", buttonLink: "/apply" },
+      de: { heading: "Bereit für den Wettkampf?", description: "Bewerbungen sind offen. Zeig uns, was du drauf hast.", buttonText: "Jetzt bewerben", buttonLink: "/apply" }
+    }
+  }
+];
+
+export const esportsSections: SectionSeed[] = [
+  {
+    blockType: "hero",
+    sortOrder: 0,
+    visible: true,
+    config: { layoutVariant: "esports" },
+    content: {
+      en: {
+        eyebrowLabel: "Professional eSports Organization",
+        heading: "Compete. Win. Dominate.",
+        subheading: "An elite eSports organization with competitive rosters, professional coaching, and a winning mindset.",
+        ctaText: "Apply for Roster",
+        ctaLink: "/apply"
+      },
+      de: {
+        eyebrowLabel: "Professionelle eSports-Organisation",
+        heading: "Antreten. Gewinnen. Dominieren.",
+        subheading: "Eine Elite-eSports-Organisation mit kompetitiven Rostern, professionellem Coaching und Sieger-Mentalität.",
+        ctaText: "Für Roster bewerben",
+        ctaLink: "/apply"
+      }
+    }
+  },
+  {
+    blockType: "team",
+    sortOrder: 1,
+    visible: true,
+    config: { layoutVariant: "esports" },
+    content: {
+      en: {
+        sectionTitle: "Our Roster",
+        members: [
+          { name: "Captain", role: "Team Captain / IGL", avatarUrl: "" },
+          { name: "Fragger", role: "Entry Fragger", avatarUrl: "" },
+          { name: "Support", role: "Support / Anchor", avatarUrl: "" },
+          { name: "Coach", role: "Head Coach", avatarUrl: "" }
+        ]
+      },
+      de: {
+        sectionTitle: "Unser Roster",
+        members: [
+          { name: "Captain", role: "Team Captain / IGL", avatarUrl: "" },
+          { name: "Fragger", role: "Entry Fragger", avatarUrl: "" },
+          { name: "Support", role: "Support / Anchor", avatarUrl: "" },
+          { name: "Coach", role: "Head Coach", avatarUrl: "" }
+        ]
+      }
+    }
+  },
+  {
+    blockType: "stats",
+    sortOrder: 2,
+    visible: true,
+    config: { layoutVariant: "esports" },
+    content: {
+      en: {
+        sectionTitle: "Track Record",
+        stats: [
+          { value: "1st", label: "Regional Championship" },
+          { value: "Top 8", label: "National League" },
+          { value: "95%", label: "Scrim Win Rate" },
+          { value: "3", label: "Active Rosters" }
+        ]
+      },
+      de: {
+        sectionTitle: "Erfolge",
+        stats: [
+          { value: "1.", label: "Regionale Meisterschaft" },
+          { value: "Top 8", label: "Nationale Liga" },
+          { value: "95%", label: "Scrim-Siegesrate" },
+          { value: "3", label: "Aktive Roster" }
+        ]
+      }
+    }
+  },
+  {
+    blockType: "features",
+    sortOrder: 3,
+    visible: true,
+    config: { columns: 3, layoutVariant: "esports" },
+    content: {
+      en: {
+        sectionTitle: "What We Offer",
+        features: [
+          { icon: "trophy", title: "Tournament Circuit", description: "Compete in official leagues and community tournaments year-round." },
+          { icon: "graduation-cap", title: "Pro Coaching", description: "VOD reviews, strategy sessions, and personalized improvement plans." },
+          { icon: "swords", title: "Daily Scrims", description: "Structured practice schedule against top-tier opponents." }
+        ]
+      },
+      de: {
+        sectionTitle: "Was wir bieten",
+        features: [
+          { icon: "trophy", title: "Turnier-Circuit", description: "Tritt ganzjährig in offiziellen Ligen und Community-Turnieren an." },
+          { icon: "graduation-cap", title: "Profi-Coaching", description: "VOD-Reviews, Strategie-Sessions und personalisierte Verbesserungspläne." },
+          { icon: "swords", title: "Tägliche Scrims", description: "Strukturierter Trainingsplan gegen Top-Gegner." }
+        ]
+      }
+    }
+  },
+  {
+    blockType: "discord-invite",
+    sortOrder: 4,
+    visible: true,
+    config: { layoutVariant: "esports" },
+    content: {
+      en: { heading: "Join Our Discord", description: "Connect with the team, watch scrims, and stay updated on roster changes." },
+      de: { heading: "Tritt unserem Discord bei", description: "Vernetze dich mit dem Team, schau bei Scrims zu und bleib über Roster-Änderungen informiert." }
+    }
+  },
+  {
+    blockType: "cta",
+    sortOrder: 5,
+    visible: true,
+    config: { variant: "accent", layoutVariant: "esports" },
+    content: {
+      en: { heading: "Think You've Got What It Takes?", description: "We're always looking for dedicated players. Apply for a roster spot.", buttonText: "Apply Now", buttonLink: "/apply" },
+      de: { heading: "Glaubst du, du hast das Zeug dazu?", description: "Wir suchen immer nach engagierten Spielern. Bewirb dich für einen Roster-Platz.", buttonText: "Jetzt bewerben", buttonLink: "/apply" }
+    }
+  }
+];
+
+export const templateSections: Record<string, SectionSeed[]> = {
+  default: defaultSections,
+  gaming: gamingSections,
+  esports: esportsSections
+};

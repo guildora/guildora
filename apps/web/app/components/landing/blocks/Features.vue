@@ -1,8 +1,10 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   content: Record<string, unknown>;
   config: Record<string, unknown>;
 }>();
+
+const variant = computed(() => String(props.config.layoutVariant || "default"));
 </script>
 
 <template>
@@ -14,13 +16,16 @@ defineProps<{
       <div
         v-for="(feature, i) in (content.features as Array<Record<string, unknown>>)"
         :key="i"
-        class="card bg-base-200 shadow-md transition-transform duration-200 hover:-translate-y-0.5"
+        :class="[
+          'rounded-xl p-5 transition-transform duration-200 hover:-translate-y-0.5',
+          variant === 'gaming' ? 'bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 shadow-lg shadow-purple-500/5' :
+          variant === 'esports' ? 'bg-white/5 border border-white/10' :
+          'bg-[var(--color-surface-2,#1a1a2e)] shadow-md'
+        ]"
       >
-        <div class="card-body gap-2">
-          <div class="mb-1 text-4xl">{{ feature.icon }}</div>
-          <h3 class="card-title text-base font-bold">{{ feature.title }}</h3>
-          <p class="text-sm opacity-70">{{ feature.description }}</p>
-        </div>
+        <div class="mb-2 text-3xl">{{ feature.icon }}</div>
+        <h3 class="text-base font-bold mb-1">{{ feature.title }}</h3>
+        <p class="text-sm opacity-70">{{ feature.description }}</p>
       </div>
     </div>
   </section>
