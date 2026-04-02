@@ -68,7 +68,7 @@ const resolvedNextLabel = computed(() =>
 <template>
   <Teleport to="body">
     <div v-if="state.active" class="tour-overlay">
-      <div class="tour-backdrop" @click="emit('skip')" />
+      <div class="tour-backdrop" @click="state.targetRect ? emit('skip') : undefined" />
       <div class="tour-spotlight" :style="spotlightStyle" />
       <div class="tour-tooltip" :style="tooltipStyle">
         <div class="tour-tooltip__header">

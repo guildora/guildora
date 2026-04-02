@@ -30,6 +30,7 @@ type FlowsResponse = {
 
 const { data, pending, error, refresh } = await useFetch<FlowsResponse>("/api/applications/flows");
 const actionPending = ref(false);
+const actionError = ref("");
 const showNewFlowInput = ref(false);
 const newFlowName = ref("");
 
@@ -67,9 +68,12 @@ const duplicateFlow = async (flowId: string) => {
 
 const deleteFlow = async (flowId: string) => {
   actionPending.value = true;
+  actionError.value = "";
   try {
     await $fetch(`/api/applications/flows/${flowId}`, { method: "DELETE" });
     await refresh();
+  } catch (e: any) {
+    actionError.value = e?.data?.message || e?.statusMessage || t("common.error");
   } finally {
     actionPending.value = false;
   }
@@ -113,6 +117,12 @@ const deleteFlow = async (flowId: string) => {
       <button class="btn btn-ghost btn-sm" @click="showNewFlowInput = false; newFlowName = ''">
         {{ t("common.cancel") }}
       </button>
+    </div>
+
+    <!-- Action error -->
+    <div v-if="actionError" class="alert alert-error flex items-center justify-between">
+      <span>{{ actionError }}</span>
+      <button class="btn btn-ghost btn-xs" @click="actionError = ''">✕</button>
     </div>
 
     <!-- Loading state -->

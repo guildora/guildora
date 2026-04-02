@@ -12,6 +12,8 @@ definePageMeta({
 const route = useRoute();
 const flowId = route.params.flowId as string;
 const { t } = useI18n();
+const { user } = useAuth();
+const isDev = useRuntimeConfig().public.isDev;
 
 type FlowResponse = {
   flow: {
@@ -232,8 +234,8 @@ const advancedTourSteps = computed<TourStep[]>(() => [
   }
 ]);
 
-const simpleTour = useOnboardingTour("flow_simple", simpleTourSteps.value);
-const advancedTour = useOnboardingTour("flow_advanced", advancedTourSteps.value);
+const simpleTour = useOnboardingTour("flow_simple", simpleTourSteps.value, user.value?.id);
+const advancedTour = useOnboardingTour("flow_advanced", advancedTourSteps.value, user.value?.id);
 
 const activeTour = computed(() =>
   editorMode.value === "simple" ? simpleTour : advancedTour
@@ -243,13 +245,26 @@ function startTour() {
   activeTour.value.start();
 }
 
+function resetTour() {
+  simpleTour.reset();
+  advancedTour.reset();
+  activeTour.value.start();
+}
+
 onMounted(() => {
   window.addEventListener("keydown", onKeydown);
-  // Start tour for current mode if not seen
-  nextTick(() => {
-    activeTour.value.startIfNotSeen(800);
-  });
 });
+
+// Start tour once data is loaded and content is rendered
+watch(
+  () => pending.value,
+  (isPending) => {
+    if (!isPending && data.value?.flow) {
+      nextTick(() => activeTour.value.startIfNotSeen(300));
+    }
+  },
+  { immediate: true }
+);
 
 onUnmounted(() => {
   window.removeEventListener("keydown", onKeydown);
@@ -292,7 +307,17 @@ onUnmounted(() => {
       </div>
 
       <button
-        class="btn btn-ghost btn-sm ml-auto"
+        v-if="isDev"
+        class="btn btn-ghost btn-sm ml-auto text-warning"
+        title="Reset Tutorial (Dev)"
+        @click="resetTour"
+      >
+        <Icon name="proicons:rotate" />
+        <span class="text-xs">Reset Tour</span>
+      </button>
+      <button
+        class="btn btn-ghost btn-sm"
+        :class="{ 'ml-auto': !isDev }"
         :title="t('applications.flowBuilder.tour.help')"
         @click="startTour"
       >

@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 export interface TourStep {
   target: string; // CSS selector
@@ -15,7 +15,7 @@ export interface TourState {
   targetRect: DOMRect | null;
 }
 
-export function useOnboardingTour(tourId: string, steps: TourStep[]) {
+export function useOnboardingTour(tourId: string, steps: TourStep[], userId?: string) {
   const state = ref<TourState>({
     active: false,
     currentStep: 0,
@@ -24,7 +24,12 @@ export function useOnboardingTour(tourId: string, steps: TourStep[]) {
     targetRect: null
   });
 
-  const storageKey = `guildora_tour_${tourId}_seen`;
+  const storageKey = userId
+    ? `guildora_tour_${tourId}_${userId}_seen`
+    : `guildora_tour_${tourId}_seen`;
+
+  // Generation counter — incremented on every goToStep/stop to cancel stale polls
+  let pollGeneration = 0;
 
   function hasBeenSeen(): boolean {
     try {
@@ -52,19 +57,53 @@ export function useOnboardingTour(tourId: string, steps: TourStep[]) {
     }
   }
 
+  /**
+   * Poll for a CSS selector to appear in the DOM.
+   * Resolves with the element once found, or null after maxWaitMs.
+   */
+  function waitForTarget(selector: string, generation: number, maxWaitMs = 5000, intervalMs = 100): Promise<Element | null> {
+    return new Promise((resolve) => {
+      const el = document.querySelector(selector);
+      if (el) { resolve(el); return; }
+
+      const start = Date.now();
+      const timer = setInterval(() => {
+        // Cancelled by a newer goToStep/stop call
+        if (generation !== pollGeneration) { clearInterval(timer); resolve(null); return; }
+        const found = document.querySelector(selector);
+        if (found) { clearInterval(timer); resolve(found); return; }
+        if (Date.now() - start >= maxWaitMs) { clearInterval(timer); resolve(null); }
+      }, intervalMs);
+    });
+  }
+
   function goToStep(index: number) {
+    pollGeneration++;
+    const myGeneration = pollGeneration;
+
     if (index < 0 || index >= steps.length) {
-      stop();
+      // All steps exhausted without finding targets — don't mark as seen
+      stop(false);
       return;
     }
+
     state.value.currentStep = index;
     state.value.step = steps[index];
-    nextTick(() => updateTargetRect());
+
+    waitForTarget(steps[index].target, myGeneration).then((el) => {
+      if (myGeneration !== pollGeneration) return; // stale
+      if (el) {
+        state.value.targetRect = el.getBoundingClientRect();
+        state.value.active = true;
+      } else {
+        // Target never appeared — skip to next step
+        goToStep(index + 1);
+      }
+    });
   }
 
   function start() {
     if (steps.length === 0) return;
-    state.value.active = true;
     goToStep(0);
   }
 
@@ -77,14 +116,15 @@ export function useOnboardingTour(tourId: string, steps: TourStep[]) {
   }
 
   function skip() {
-    stop();
+    stop(true);
   }
 
-  function stop() {
+  function stop(markAsSeen = true) {
+    pollGeneration++;
     state.value.active = false;
     state.value.step = null;
     state.value.targetRect = null;
-    markSeen();
+    if (markAsSeen) markSeen();
   }
 
   function startIfNotSeen(delayMs = 500) {
@@ -113,6 +153,14 @@ export function useOnboardingTour(tourId: string, steps: TourStep[]) {
     if (rafId) cancelAnimationFrame(rafId);
   });
 
+  function reset() {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // localStorage unavailable
+    }
+  }
+
   return {
     state,
     start,
@@ -120,6 +168,7 @@ export function useOnboardingTour(tourId: string, steps: TourStep[]) {
     skip,
     stop,
     startIfNotSeen,
-    hasBeenSeen
+    hasBeenSeen,
+    reset
   };
 }

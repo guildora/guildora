@@ -352,9 +352,9 @@ function setLocaleContent(section: LandingSection, key: string, value: unknown) 
   c[editLocale.value][key] = value;
 }
 
-onMounted(() => {
-  loadData();
-  nextTick(() => tour.startIfNotSeen(800));
+onMounted(async () => {
+  await loadData();
+  nextTick(() => tour.startIfNotSeen(300));
 });
 </script>
 
@@ -468,7 +468,7 @@ onMounted(() => {
       <div v-if="showBlockCatalog" class="landing-block-catalog rounded-xl bg-white/5 p-5">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold">{{ t("landingEditor.blockCatalog") }}</h3>
-          <button class="rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-white/10 transition-colors" @click="showBlockCatalog = false">&times;</button>
+          <button class="rounded-full w-7 h-7 flex items-center justify-center hover:bg-white/10 transition-colors" @click="showBlockCatalog = false"><Icon name="proicons:cancel" class="h-4 w-4" /></button>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <button
@@ -520,7 +520,7 @@ onMounted(() => {
           <div class="p-4">
             <div class="flex items-center gap-3">
               <!-- Drag handle -->
-              <div class="cursor-grab text-lg opacity-40 hover:opacity-70 select-none">&#x2630;</div>
+              <div class="cursor-grab opacity-40 hover:opacity-70 select-none"><Icon name="proicons:re-order" class="h-4 w-4" /></div>
 
               <!-- Block info -->
               <div class="flex-1 min-w-0">
@@ -536,16 +536,16 @@ onMounted(() => {
                   :title="section.visible ? 'Hide' : 'Show'"
                   @click="toggleVisibility(section)"
                 >
-                  {{ section.visible ? '&#x1F441;' : '&#x1F576;' }}
+                  <Icon :name="section.visible ? 'proicons:eye' : 'proicons:eye-off'" class="h-4 w-4" />
                 </button>
                 <button
                   class="rounded p-1.5 hover:bg-white/10 transition-colors text-sm"
                   @click="editingSection = editingSection?.id === section.id ? null : section"
                 >
-                  &#x270E;
+                  <Icon name="proicons:pencil" class="h-4 w-4" />
                 </button>
                 <button class="rounded p-1.5 hover:bg-red-500/20 transition-colors text-sm text-red-400" @click="removeSection(section.id)">
-                  &#x2716;
+                  <Icon name="proicons:delete" class="h-4 w-4" />
                 </button>
               </div>
             </div>
