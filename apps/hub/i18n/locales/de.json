@@ -701,6 +701,52 @@
         "advanced": "Erweitert",
         "incompatible": "Dieser Flow enthält Verzweigungen oder erweiterte Elemente, die im einfachen Modus nicht unterstützt werden. Entferne diese im erweiterten Editor, um zurückzuwechseln."
       },
+      "tour": {
+        "skip": "Überspringen",
+        "next": "Weiter",
+        "done": "Fertig",
+        "help": "Geführte Tour starten",
+        "simple": {
+          "modeToggle": {
+            "title": "Editor-Modi",
+            "description": "Wechsle zwischen Einfach (lineares Formular) und Erweitert (visueller Graph-Editor). Der einfache Modus ist ideal für unkomplizierte Bewerbungsformulare."
+          },
+          "sectionTitle": {
+            "title": "Abschnitte",
+            "description": "Dein Formular ist in Abschnitte gegliedert. Klicke auf den Titel, um ihn umzubenennen."
+          },
+          "addField": {
+            "title": "Felder hinzufügen",
+            "description": "Klicke hier, um ein neues Feld hinzuzufügen. Wähle aus Texteingaben, Auswahlen, Datei-Uploads und mehr."
+          },
+          "dragDrop": {
+            "title": "Felder sortieren",
+            "description": "Ziehe am Griff, um Felder innerhalb eines Abschnitts neu zu sortieren."
+          },
+          "publish": {
+            "title": "Änderungen veröffentlichen",
+            "description": "Deine Änderungen werden automatisch als Entwurf gespeichert. Klicke auf Veröffentlichen, um sie live zu schalten."
+          }
+        },
+        "advanced": {
+          "modeToggle": {
+            "title": "Editor-Modi",
+            "description": "Du bist im erweiterten Editor. Wechsle zum einfachen Modus für lineare Formulare ohne Verzweigungen."
+          },
+          "nodePalette": {
+            "title": "Knotenpalette",
+            "description": "Ziehe Knoten von hier auf die Arbeitsfläche. Verwende Eingabefelder, Info-Blöcke, Verzweigungen und mehr."
+          },
+          "canvas": {
+            "title": "Flow-Arbeitsfläche",
+            "description": "Verbinde Knoten, indem du von einem Anschluss zum anderen ziehst. Nutze Verzweigungen für komplexe Flows."
+          },
+          "publish": {
+            "title": "Speichern & Veröffentlichen",
+            "description": "Änderungen werden automatisch als Entwurf gespeichert. Veröffentliche, um deinen Flow zu aktivieren."
+          }
+        }
+      },
       "sidebar": {
         "inputType": "Eingabetyp",
         "label": "Bezeichnung",

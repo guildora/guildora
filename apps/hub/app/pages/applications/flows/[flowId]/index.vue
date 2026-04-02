@@ -2,6 +2,8 @@
 import type { ApplicationFlowGraph, EditorMode } from "@guildora/shared";
 import type { Node, Edge } from "@vue-flow/core";
 import { useFlowBuilder } from "~/composables/useFlowBuilder";
+import { useOnboardingTour } from "~/composables/useOnboardingTour";
+import type { TourStep } from "~/composables/useOnboardingTour";
 
 definePageMeta({
   middleware: ["moderator"],
@@ -168,8 +170,85 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
+// ─── Onboarding Tours ───────────────────────────────────────────────
+
+const simpleTourSteps = computed<TourStep[]>(() => [
+  {
+    target: ".mode-toggle",
+    title: t("applications.flowBuilder.tour.simple.modeToggle.title"),
+    description: t("applications.flowBuilder.tour.simple.modeToggle.description"),
+    placement: "bottom"
+  },
+  {
+    target: ".simple-section__title",
+    title: t("applications.flowBuilder.tour.simple.sectionTitle.title"),
+    description: t("applications.flowBuilder.tour.simple.sectionTitle.description"),
+    placement: "bottom"
+  },
+  {
+    target: ".add-field-dropdown",
+    title: t("applications.flowBuilder.tour.simple.addField.title"),
+    description: t("applications.flowBuilder.tour.simple.addField.description"),
+    placement: "top"
+  },
+  {
+    target: ".simple-field__handle",
+    title: t("applications.flowBuilder.tour.simple.dragDrop.title"),
+    description: t("applications.flowBuilder.tour.simple.dragDrop.description"),
+    placement: "right"
+  },
+  {
+    target: ".simple-builder__toolbar-right",
+    title: t("applications.flowBuilder.tour.simple.publish.title"),
+    description: t("applications.flowBuilder.tour.simple.publish.description"),
+    placement: "bottom"
+  }
+]);
+
+const advancedTourSteps = computed<TourStep[]>(() => [
+  {
+    target: ".mode-toggle",
+    title: t("applications.flowBuilder.tour.advanced.modeToggle.title"),
+    description: t("applications.flowBuilder.tour.advanced.modeToggle.description"),
+    placement: "bottom"
+  },
+  {
+    target: ".flow-toolbar__nodes",
+    title: t("applications.flowBuilder.tour.advanced.nodePalette.title"),
+    description: t("applications.flowBuilder.tour.advanced.nodePalette.description"),
+    placement: "right"
+  },
+  {
+    target: ".vue-flow",
+    title: t("applications.flowBuilder.tour.advanced.canvas.title"),
+    description: t("applications.flowBuilder.tour.advanced.canvas.description"),
+    placement: "left"
+  },
+  {
+    target: ".flow-toolbar__publish",
+    title: t("applications.flowBuilder.tour.advanced.publish.title"),
+    description: t("applications.flowBuilder.tour.advanced.publish.description"),
+    placement: "right"
+  }
+]);
+
+const simpleTour = useOnboardingTour("flow_simple", simpleTourSteps.value);
+const advancedTour = useOnboardingTour("flow_advanced", advancedTourSteps.value);
+
+const activeTour = computed(() =>
+  editorMode.value === "simple" ? simpleTour : advancedTour
+);
+
+function startTour() {
+  activeTour.value.start();
+}
+
 onMounted(() => {
   window.addEventListener("keydown", onKeydown);
+  // Start tour for current mode if not seen
+  nextTick(() => {
+    activeTour.value.startIfNotSeen(800);
+  });
 });
 
 onUnmounted(() => {
@@ -212,9 +291,16 @@ onUnmounted(() => {
         </button>
       </div>
 
+      <button
+        class="btn btn-ghost btn-sm ml-auto"
+        :title="t('applications.flowBuilder.tour.help')"
+        @click="startTour"
+      >
+        <Icon name="proicons:question-mark" />
+      </button>
       <NuxtLink
         :to="`/applications/flows/${flowId}/settings`"
-        class="btn btn-outline btn-sm ml-auto"
+        class="btn btn-outline btn-sm"
       >
         {{ t("applications.actions.settings") }}
       </NuxtLink>
@@ -281,6 +367,13 @@ onUnmounted(() => {
         </div>
       </template>
     </ClientOnly>
+
+    <!-- Onboarding Tour Overlay -->
+    <ApplicationsFlowBuilderFlowBuilderTour
+      :state="activeTour.state.value"
+      @next="activeTour.next()"
+      @skip="activeTour.skip()"
+    />
   </div>
 </template>
 

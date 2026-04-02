@@ -701,6 +701,52 @@
         "advanced": "Advanced",
         "incompatible": "This flow contains branches or advanced elements that are not supported in Simple Mode. Remove them in the Advanced editor to switch back."
       },
+      "tour": {
+        "skip": "Skip",
+        "next": "Next",
+        "done": "Done",
+        "help": "Show guided tour",
+        "simple": {
+          "modeToggle": {
+            "title": "Editor Modes",
+            "description": "Switch between Simple (linear form) and Advanced (visual graph) mode. Simple is perfect for straightforward application forms."
+          },
+          "sectionTitle": {
+            "title": "Sections",
+            "description": "Your form is organized in sections. Click a section title to rename it."
+          },
+          "addField": {
+            "title": "Add Fields",
+            "description": "Click here to add a new field to your section. Choose from text inputs, selections, file uploads, and more."
+          },
+          "dragDrop": {
+            "title": "Reorder Fields",
+            "description": "Drag the handle to reorder fields within a section."
+          },
+          "publish": {
+            "title": "Publish Changes",
+            "description": "Your changes are auto-saved as drafts. Click Publish to make them live."
+          }
+        },
+        "advanced": {
+          "modeToggle": {
+            "title": "Editor Modes",
+            "description": "You are in the Advanced editor. Switch to Simple mode for linear forms without branching."
+          },
+          "nodePalette": {
+            "title": "Node Palette",
+            "description": "Drag nodes from here onto the canvas to build your flow. Use input fields, info blocks, branches, and more."
+          },
+          "canvas": {
+            "title": "Flow Canvas",
+            "description": "Connect nodes by dragging from one handle to another. Use conditional branches for complex flows."
+          },
+          "publish": {
+            "title": "Save & Publish",
+            "description": "Changes are auto-saved as drafts. Publish to make your flow active."
+          }
+        }
+      },
       "sidebar": {
         "inputType": "Input Type",
         "label": "Label",
