@@ -7,9 +7,8 @@ Work correctly with the Payload CMS content model, access rules, and its integra
 ## When To Use
 
 - editing `apps/cms`
-- changing landing-page content structures
 - modifying CMS SSO behavior
-- updating how the landing app fetches landing data
+- working with editorial content (pages, media, site settings)
 
 ## Relevant Project Areas
 
@@ -18,16 +17,14 @@ Work correctly with the Payload CMS content model, access rules, and its integra
 - `apps/cms/src/globals/*`
 - `apps/cms/src/blocks/*`
 - `apps/cms/src/endpoints/cms-sso.ts`
-- `apps/web/app/components/landing/*`
-- `apps/web/app/composables/usePayload.ts`
 - `apps/hub/app/pages/cms/index.vue`
 
 ## Rules And Constraints
 
 - CMS tables live in the `payload` schema
-- public landing content is fetched over HTTP from the CMS, not read directly from the DB by the landing app
+- landing page content is **not** managed by CMS — it is managed in Hub via DB tables (`landing_sections`, `landing_pages`, etc.) and served by `/api/public/landing`
 - CMS roles are local to Payload
-- landing layout changes should map cleanly to the existing block renderer and `landing` slug fetch path
+- CMS is used for editorial content only (pages, media, site settings)
 - hub embeds CMS via signed SSO; it does not become the CMS runtime owner
 
 ## Step-By-Step Orientation
@@ -35,7 +32,7 @@ Work correctly with the Payload CMS content model, access rules, and its integra
 1. Read `docs/subsystems/cms.md`.
 2. Read `docs/workflows/cms-sso.md` if auth is involved.
 3. Inspect the relevant collection, block, or global definition.
-4. If the change affects rendering, inspect `CmsBlockRenderer` and the landing page fetch path.
+4. Note: landing page rendering is handled by Hub, not CMS — see `apps/web/app/composables/useLanding.ts` and `app/components/landing/blocks/`.
 
 ## Docs References
 

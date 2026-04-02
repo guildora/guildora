@@ -17,13 +17,15 @@ Understand how the repository is split across public landing, internal hub, CMS,
 - `apps/cms`
 - `apps/bot`
 - `packages/shared`
+- `packages/mcp-server`
 
 ## Rules And Constraints
 
 - treat the hub app as the operational center for members, moderation, admin logic, and the real auth flow
 - treat the web app as public landing plus a compatibility OAuth redirect shim
 - treat the bot as the source of truth for live Discord guild state
-- treat the CMS as the source of truth for public landing-page content
+- treat the Hub as the source of truth for landing-page content (DB-backed, managed at `/settings/landing`, served via `/api/public/landing`)
+- treat the CMS as the source of truth for editorial content only (pages, media, site settings — not landing pages)
 - do not assume the CMS and app-domain tables share the same schema namespace
 
 ## Step-By-Step Orientation

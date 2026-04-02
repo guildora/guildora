@@ -3,7 +3,7 @@
   "description": "Frontend route manifest split by public landing ownership in web and internal ownership in hub.",
   "apiBase": "/api",
   "pages": [
-    { "app": "web", "path": "/", "purpose": "CMS-backed public landing page with login CTA fallback", "auth": false, "layout": "default", "docsRef": "../docs/routing-and-navigation.md" },
+    { "app": "web", "path": "/", "purpose": "DB-backed public landing page (Hub API content) with login CTA fallback", "auth": false, "layout": "default", "docsRef": "../docs/routing-and-navigation.md" },
 
     { "app": "hub", "path": "/", "purpose": "Hub root redirect to /dashboard", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default", "redirectsTo": "/dashboard" },
     { "app": "hub", "path": "/login", "purpose": "Discord login entry page", "auth": false, "layout": "auth", "docsRef": "../docs/routing-and-navigation.md" },
@@ -23,6 +23,7 @@
     { "app": "hub", "path": "/settings/dev-role-switcher", "purpose": "Development role switcher and superadmin self-import tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/apps", "purpose": "Installed app management and sideloading", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/apps/review", "purpose": "App review interface", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
+    { "app": "hub", "path": "/settings/landing", "purpose": "Landing page editor (sections, templates, publish/version history)", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
 
     { "app": "hub", "path": "/applications", "purpose": "Application flow management root", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/applications/flows", "purpose": "Application flow listing", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },

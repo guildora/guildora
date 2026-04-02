@@ -6,7 +6,7 @@
     {
       "id": "users",
       "table": "users",
-      "fields": ["id", "discordId", "email", "displayName", "avatarUrl", "avatarSource", "primaryDiscordRoleName", "createdAt", "updatedAt"],
+      "fields": ["id", "discordId", "email", "displayName", "avatarUrl", "avatarSource", "primaryDiscordRoleName", "lastLoginAt", "createdAt", "updatedAt"],
       "primaryKey": "id",
       "notes": ["displayName is the serialized profile name string", "avatarSource tracks where the avatar was set from", "primaryDiscordRoleName is a snapshot of the user's primary Discord role"],
       "relations": ["profile", "permissionRoles", "communityRole", "discordRoles", "voiceSessions", "profileChangeLogs", "createdApps", "submittedAppSubmissions", "reviewedAppSubmissions", "createdApplicationFlows", "reviewedApplications", "applicationModeratorNotifications", "createdCommunityTags"]
@@ -48,11 +48,25 @@
       "notes": ["At most one community role per user"]
     },
     {
+      "id": "role_groups",
+      "table": "role_groups",
+      "fields": ["id", "name", "description", "sortOrder", "createdAt", "updatedAt"],
+      "primaryKey": "id",
+      "notes": ["Named groups for organizing selectable Discord roles"]
+    },
+    {
       "id": "selectable_discord_roles",
       "table": "selectable_discord_roles",
-      "fields": ["discordRoleId", "roleNameSnapshot", "createdAt", "updatedAt"],
+      "fields": ["discordRoleId", "roleNameSnapshot", "groupId", "emoji", "sortOrder", "createdAt", "updatedAt"],
       "primaryKey": "discordRoleId",
-      "notes": ["Global admin-managed allowlist for self-service Discord roles"]
+      "notes": ["Admin-managed allowlist for self-service Discord roles, optionally grouped via role_groups"]
+    },
+    {
+      "id": "role_picker_embeds",
+      "table": "role_picker_embeds",
+      "fields": ["id", "groupId", "discordChannelId", "discordMessageId", "createdAt", "updatedAt"],
+      "primaryKey": "id",
+      "notes": ["Discord message embeds for reaction-based role selection, one per role group"]
     },
     {
       "id": "user_discord_roles",
@@ -105,11 +119,11 @@
       "notes": ["Used as a singleton-like settings table by the hub app"]
     },
     {
-      "id": "cms_access_settings",
-      "table": "cms_access_settings",
+      "id": "moderation_settings",
+      "table": "moderation_settings",
       "fields": ["id", "allowModeratorAccess", "allowModeratorAppsAccess", "modDeleteUsers", "modManageApplications", "modAccessCommunitySettings", "modAccessDesign", "modAccessApps", "modAccessDiscordRoles", "modAccessCustomFields", "modAccessPermissions", "updatedAt", "updatedBy"],
       "primaryKey": "id",
-      "notes": ["Controls both CMS access and granular moderator permissions for settings sections", "Despite the table name, this now serves as the central moderation-rights configuration"]
+      "notes": ["Controls CMS access and granular moderator permissions for settings sections"]
     },
     {
       "id": "community_settings",
@@ -121,7 +135,7 @@
     {
       "id": "application_flows",
       "table": "application_flows",
-      "fields": ["id", "name", "status", "flowJson", "settingsJson", "createdBy", "createdAt", "updatedAt"],
+      "fields": ["id", "name", "status", "editorMode", "flowJson", "draftFlowJson", "settingsJson", "createdBy", "createdAt", "updatedAt"],
       "primaryKey": "id",
       "enums": { "status": ["draft", "active", "inactive"] },
       "notes": ["Visual node-based application flow definitions", "flowJson stores the ApplicationFlowGraph with nodes and edges", "settingsJson stores ApplicationFlowSettings"]
@@ -143,7 +157,7 @@
     {
       "id": "applications",
       "table": "applications",
-      "fields": ["id", "flowId", "discordId", "discordUsername", "discordAvatarUrl", "answersJson", "status", "rolesAssigned", "pendingRoleAssignments", "displayNameComposed", "reviewedBy", "reviewedAt", "createdAt", "updatedAt"],
+      "fields": ["id", "flowId", "discordId", "discordUsername", "discordAvatarUrl", "answersJson", "status", "rolesAssigned", "pendingRoleAssignments", "displayNameComposed", "ticketChannelId", "reviewedBy", "reviewedAt", "createdAt", "updatedAt"],
       "primaryKey": "id",
       "enums": { "status": ["pending", "approved", "rejected"] },
       "notes": ["Submitted applications linked to a flow", "answersJson stores the applicant's responses", "rolesAssigned and pendingRoleAssignments track Discord role assignment state"]
@@ -182,6 +196,49 @@
       "fields": ["id", "allowModeratorAccess", "updatedAt", "updatedBy"],
       "primaryKey": "id",
       "notes": ["Singleton controlling whether moderators can access the application management section"]
+    },
+    {
+      "id": "membership_settings",
+      "table": "membership_settings",
+      "fields": ["id", "applicationsRequired", "defaultCommunityRoleId", "requiredLoginRoleId", "autoSyncEnabled", "autoSyncIntervalHours", "autoSyncLastRun", "autoCleanupEnabled", "autoCleanupIntervalHours", "autoCleanupLastRun", "cleanupRoleConfigs", "cleanupRoleWhitelist", "cleanupProtectModerators", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "notes": ["Singleton controlling membership, auto-login, auto-sync, and auto-cleanup", "cleanupRoleConfigs is a per-permission-role JSONB config array (RoleCleanupConfig[])"]
+    },
+    {
+      "id": "cleanup_log",
+      "table": "cleanup_log",
+      "fields": ["id", "userId", "discordId", "discordUsername", "reason", "conditionsMatched", "rolesRemoved", "createdAt"],
+      "primaryKey": "id",
+      "notes": ["Audit log for auto-cleanup actions"]
+    },
+    {
+      "id": "landing_templates",
+      "table": "landing_templates",
+      "fields": ["id", "name", "description", "previewUrl", "isBuiltin", "createdAt"],
+      "primaryKey": "id",
+      "notes": ["Built-in and custom landing page templates"]
+    },
+    {
+      "id": "landing_pages",
+      "table": "landing_pages",
+      "fields": ["id", "activeTemplate", "customCss", "locale", "metaTitle", "metaDescription", "publishedAt", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "notes": ["Landing page configuration, one row per locale"]
+    },
+    {
+      "id": "landing_sections",
+      "table": "landing_sections",
+      "fields": ["id", "blockType", "sortOrder", "visible", "status", "config", "content", "updatedAt", "updatedBy"],
+      "primaryKey": "id",
+      "enums": { "status": ["draft", "published"] },
+      "notes": ["Individual content sections on the landing page"]
+    },
+    {
+      "id": "landing_page_versions",
+      "table": "landing_page_versions",
+      "fields": ["id", "snapshot", "label", "createdAt", "createdBy"],
+      "primaryKey": "id",
+      "notes": ["Version snapshots for landing page rollback"]
     }
   ]
 }
