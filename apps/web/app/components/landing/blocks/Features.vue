@@ -5,27 +5,41 @@ const props = defineProps<{
 }>();
 
 const variant = computed(() => String(props.config.layoutVariant || "default"));
+
+function iconName(icon: unknown): string {
+  const name = String(icon || "");
+  if (!name) return "";
+  if (name.includes(":")) return name;
+  return `lucide:${name}`;
+}
 </script>
 
 <template>
-  <section class="py-6">
-    <h2 v-if="content.sectionTitle" class="mb-8 text-center text-2xl font-bold md:text-3xl">
+  <section class="py-16 md:py-24">
+    <h2 v-if="content.sectionTitle" class="mb-10 text-center text-3xl font-bold tracking-tight md:text-4xl">
       {{ content.sectionTitle }}
     </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
       <div
         v-for="(feature, i) in (content.features as Array<Record<string, unknown>>)"
         :key="i"
         :class="[
-          'rounded-xl p-5 transition-transform duration-200 hover:-translate-y-0.5',
-          variant === 'gaming' ? 'bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 shadow-lg shadow-purple-500/5' :
-          variant === 'esports' ? 'bg-white/5 border border-white/10' :
-          'bg-[var(--color-surface-2,#1a1a2e)] shadow-md'
+          'rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5',
+          variant === 'gaming' ? 'bg-gradient-to-br from-purple-500/10 to-surface-2 shadow-md' :
+          variant === 'esports' ? 'bg-surface-2 shadow-md' :
+          'bg-surface-2 shadow-md'
         ]"
       >
-        <div class="mb-2 text-3xl">{{ feature.icon }}</div>
-        <h3 class="text-base font-bold mb-1">{{ feature.title }}</h3>
-        <p class="text-sm opacity-70">{{ feature.description }}</p>
+        <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-accent-subtle">
+          <Icon
+            v-if="feature.icon"
+            :name="iconName(feature.icon)"
+            class="h-5 w-5 text-accent-light"
+          />
+          <div v-else class="h-2 w-2 rounded-full bg-accent" />
+        </div>
+        <h3 class="mb-1.5 text-base font-semibold">{{ feature.title }}</h3>
+        <p class="text-sm leading-relaxed text-[var(--color-text-secondary)]">{{ feature.description }}</p>
       </div>
     </div>
   </section>

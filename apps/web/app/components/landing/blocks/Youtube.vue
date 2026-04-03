@@ -12,9 +12,9 @@ const videoId = computed(() => {
 </script>
 
 <template>
-  <section class="py-4">
-    <h2 v-if="content.title" class="mb-4 text-center text-2xl font-bold md:text-3xl">{{ content.title }}</h2>
-    <div class="aspect-video overflow-hidden rounded-2xl shadow-md">
+  <section class="py-16 md:py-24">
+    <h2 v-if="content.title" class="mb-6 text-center text-3xl font-bold tracking-tight md:text-4xl">{{ content.title }}</h2>
+    <div class="aspect-video overflow-hidden rounded-xl shadow-md">
       <iframe
         v-if="videoId"
         :src="`https://www.youtube-nocookie.com/embed/${videoId}`"

@@ -3,7 +3,9 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const { locale } = useI18n();
 const { fetchLandingPage } = useLanding();
-const landingPage = await fetchLandingPage(locale.value === "de" ? "de" : "en");
+const { data: landingPage } = await useAsyncData("landing-page", () =>
+  fetchLandingPage(locale.value === "de" ? "de" : "en")
+);
 
 const isPreview = computed(() => route.query.preview === "true");
 
@@ -19,11 +21,11 @@ const previewSections = ref<PreviewSection[] | null>(null);
 const previewCustomCss = ref<string | null>(null);
 
 const activeSections = computed(() =>
-  previewSections.value ?? landingPage?.sections ?? []
+  previewSections.value ?? landingPage.value?.sections ?? []
 );
 
 const activeCustomCss = computed(() =>
-  previewCustomCss.value ?? landingPage?.customCss ?? null
+  previewCustomCss.value ?? landingPage.value?.customCss ?? null
 );
 
 const hubLoginUrl = computed(() => {
@@ -38,10 +40,10 @@ const hubLoginUrl = computed(() => {
   }
 });
 
-if (landingPage?.meta?.title) {
+if (landingPage.value?.meta?.title) {
   useSeoMeta({
-    title: landingPage.meta.title,
-    description: landingPage.meta.description
+    title: landingPage.value.meta.title,
+    description: landingPage.value.meta.description
   });
 }
 
@@ -61,10 +63,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="['space-y-6', isPreview && 'pointer-events-none select-none']">
-    <div v-if="activeSections.length === 0" class="rounded-lg bg-blue-500/10 border border-blue-500/20 px-4 py-8 text-center">
+  <div :class="['space-y-6', isPreview && 'landing-preview-kiosk']">
+    <div v-if="activeSections.length === 0 && !isPreview" class="rounded-lg bg-blue-500/10 border border-blue-500/20 px-4 py-8 text-center">
       <span>{{ $t("landing.fallbackText") }}</span>
-      <a v-if="!isPreview" :href="hubLoginUrl" class="block mt-3 font-semibold text-[var(--color-accent)]">{{ $t("nav.login") }}</a>
+      <a :href="hubLoginUrl" class="block mt-3 font-semibold text-[var(--color-accent)]">{{ $t("nav.login") }}</a>
+    </div>
+    <div v-else-if="activeSections.length === 0 && isPreview" class="flex items-center justify-center min-h-[50vh] text-sm opacity-40">
+      {{ $t("landing.fallbackText") }}
     </div>
     <template v-else>
       <LandingBlockRenderer
@@ -72,11 +77,24 @@ onMounted(() => {
         :key="section.id"
         :section="section"
       />
-      <div v-if="!isPreview" class="pt-2">
-        <a :href="hubLoginUrl" class="inline-block rounded-lg bg-[var(--color-accent,#7C3AED)] px-6 py-3 text-sm font-medium text-white hover:opacity-90 transition-opacity">{{ $t("nav.login") }}</a>
-      </div>
     </template>
 
     <component v-if="activeCustomCss" :is="'style'" v-text="activeCustomCss" />
   </div>
 </template>
+
+<style scoped>
+.landing-preview-kiosk {
+  pointer-events: none;
+  user-select: none;
+}
+
+.landing-preview-kiosk :deep(a),
+.landing-preview-kiosk :deep(button),
+.landing-preview-kiosk :deep(input),
+.landing-preview-kiosk :deep(select),
+.landing-preview-kiosk :deep(textarea) {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+</style>

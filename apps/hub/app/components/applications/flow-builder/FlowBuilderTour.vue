@@ -14,7 +14,7 @@ defineEmits<{
 </script>
 
 <template>
-  <OnboardingTour
+  <SharedOnboardingTour
     :state="state"
     :skip-label="t('applications.flowBuilder.tour.skip')"
     :next-label="t('applications.flowBuilder.tour.next')"

@@ -8,7 +8,8 @@ import { readBodyWithSchema } from "../../../utils/http";
 const updatePageSchema = z.object({
   customCss: z.string().nullable().optional(),
   metaTitle: z.string().nullable().optional(),
-  metaDescription: z.string().nullable().optional()
+  metaDescription: z.string().nullable().optional(),
+  enabledLocales: z.array(z.string().min(2).max(5)).min(1).optional()
 });
 
 export default defineEventHandler(async (event) => {
@@ -22,6 +23,7 @@ export default defineEventHandler(async (event) => {
   if (body.customCss !== undefined) updateData.customCss = body.customCss;
   if (body.metaTitle !== undefined) updateData.metaTitle = body.metaTitle;
   if (body.metaDescription !== undefined) updateData.metaDescription = body.metaDescription;
+  if (body.enabledLocales !== undefined) updateData.enabledLocales = body.enabledLocales;
 
   if (page) {
     await db

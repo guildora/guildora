@@ -10,11 +10,12 @@ const inviteCode = computed(() => String(branding.value?.discordInviteCode || pr
 </script>
 
 <template>
-  <DiscordInviteWidget
-    v-if="inviteCode"
-    :invite-code="inviteCode"
-    :fallback-heading="String(content.heading || '')"
-    :fallback-description="String(content.description || '')"
-    :community-name="communityName"
-  />
+  <div v-if="inviteCode" class="py-16 md:py-24">
+    <DiscordInviteWidget
+      :invite-code="inviteCode"
+      :fallback-heading="String(content.heading || '')"
+      :fallback-description="String(content.description || '')"
+      :community-name="communityName"
+    />
+  </div>
 </template>

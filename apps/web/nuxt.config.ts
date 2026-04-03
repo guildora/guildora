@@ -6,9 +6,12 @@ export default defineNuxtConfig({
       }
     }
   },
-  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxt/eslint"],
+  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxt/eslint", "@nuxt/icon"],
   components: {
-    dirs: [{ path: "~/components", pathPrefix: false }]
+    dirs: [
+      { path: "~/components/landing/blocks", prefix: "LandingBlocks", pathPrefix: false, global: true },
+      { path: "~/components", pathPrefix: false }
+    ]
   },
   devtools: { enabled: false },
   css: ["~/assets/css/main.css"],

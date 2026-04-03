@@ -8,29 +8,29 @@ const variant = computed(() => String(props.config.layoutVariant || "default"));
 </script>
 
 <template>
-  <section class="py-6">
-    <h2 v-if="content.sectionTitle" class="mb-8 text-center text-2xl font-bold md:text-3xl">
+  <section class="py-16 md:py-24">
+    <h2 v-if="content.sectionTitle" class="mb-10 text-center text-3xl font-bold tracking-tight md:text-4xl">
       {{ content.sectionTitle }}
     </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
       <div
         v-for="(stat, i) in (content.stats as Array<Record<string, unknown>>)"
         :key="i"
         :class="[
-          'rounded-xl p-5 text-center',
-          variant === 'gaming' ? 'bg-gradient-to-b from-purple-500/10 to-transparent border border-purple-500/20' :
-          variant === 'esports' ? 'bg-white/5 border border-white/10' :
-          'bg-[var(--color-surface-2,#1a1a2e)] shadow-md'
+          'rounded-xl p-6 text-center',
+          variant === 'gaming' ? 'bg-gradient-to-b from-purple-500/10 to-surface-2 shadow-md' :
+          variant === 'esports' ? 'bg-surface-2 shadow-md' :
+          'bg-surface-2 shadow-md'
         ]"
       >
         <span
           :class="[
-            'block text-3xl font-extrabold',
+            'block text-4xl font-extrabold md:text-5xl',
             variant === 'gaming' ? 'text-purple-400' :
-            'text-[var(--color-accent,#7C3AED)]'
+            'text-accent'
           ]"
         >{{ stat.value }}</span>
-        <p class="text-sm font-medium opacity-70 mt-1">{{ stat.label }}</p>
+        <p class="mt-2 text-sm font-medium text-[var(--color-text-secondary)]">{{ stat.label }}</p>
       </div>
     </div>
   </section>

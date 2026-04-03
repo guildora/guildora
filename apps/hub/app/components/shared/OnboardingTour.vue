@@ -27,29 +27,60 @@ const spotlightStyle = computed(() => {
   };
 });
 
+const TOOLTIP_W = 288; // 18rem
+const VIEWPORT_PAD = 12;
+
 const tooltipStyle = computed(() => {
   const r = props.state.targetRect;
-  const placement = props.state.step?.placement ?? "bottom";
+  let placement = props.state.step?.placement ?? "bottom";
   if (!r) return { display: "none" };
 
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
   const style: Record<string, string> = {};
 
+  // If "right" would overflow, fall back to "bottom"
+  if (placement === "right" && r.right + TOOLTIP_GAP + TOOLTIP_W > vw - VIEWPORT_PAD) {
+    placement = "bottom";
+  }
+  // If "left" would overflow, fall back to "bottom"
+  if (placement === "left" && r.left - TOOLTIP_GAP - TOOLTIP_W < VIEWPORT_PAD) {
+    placement = "bottom";
+  }
+
+  let top = 0;
+  let left = 0;
+  let useBottomAnchor = false;
+
   if (placement === "bottom") {
-    style.top = `${r.bottom + TOOLTIP_GAP}px`;
-    style.left = `${r.left + r.width / 2}px`;
-    style.transform = "translateX(-50%)";
+    top = r.bottom + TOOLTIP_GAP;
+    left = r.left + r.width / 2 - TOOLTIP_W / 2;
   } else if (placement === "top") {
-    style.bottom = `${window.innerHeight - r.top + TOOLTIP_GAP}px`;
-    style.left = `${r.left + r.width / 2}px`;
-    style.transform = "translateX(-50%)";
+    useBottomAnchor = true;
+    left = r.left + r.width / 2 - TOOLTIP_W / 2;
   } else if (placement === "right") {
-    style.top = `${r.top + r.height / 2}px`;
-    style.left = `${r.right + TOOLTIP_GAP}px`;
+    top = r.top + r.height / 2;
+    left = r.right + TOOLTIP_GAP;
     style.transform = "translateY(-50%)";
   } else if (placement === "left") {
-    style.top = `${r.top + r.height / 2}px`;
-    style.right = `${window.innerWidth - r.left + TOOLTIP_GAP}px`;
+    top = r.top + r.height / 2;
+    left = r.left - TOOLTIP_GAP - TOOLTIP_W;
     style.transform = "translateY(-50%)";
+  }
+
+  // Clamp horizontal position to viewport
+  left = Math.max(VIEWPORT_PAD, Math.min(left, vw - TOOLTIP_W - VIEWPORT_PAD));
+
+  // Clamp vertical: if tooltip would go below viewport, push up
+  if (!useBottomAnchor && top > vh - VIEWPORT_PAD) {
+    top = vh - VIEWPORT_PAD;
+  }
+
+  style.left = `${left}px`;
+  if (useBottomAnchor) {
+    style.bottom = `${vh - r.top + TOOLTIP_GAP}px`;
+  } else {
+    style.top = `${top}px`;
   }
 
   return style;

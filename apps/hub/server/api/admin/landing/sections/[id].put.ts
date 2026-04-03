@@ -30,6 +30,14 @@ export default defineEventHandler(async (event) => {
   if (body.config !== undefined) updateData.config = body.config;
   if (body.content !== undefined) updateData.content = body.content;
 
+  // Auto-draft: when content or config changes on a published section, mark as draft
+  if ((body.content !== undefined || body.config !== undefined) && body.status === undefined) {
+    const [existing] = await db.select({ status: landingSections.status }).from(landingSections).where(eq(landingSections.id, id));
+    if (existing?.status === "published") {
+      updateData.status = "draft";
+    }
+  }
+
   const [updated] = await db
     .update(landingSections)
     .set(updateData)

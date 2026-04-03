@@ -6,28 +6,24 @@ defineProps<{
 </script>
 
 <template>
-  <section class="py-6">
-    <h2 v-if="content.sectionTitle" class="mb-8 text-center text-2xl font-bold md:text-3xl">
+  <section class="py-16 md:py-24">
+    <h2 v-if="content.sectionTitle" class="mb-10 text-center text-3xl font-bold tracking-tight md:text-4xl">
       {{ content.sectionTitle }}
     </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
       <div
         v-for="(item, i) in (content.testimonials as Array<Record<string, unknown>>)"
         :key="i"
-        class="card bg-base-200 shadow-md"
+        class="rounded-xl bg-surface-2 p-6 shadow-md"
       >
-        <div class="card-body">
-          <p class="text-sm italic opacity-80">"{{ item.quote }}"</p>
-          <div class="mt-3 flex items-center gap-3">
-            <div class="avatar" v-if="item.avatarUrl">
-              <div class="w-10 rounded-full">
-                <img :src="String(item.avatarUrl)" :alt="String(item.name || '')" />
-              </div>
-            </div>
-            <div>
-              <p class="text-sm font-bold">{{ item.name }}</p>
-              <p v-if="item.role" class="text-xs opacity-60">{{ item.role }}</p>
-            </div>
+        <p class="text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">"{{ item.quote }}"</p>
+        <div class="mt-5 flex items-center gap-3">
+          <div v-if="item.avatarUrl" class="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+            <img :src="String(item.avatarUrl)" :alt="String(item.name || '')" class="h-full w-full object-cover" />
+          </div>
+          <div>
+            <p class="text-sm font-semibold">{{ item.name }}</p>
+            <p v-if="item.role" class="text-xs text-[var(--color-text-secondary)]">{{ item.role }}</p>
           </div>
         </div>
       </div>

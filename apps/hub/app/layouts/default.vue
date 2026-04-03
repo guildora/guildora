@@ -65,6 +65,7 @@ const fallbackRail = computed(() => {
     { id: "dashboard", to: localePath("/dashboard"), label: t("nav.dashboard"), labelKey: "nav.dashboard", iconPath: iconNames.dashboard, visible: true },
     { id: "profile", to: localePath("/profile/customize"), label: t("nav.profile"), labelKey: "nav.profile", iconPath: "proicons:person", visible: true },
     { id: "members", to: localePath("/members"), label: t("nav.members"), labelKey: "nav.members", iconPath: iconNames.members, visible: true },
+    { id: "landing", to: localePath("/landing"), label: t("nav.landing"), labelKey: "nav.landing", iconPath: "proicons:layout", visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "settings", to: localePath("/settings"), label: t("nav.settings"), labelKey: "nav.settings", iconPath: iconNames.settings, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "apps", to: localePath("/apps"), label: t("nav.apps"), labelKey: "nav.apps", iconPath: iconNames.apps, visible: hasAnyRole("moderator", "admin", "superadmin") },
     { id: "dev", to: localePath("/dev"), label: t("nav.dev"), labelKey: "nav.dev", iconPath: iconNames.dev, visible: useRuntimeConfig().public.isDev === true }
@@ -169,8 +170,9 @@ const cmsBasePath = computed(() => localePath("/cms"));
 const isFlowBuilderRoute = computed(() => {
   return /^(\/[a-z]{2})?\/applications\/flows\/[^/]+$/.test(route.path);
 });
+const landingPreviewOpen = useState<boolean>("landing-preview-open", () => false);
 const isTinySidebar = computed(() => {
-  return isRouteMatch(cmsBasePath.value, route.path) || isFlowBuilderRoute.value;
+  return isRouteMatch(cmsBasePath.value, route.path) || isFlowBuilderRoute.value || landingPreviewOpen.value;
 });
 const isEmbedFullContentRoute = computed(() => {
   return isRouteMatch(cmsBasePath.value, route.path) || isFlowBuilderRoute.value;

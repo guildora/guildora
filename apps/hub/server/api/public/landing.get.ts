@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "public, max-age=30, stale-while-revalidate=120");
 
   const query = getQuery(event);
-  const locale = query.locale === "de" ? "de" : "en";
+  const locale = typeof query.locale === "string" && query.locale.length >= 2 ? query.locale : "en";
 
   const db = getDb();
 
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     .from(landingPages)
     .limit(1);
 
-  if (!page) {
+  if (!page || !page.publishedAt) {
     return { sections: [], template: null, customCss: null, meta: {} };
   }
 
