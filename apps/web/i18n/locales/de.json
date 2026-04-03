@@ -17,6 +17,10 @@
     "unsupported": "Dieser Block-Typ wird aktuell nicht unterstützt: {type}."
   },
   "footer": {
-    "tagline": "Community-Plattform"
+    "tagline": "Community-Plattform",
+    "rights": "Alle Rechte vorbehalten.",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "imprint": "Impressum"
   }
 }

@@ -22,7 +22,7 @@ import {
 } from "../../../utils/botSync";
 
 const bodySchema = z.object({
-  token: z.string().min(1),
+  token: z.string().min(1).optional(),
   answers: z.record(z.unknown()),
   fileUploadIds: z.array(z.string().uuid()).optional().default([])
 });
@@ -31,13 +31,35 @@ export default defineEventHandler(async (event) => {
   const flowId = requireRouterParam(event, "flowId", "Missing flow ID.");
   const body = await readBodyWithSchema(event, bodySchema, "Invalid submission payload.");
 
-  const verified = await verifyAndLoadToken(body.token);
-  if (!verified) {
-    throw createError({ statusCode: 401, statusMessage: "Invalid or expired token." });
+  let verified: Awaited<ReturnType<typeof verifyAndLoadToken>> = null;
+  let sessionAuth: { discordId: string; discordUsername: string; discordAvatarUrl: string | null } | null = null;
+
+  if (body.token) {
+    // Token-based auth (from bot)
+    verified = await verifyAndLoadToken(body.token);
+    if (!verified) {
+      throw createError({ statusCode: 401, statusMessage: "Invalid or expired token." });
+    }
+    if (verified.flowId !== flowId) {
+      throw createError({ statusCode: 400, statusMessage: "Token does not match this flow." });
+    }
+  } else {
+    // Session-based auth (from web OAuth)
+    const { requireSession } = await import("../../../utils/auth");
+    const session = await requireSession(event);
+    if (!session.user.discordId) {
+      throw createError({ statusCode: 400, statusMessage: "No Discord ID in session." });
+    }
+    sessionAuth = {
+      discordId: session.user.discordId,
+      discordUsername: session.user.profileName || "User",
+      discordAvatarUrl: session.user.avatarUrl || null
+    };
   }
-  if (verified.flowId !== flowId) {
-    throw createError({ statusCode: 400, statusMessage: "Token does not match this flow." });
-  }
+
+  const applicant = verified
+    ? { discordId: verified.discordId, discordUsername: verified.discordUsername, discordAvatarUrl: verified.discordAvatarUrl }
+    : sessionAuth!;
 
   const db = getDb();
 
@@ -61,7 +83,7 @@ export default defineEventHandler(async (event) => {
       .from(applications)
       .where(and(
         eq(applications.flowId, flowId),
-        eq(applications.discordId, verified.discordId),
+        eq(applications.discordId, applicant.discordId),
         eq(applications.status, "pending")
       ))
       .limit(1);
@@ -124,9 +146,9 @@ export default defineEventHandler(async (event) => {
   // Insert application
   const [application] = await db.insert(applications).values({
     flowId,
-    discordId: verified.discordId,
-    discordUsername: verified.discordUsername,
-    discordAvatarUrl: verified.discordAvatarUrl,
+    discordId: applicant.discordId,
+    discordUsername: applicant.discordUsername,
+    discordAvatarUrl: applicant.discordAvatarUrl,
     answersJson: body.answers,
     status: "pending",
     rolesAssigned: [],
@@ -134,17 +156,21 @@ export default defineEventHandler(async (event) => {
   }).returning();
 
   // Link file uploads + mark token used in parallel
-  await Promise.all([
-    body.fileUploadIds.length > 0
-      ? db.update(applicationFileUploads)
-          .set({ applicationId: application.id })
-          .where(and(
-            inArray(applicationFileUploads.id, body.fileUploadIds),
-            eq(applicationFileUploads.discordId, verified.discordId)
-          ))
-      : Promise.resolve(),
-    markTokenUsed(verified.tokenId)
-  ]);
+  const postInsertOps: Promise<unknown>[] = [];
+  if (body.fileUploadIds.length > 0) {
+    postInsertOps.push(
+      db.update(applicationFileUploads)
+        .set({ applicationId: application.id })
+        .where(and(
+          inArray(applicationFileUploads.id, body.fileUploadIds),
+          eq(applicationFileUploads.discordId, applicant.discordId)
+        ))
+    );
+  }
+  if (verified) {
+    postInsertOps.push(markTokenUsed(verified.tokenId));
+  }
+  await Promise.all(postInsertOps);
 
   // Assign roles via bot bridge (non-blocking for response)
   const assignedRoleIds: string[] = [];
@@ -152,7 +178,7 @@ export default defineEventHandler(async (event) => {
 
   if (allRoleIds.length > 0) {
     try {
-      const result = await addDiscordRolesToMember(verified.discordId, allRoleIds);
+      const result = await addDiscordRolesToMember(applicant.discordId, allRoleIds);
       if (result?.addedRoleIds) {
         assignedRoleIds.push(...result.addedRoleIds);
       }
@@ -165,7 +191,7 @@ export default defineEventHandler(async (event) => {
   const removeOnSubmission = settings.roles.removeOnSubmission || [];
   if (removeOnSubmission.length > 0) {
     try {
-      await removeDiscordRolesFromBot(verified.discordId, { roleIds: removeOnSubmission });
+      await removeDiscordRolesFromBot(applicant.discordId, { roleIds: removeOnSubmission });
     } catch {
       // Non-blocking
     }
@@ -179,7 +205,7 @@ export default defineEventHandler(async (event) => {
   // Create ticket channel/thread if enabled
   if (settings.ticket?.enabled) {
     const ticketName = (settings.ticket.nameTemplate || "{username}-bewerbung")
-      .replace("{username}", verified.discordUsername)
+      .replace("{username}", applicant.discordUsername)
       .replace("{applicationId}", application.id.substring(0, 8))
       .slice(0, 100);
 
@@ -190,14 +216,14 @@ export default defineEventHandler(async (event) => {
         const result = await createDiscordThread(
           settings.ticket.parentChannelId,
           ticketName,
-          { type: "private", memberUserIds: [verified.discordId] }
+          { type: "private", memberUserIds: [applicant.discordId] }
         );
         ticketChannelId = result?.threadId ?? null;
       } else if (settings.ticket.type === "channel" && settings.ticket.parentCategoryId) {
         // Build permission overwrites: allow applicant + access roles
         const VIEW_SEND = "3072"; // ViewChannel (1024) + SendMessages (2048)
         const overwrites: Array<{ id: string; type: number; allow: string; deny: string }> = [
-          { id: verified.discordId, type: 1, allow: VIEW_SEND, deny: "0" }
+          { id: applicant.discordId, type: 1, allow: VIEW_SEND, deny: "0" }
         ];
         for (const roleId of (settings.ticket.accessRoleIds || [])) {
           overwrites.push({ id: roleId, type: 0, allow: VIEW_SEND, deny: "0" });
@@ -218,8 +244,8 @@ export default defineEventHandler(async (event) => {
 
         if (settings.ticket.initialMessage) {
           const msg = settings.ticket.initialMessage
-            .replace("{discordId}", `<@${verified.discordId}>`)
-            .replace("{username}", verified.discordUsername);
+            .replace("{discordId}", `<@${applicant.discordId}>`)
+            .replace("{username}", applicant.discordUsername);
           sendChannelMessage(ticketChannelId, msg).catch(() => {});
         }
       }
@@ -245,7 +271,7 @@ export default defineEventHandler(async (event) => {
       .where(inArray(users.id, modUserIds));
 
     const dmMessage = settings.messages.dmToModsOnSubmission
-      || `A new application has been submitted by ${verified.discordUsername}.`;
+      || `A new application has been submitted by ${applicant.discordUsername}.`;
 
     // Fire all DMs concurrently, non-blocking
     Promise.all(

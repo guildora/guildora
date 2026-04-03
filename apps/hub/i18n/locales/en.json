@@ -3,7 +3,10 @@
     "name": "Guildora"
   },
   "nav": {
-    "landing": "Landing",
+    "landing": "Landing Page",
+    "landingEditor": "Editor",
+    "landingSettings": "Settings",
+    "landingFooter": "Footer Pages",
     "dashboard": "Dashboard",
     "members": "Members",
     "profile": "Profile",
@@ -12,7 +15,6 @@
     "login": "Login with Discord",
     "logout": "Logout",
     "apps": "Apps",
-    "landing": "Landing page",
     "applications": "Applications",
     "settings": "Settings",
     "dev": "DEV",
@@ -453,9 +455,11 @@
     "saved": "Changes saved.",
     "draft": "Draft",
     "published": "Published",
-    "publishAll": "Publish all",
-    "publishConfirm": "Publish all draft sections? They will become visible to visitors.",
+    "publishAll": "Publish",
+    "publishConfirm": "Publish all sections? They will become visible to visitors.",
     "publishSuccess": "All changes published.",
+    "unpublish": "Unpublish",
+    "unpublishConfirm": "Take the landing page offline? It will no longer be visible to visitors.",
     "noDrafts": "No unpublished changes.",
     "history": "History",
     "versionHistory": "Version history",
@@ -470,21 +474,143 @@
       "done": "Done",
       "help": "Show guided tour",
       "sectionsTitle": "Your Sections",
-      "sectionsDesc": "These are the content blocks on your landing page. Drag them to reorder, or click the edit icon to change content.",
+      "sectionsDesc": "These are the content blocks on your landing page — Hero banners, Feature grids, How-it-Works sections, Rich Text, Discord Invite widgets, and Call-to-Action buttons. Drag them to reorder, or click the pencil icon to edit content.",
       "blockItemTitle": "Edit, Reorder, Hide",
-      "blockItemDesc": "Use the drag handle to reorder blocks. Toggle visibility to hide a block without deleting it. Click the pencil to edit content.",
+      "blockItemDesc": "Use the drag handle to reorder blocks. Toggle the eye icon to hide a block without deleting it. Click the pencil to open the inline editor for that block's content.",
       "addBlockTitle": "Add Blocks",
-      "addBlockDesc": "Open the block catalog to browse all available block types and add them to your page.",
+      "addBlockDesc": "Open the block catalog to browse all available block types — Hero, Features, How It Works, Rich Text, Discord Invite, and Call to Action — and add them to your page.",
+      "publishTitle": "Save & Publish",
+      "publishDesc": "Save stores your changes as a draft. Publish makes your landing page live for visitors. You can also unpublish to take the page offline while you make edits.",
+      "settingsTitle": "Landing Settings",
+      "settingsDesc": "Configure languages, choose a design template, and manage advanced options like custom CSS on the Settings page.",
       "localeTitle": "Switch Language",
       "localeDesc": "Edit content separately for English and German. Use these buttons to switch between locales.",
       "templateTitle": "Templates",
       "templateDesc": "Switch between design templates. Your content is preserved — only the layout and styling change.",
       "seoTitle": "SEO Settings",
-      "seoDesc": "Set the meta title and description for search engines.",
+      "seoDesc": "Set the meta title and description so search engines and social media previews display the right information for your landing page.",
       "cssTitle": "Custom CSS",
       "cssDesc": "Inject custom CSS to fine-tune the landing page design beyond what templates offer.",
       "resetTitle": "Reset to Template",
       "resetDesc": "Reset all sections back to the template defaults. Warning: this removes all your custom content."
+    },
+    "languages": {
+      "title": "Languages",
+      "description": "Configure which languages are available for your landing page content.",
+      "addLanguage": "Add language",
+      "removeLanguage": "Remove",
+      "removeConfirm": "Remove this language? Content in this language will no longer be shown.",
+      "defaultNote": "The first language is the default. Visitors see this language unless they select another.",
+      "noOtherLanguages": "All available languages have been added."
+    }
+  },
+  "landingFooter": {
+    "title": "Footer Pages",
+    "description": "Create and manage pages that appear as links in your landing page footer.",
+    "pagesTitle": "Pages",
+    "addPage": "Add page",
+    "noPages": "No footer pages yet. Add a suggested page or create a custom one.",
+    "suggestedPages": "Suggested pages",
+    "slugLabel": "URL slug",
+    "titleLabel": "Page title",
+    "contentLabel": "Page content",
+    "hidden": "Hidden",
+    "loadError": "Failed to load footer pages.",
+    "saveError": "Failed to save footer page.",
+    "deleteError": "Failed to delete footer page.",
+    "deleteConfirmTitle": "Delete page",
+    "deleteConfirmText": "This page will be permanently removed from the footer."
+  },
+  "landingBlocks": {
+    "common": {
+      "sectionTitle": "Section title",
+      "addItem": "Add item",
+      "removeItem": "Remove",
+      "item": "item",
+      "items": "items"
+    },
+    "hero": {
+      "heading": "Heading",
+      "subheading": "Subheading",
+      "eyebrowLabel": "Eyebrow label",
+      "backgroundImage": "Background image URL",
+      "ctaText": "CTA button text",
+      "ctaLink": "CTA button link",
+      "ctaExploreLabel": "Explore button text"
+    },
+    "features": {
+      "items": "Features",
+      "icon": "Icon (emoji)",
+      "title": "Title",
+      "description": "Description"
+    },
+    "howItWorks": {
+      "steps": "Steps",
+      "stepTitle": "Step title",
+      "stepDescription": "Step description"
+    },
+    "cta": {
+      "heading": "Heading",
+      "description": "Description",
+      "buttonText": "Button text",
+      "buttonLink": "Button link",
+      "variant": "Style variant",
+      "variantDefault": "Default",
+      "variantAccent": "Accent",
+      "variantSecondary": "Secondary"
+    },
+    "richText": {
+      "title": "Title",
+      "body": "Body text"
+    },
+    "gallery": {
+      "images": "Images",
+      "imageUrl": "Image URL",
+      "imageAlt": "Alt text"
+    },
+    "youtube": {
+      "title": "Title",
+      "videoUrl": "YouTube video URL"
+    },
+    "discordInvite": {
+      "heading": "Heading",
+      "description": "Description",
+      "inviteCode": "Invite code"
+    },
+    "testimonials": {
+      "items": "Testimonials",
+      "quote": "Quote",
+      "name": "Name",
+      "role": "Role",
+      "avatarUrl": "Avatar URL"
+    },
+    "stats": {
+      "items": "Statistics",
+      "value": "Value",
+      "label": "Label"
+    },
+    "faq": {
+      "items": "FAQ items",
+      "question": "Question",
+      "answer": "Answer"
+    },
+    "team": {
+      "members": "Team members",
+      "name": "Name",
+      "role": "Role",
+      "avatarUrl": "Avatar URL"
+    },
+    "unsupported": "Unsupported block type: {type}",
+    "applications": {
+      "heading": "Heading",
+      "description": "Description",
+      "buttonText": "Button text",
+      "customLink": "Custom link",
+      "mode": "Mode",
+      "modeFlow": "Application Flow",
+      "modeLink": "Custom Link",
+      "flowId": "Application Flow",
+      "selectFlow": "Select a flow..."
     }
   },
   "language": {
@@ -514,9 +640,6 @@
   },
   "footer": {
     "tagline": "Community Platform"
-  },
-  "landingBlocks": {
-    "unsupported": "Unsupported block type: {type}"
   },
   "adminPermissions": {
     "title": "Permissions & User Sync",
@@ -646,6 +769,14 @@
     "applySuccess": "Your application has been submitted successfully!",
     "applySuccessHint": "You will be notified about the status of your application. You can close this page now.",
     "applyExpiredTitle": "Link expired",
+    "applyNoToken": {
+      "errorTitle": "Error",
+      "joinDiscord": "Join our Discord server",
+      "joinDiscordDesc": "You need to be a member of our Discord server before you can apply. Join the server and try again.",
+      "joinDiscordButton": "Join Discord",
+      "alreadyApplied": "Application already submitted",
+      "alreadyAppliedDesc": "You already have a pending application for this flow. Please wait for a response."
+    },
     "status": {
       "draft": "Draft",
       "active": "Active",

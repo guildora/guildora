@@ -318,6 +318,7 @@ export const landingPages = pgTable("landing_pages", {
     .default("default"),
   customCss: text("custom_css"),
   locale: text("locale").notNull().default("en"),
+  enabledLocales: jsonb("enabled_locales").$type<string[]>().notNull().default(sql`'["en"]'::jsonb`),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
   publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -349,6 +350,23 @@ export const landingPageVersions = pgTable("landing_page_versions", {
   label: text("label"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" })
+});
+
+// ─── Footer Pages ────────────────────────────────────────────────────────
+
+export const footerPages = pgTable("footer_pages", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  title: jsonb("title").$type<Record<string, string>>().notNull(),
+  content: jsonb("content").$type<Record<string, string>>().notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  visible: boolean("visible").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdateFn(() => new Date()),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" })
 });
 
 // ─── Community Settings ───────────────────────────────────────────────────

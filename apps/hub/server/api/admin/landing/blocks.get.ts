@@ -72,6 +72,12 @@ const blockTypes = [
     name: { en: "Team", de: "Team" },
     description: { en: "Team or member showcase with avatars and roles", de: "Team- oder Mitglieder-Vorstellung mit Avataren und Rollen" },
     icon: "users"
+  },
+  {
+    type: "applications",
+    name: { en: "Applications", de: "Bewerbungen" },
+    description: { en: "Apply button linked to an application flow or external URL", de: "Bewerben-Button verknüpft mit einem Bewerbungsablauf oder externer URL" },
+    icon: "clipboard-list"
   }
 ];
 

@@ -3,7 +3,10 @@
     "name": "Guildora"
   },
   "nav": {
-    "landing": "Startseite",
+    "landing": "Landing-Seite",
+    "landingEditor": "Editor",
+    "landingSettings": "Einstellungen",
+    "landingFooter": "Footer-Seiten",
     "dashboard": "Dashboard",
     "members": "Mitglieder",
     "profile": "Profil",
@@ -12,7 +15,6 @@
     "login": "Mit Discord anmelden",
     "logout": "Abmelden",
     "apps": "Apps",
-    "landing": "Landing-Seite",
     "applications": "Bewerbungen",
     "settings": "Einstellungen",
     "dev": "DEV",
@@ -453,9 +455,11 @@
     "saved": "Änderungen gespeichert.",
     "draft": "Entwurf",
     "published": "Veröffentlicht",
-    "publishAll": "Alle veröffentlichen",
-    "publishConfirm": "Alle Entwurfs-Sektionen veröffentlichen? Sie werden für Besucher sichtbar.",
-    "publishSuccess": "Alle Änderungen veröffentlicht.",
+    "publishAll": "Veroeffentlichen",
+    "publishConfirm": "Alle Sektionen veroeffentlichen? Sie werden fuer Besucher sichtbar.",
+    "publishSuccess": "Alle Aenderungen veroeffentlicht.",
+    "unpublish": "Offline nehmen",
+    "unpublishConfirm": "Die Landing-Seite offline nehmen? Sie wird fuer Besucher nicht mehr sichtbar sein.",
     "noDrafts": "Keine unveröffentlichten Änderungen.",
     "history": "Verlauf",
     "versionHistory": "Versionsverlauf",
@@ -470,21 +474,143 @@
       "done": "Fertig",
       "help": "Geführte Tour anzeigen",
       "sectionsTitle": "Deine Sektionen",
-      "sectionsDesc": "Das sind die Inhaltsblöcke auf deiner Landing-Seite. Ziehe sie zum Umordnen oder klicke auf den Stift zum Bearbeiten.",
+      "sectionsDesc": "Das sind die Inhaltsblöcke deiner Landing-Seite — Hero-Banner, Feature-Grids, How-it-Works-Sektionen, Rich Text, Discord-Einladungen und Call-to-Action-Buttons. Ziehe sie zum Umordnen oder klicke auf den Stift zum Bearbeiten.",
       "blockItemTitle": "Bearbeiten, Umordnen, Ausblenden",
-      "blockItemDesc": "Nutze den Ziehgriff zum Umordnen. Schalte die Sichtbarkeit um, ohne den Block zu löschen. Klicke den Stift zum Bearbeiten.",
+      "blockItemDesc": "Nutze den Ziehgriff zum Umordnen. Klicke das Auge-Symbol um einen Block auszublenden, ohne ihn zu löschen. Klicke den Stift um den Inline-Editor für den Block zu öffnen.",
       "addBlockTitle": "Blöcke hinzufügen",
-      "addBlockDesc": "Öffne den Block-Katalog, um alle verfügbaren Blocktypen zu durchsuchen und zur Seite hinzuzufügen.",
+      "addBlockDesc": "Öffne den Block-Katalog um alle verfügbaren Blocktypen zu durchsuchen — Hero, Features, How It Works, Rich Text, Discord Invite und Call to Action — und zur Seite hinzuzufügen.",
+      "publishTitle": "Speichern & Veröffentlichen",
+      "publishDesc": "Speichern sichert deine Änderungen als Entwurf. Veröffentlichen macht die Landing-Seite für Besucher sichtbar. Du kannst die Seite auch zurückziehen, um offline Änderungen vorzunehmen.",
+      "settingsTitle": "Landing-Einstellungen",
+      "settingsDesc": "Konfiguriere Sprachen, wähle ein Design-Template und verwalte erweiterte Optionen wie benutzerdefiniertes CSS auf der Einstellungsseite.",
       "localeTitle": "Sprache wechseln",
       "localeDesc": "Bearbeite Inhalte separat für Englisch und Deutsch. Nutze diese Buttons zum Umschalten.",
       "templateTitle": "Templates",
       "templateDesc": "Wechsle zwischen Design-Templates. Dein Inhalt bleibt erhalten — nur Layout und Styling ändern sich.",
       "seoTitle": "SEO-Einstellungen",
-      "seoDesc": "Setze Meta-Titel und Beschreibung für Suchmaschinen.",
+      "seoDesc": "Setze Meta-Titel und Beschreibung, damit Suchmaschinen und Social-Media-Vorschauen die richtigen Informationen für deine Landing-Seite anzeigen.",
       "cssTitle": "Benutzerdefiniertes CSS",
       "cssDesc": "Füge eigenes CSS ein, um das Landing-Page-Design über die Templates hinaus anzupassen.",
       "resetTitle": "Auf Template zurücksetzen",
       "resetDesc": "Alle Sektionen auf die Template-Standards zurücksetzen. Achtung: Alle benutzerdefinierten Inhalte gehen verloren."
+    },
+    "languages": {
+      "title": "Sprachen",
+      "description": "Konfiguriere, welche Sprachen fuer deine Landing-Page verfuegbar sind.",
+      "addLanguage": "Sprache hinzufuegen",
+      "removeLanguage": "Entfernen",
+      "removeConfirm": "Diese Sprache entfernen? Inhalte in dieser Sprache werden nicht mehr angezeigt.",
+      "defaultNote": "Die erste Sprache ist die Standardsprache. Besucher sehen diese, wenn sie keine andere waehlen.",
+      "noOtherLanguages": "Alle verfuegbaren Sprachen wurden bereits hinzugefuegt."
+    }
+  },
+  "landingFooter": {
+    "title": "Footer-Seiten",
+    "description": "Erstelle und verwalte Seiten, die als Links im Footer der Landing-Seite erscheinen.",
+    "pagesTitle": "Seiten",
+    "addPage": "Seite hinzufügen",
+    "noPages": "Noch keine Footer-Seiten. Füge eine vorgeschlagene Seite hinzu oder erstelle eine eigene.",
+    "suggestedPages": "Vorgeschlagene Seiten",
+    "slugLabel": "URL-Slug",
+    "titleLabel": "Seitentitel",
+    "contentLabel": "Seiteninhalt",
+    "hidden": "Versteckt",
+    "loadError": "Footer-Seiten konnten nicht geladen werden.",
+    "saveError": "Footer-Seite konnte nicht gespeichert werden.",
+    "deleteError": "Footer-Seite konnte nicht gelöscht werden.",
+    "deleteConfirmTitle": "Seite löschen",
+    "deleteConfirmText": "Diese Seite wird dauerhaft aus dem Footer entfernt."
+  },
+  "landingBlocks": {
+    "common": {
+      "sectionTitle": "Abschnittstitel",
+      "addItem": "Eintrag hinzufuegen",
+      "removeItem": "Entfernen",
+      "item": "Eintrag",
+      "items": "Eintraege"
+    },
+    "hero": {
+      "heading": "Ueberschrift",
+      "subheading": "Unterueberschrift",
+      "eyebrowLabel": "Dachzeile",
+      "backgroundImage": "Hintergrundbild-URL",
+      "ctaText": "CTA-Button-Text",
+      "ctaLink": "CTA-Button-Link",
+      "ctaExploreLabel": "Entdecken-Button-Text"
+    },
+    "features": {
+      "items": "Features",
+      "icon": "Icon (Emoji)",
+      "title": "Titel",
+      "description": "Beschreibung"
+    },
+    "howItWorks": {
+      "steps": "Schritte",
+      "stepTitle": "Schritt-Titel",
+      "stepDescription": "Schritt-Beschreibung"
+    },
+    "cta": {
+      "heading": "Ueberschrift",
+      "description": "Beschreibung",
+      "buttonText": "Button-Text",
+      "buttonLink": "Button-Link",
+      "variant": "Stil-Variante",
+      "variantDefault": "Standard",
+      "variantAccent": "Akzent",
+      "variantSecondary": "Sekundaer"
+    },
+    "richText": {
+      "title": "Titel",
+      "body": "Textinhalt"
+    },
+    "gallery": {
+      "images": "Bilder",
+      "imageUrl": "Bild-URL",
+      "imageAlt": "Alt-Text"
+    },
+    "youtube": {
+      "title": "Titel",
+      "videoUrl": "YouTube-Video-URL"
+    },
+    "discordInvite": {
+      "heading": "Ueberschrift",
+      "description": "Beschreibung",
+      "inviteCode": "Einladungscode"
+    },
+    "testimonials": {
+      "items": "Stimmen",
+      "quote": "Zitat",
+      "name": "Name",
+      "role": "Rolle",
+      "avatarUrl": "Avatar-URL"
+    },
+    "stats": {
+      "items": "Statistiken",
+      "value": "Wert",
+      "label": "Bezeichnung"
+    },
+    "faq": {
+      "items": "FAQ-Eintraege",
+      "question": "Frage",
+      "answer": "Antwort"
+    },
+    "team": {
+      "members": "Teammitglieder",
+      "name": "Name",
+      "role": "Rolle",
+      "avatarUrl": "Avatar-URL"
+    },
+    "unsupported": "Nicht unterstützter Blocktyp: {type}",
+    "applications": {
+      "heading": "Überschrift",
+      "description": "Beschreibung",
+      "buttonText": "Button-Text",
+      "customLink": "Eigener Link",
+      "mode": "Modus",
+      "modeFlow": "Bewerbungsablauf",
+      "modeLink": "Eigener Link",
+      "flowId": "Bewerbungsablauf",
+      "selectFlow": "Ablauf auswählen..."
     }
   },
   "language": {
@@ -514,9 +640,6 @@
   },
   "footer": {
     "tagline": "Community Plattform"
-  },
-  "landingBlocks": {
-    "unsupported": "Nicht unterstützter Blocktyp: {type}"
   },
   "adminPermissions": {
     "title": "Berechtigungen & Nutzer-Sync",
@@ -646,6 +769,14 @@
     "applySuccess": "Deine Bewerbung wurde erfolgreich eingereicht!",
     "applySuccessHint": "Du wirst ueber den Status deiner Bewerbung benachrichtigt. Du kannst diese Seite jetzt schliessen.",
     "applyExpiredTitle": "Link abgelaufen",
+    "applyNoToken": {
+      "errorTitle": "Fehler",
+      "joinDiscord": "Tritt unserem Discord-Server bei",
+      "joinDiscordDesc": "Du musst Mitglied unseres Discord-Servers sein, bevor du dich bewerben kannst. Tritt dem Server bei und versuche es erneut.",
+      "joinDiscordButton": "Discord beitreten",
+      "alreadyApplied": "Bewerbung bereits eingereicht",
+      "alreadyAppliedDesc": "Du hast bereits eine ausstehende Bewerbung für diesen Ablauf. Bitte warte auf eine Rückmeldung."
+    },
     "status": {
       "draft": "Entwurf",
       "active": "Aktiv",

@@ -38,6 +38,7 @@ const iconNames = {
   dashboard: "proicons:home",
   members: "proicons:person-multiple",
   profile: "proicons:person",
+  landing: "proicons:layout",
   settings: "proicons:settings",
   applications: "proicons:checkmark-circle",
   apps: "proicons:grid",
@@ -70,7 +71,10 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     members: { label: "Members", key: "nav.members" },
     profile: { label: "Profile", key: "nav.profile" },
     settings: { label: "Settings", key: "nav.settings" },
-    landing: { label: "Landing page", key: "nav.landing" },
+    landingSection: { label: "Landing Page", key: "nav.landing" },
+    landingEditor: { label: "Editor", key: "nav.landingEditor" },
+    landingSettings: { label: "Settings", key: "nav.landingSettings" },
+    landingFooter: { label: "Footer Pages", key: "nav.landingFooter" },
     overview: { label: "Overview", key: "dashboard.title" },
     memberList: { label: "Member list", key: "members.title" },
     community: { label: "Community", key: "settings.communityTitle" },
@@ -97,6 +101,7 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
     { id: "dashboard", to: "/dashboard", label: labels.dashboard.label, labelKey: labels.dashboard.key, iconPath: iconNames.dashboard, order: 10, requiredRoles: [] },
     { id: "profile", to: "/profile/customize", label: labels.profile.label, labelKey: labels.profile.key, iconPath: iconNames.profile, order: 15, requiredRoles: [] },
     { id: "members", to: "/members", label: labels.members.label, labelKey: labels.members.key, iconPath: iconNames.members, order: 20, requiredRoles: [] },
+    { id: "landing", to: "/landing", label: labels.landingSection.label, labelKey: labels.landingSection.key, iconPath: iconNames.landing, order: 50, requiredRoles: landingRequiredRoles },
     ...(applicationsEnabled ? [{
       id: "applications",
       to: "/applications",
@@ -139,9 +144,20 @@ export function getLocalizedCoreNavigation(locale: NavigationLocale, options: Co
         { id: "settings-custom-fields", label: labels.customFields.label, labelKey: labels.customFields.key, to: "/settings/custom-fields", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-permissions", label: labels.permissions.label, labelKey: labels.permissions.key, to: "/settings/permissions", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-moderation-rights", label: labels.moderationRights.label, labelKey: labels.moderationRights.key, to: "/settings/moderation-rights", requiredRoles: ["admin", "superadmin"] },
-        { id: "settings-landing", label: labels.landing.label, labelKey: labels.landing.key, to: "/settings/landing", requiredRoles: landingRequiredRoles },
         { id: "settings-design", label: labels.design.label, labelKey: labels.design.key, to: "/settings/design", requiredRoles: ["admin", "superadmin"] },
         { id: "settings-files", label: labels.files.label, labelKey: labels.files.key, to: "/settings/files", requiredRoles: ["superadmin"] }
+      ]
+    },
+    {
+      id: "landing-main",
+      railItemId: "landing",
+      title: labels.landingSection.label,
+      titleKey: labels.landingSection.key,
+      order: 10,
+      items: [
+        { id: "landing-editor", label: labels.landingEditor.label, labelKey: labels.landingEditor.key, to: "/landing/editor", requiredRoles: landingRequiredRoles },
+        { id: "landing-settings", label: labels.landingSettings.label, labelKey: labels.landingSettings.key, to: "/landing/settings", requiredRoles: landingRequiredRoles },
+        { id: "landing-footer", label: labels.landingFooter.label, labelKey: labels.landingFooter.key, to: "/landing/footer", requiredRoles: landingRequiredRoles }
       ]
     },
     ...(applicationsEnabled ? [{

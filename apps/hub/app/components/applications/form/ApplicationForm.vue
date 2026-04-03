@@ -62,7 +62,7 @@ async function submit() {
       {
         method: "POST",
         body: {
-          token: props.token,
+          ...(props.token ? { token: props.token } : {}),
           answers: answers.value,
           fileUploadIds: fileUploadIds.value
         }

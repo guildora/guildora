@@ -15,7 +15,8 @@ export const blockComponentMap: Record<string, string> = {
   "testimonials": "LandingBlocksTestimonials",
   "stats": "LandingBlocksStats",
   "faq": "LandingBlocksFaq",
-  "team": "LandingBlocksTeam"
+  "team": "LandingBlocksTeam",
+  "applications": "LandingBlocksApplications"
 };
 
 /**

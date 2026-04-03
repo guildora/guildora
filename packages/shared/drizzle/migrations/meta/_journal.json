@@ -190,6 +190,20 @@
       "when": 1775200000000,
       "tag": "0038_landing_draft_publish",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1775300000000,
+      "tag": "0039_landing_enabled_locales",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1775400000000,
+      "tag": "0040_footer_pages",
+      "breakpoints": true
     }
   ]
 }
