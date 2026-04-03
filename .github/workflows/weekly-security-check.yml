@@ -265,7 +265,10 @@ jobs:
           req = urllib.request.Request(
               webhook_url,
               data=payload.encode(),
-              headers={"Content-Type": "application/json"}
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "GitHub-Actions-Security-Check"
+              }
           )
           try:
               resp = urllib.request.urlopen(req)
@@ -300,7 +303,10 @@ jobs:
           req = urllib.request.Request(
               webhook_url,
               data=payload.encode(),
-              headers={"Content-Type": "application/json"}
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "GitHub-Actions-Security-Check"
+              }
           )
           try:
               resp = urllib.request.urlopen(req)
