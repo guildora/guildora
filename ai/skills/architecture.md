@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Understand how the repository is split across public landing, internal hub, CMS, bot, and shared package before making cross-cutting changes.
+Understand how the repository is split across public landing, internal hub, bot, and shared package before making cross-cutting changes.
 
 ## When To Use
 
@@ -14,7 +14,6 @@ Understand how the repository is split across public landing, internal hub, CMS,
 
 - `apps/web`
 - `apps/hub`
-- `apps/cms`
 - `apps/bot`
 - `packages/shared`
 - `packages/mcp-server`
@@ -25,8 +24,6 @@ Understand how the repository is split across public landing, internal hub, CMS,
 - treat the web app as public landing plus a compatibility OAuth redirect shim
 - treat the bot as the source of truth for live Discord guild state
 - treat the Hub as the source of truth for landing-page content (DB-backed, managed at `/settings/landing`, served via `/api/public/landing`)
-- treat the CMS as the source of truth for editorial content only (pages, media, site settings — not landing pages)
-- do not assume the CMS and app-domain tables share the same schema namespace
 
 ## Step-By-Step Orientation
 
@@ -42,7 +39,6 @@ Understand how the repository is split across public landing, internal hub, CMS,
 - `docs/architecture.md`
 - `docs/subsystems/web-app.md`
 - `docs/subsystems/web-landing.md`
-- `docs/subsystems/cms.md`
 - `docs/subsystems/bot.md`
 - `docs/subsystems/shared-package.md`
 

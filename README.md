@@ -7,7 +7,6 @@ Guildora is a monorepo for a Discord-centered community platform. It combines:
 
 - **`apps/web`** — Nuxt 4 public landing page
 - **`apps/hub`** — Nuxt 4 internal hub for members, moderation, admin, auth, and APIs
-- **`apps/cms`** — Payload CMS 3 / Next.js for content authoring
 - **`apps/bot`** — Discord bot for voice tracking, guild sync, and setup helpers
 - **`packages/shared`** — Shared TypeScript package with Drizzle schema, DB client, and cross-service types
 - **`packages/app-sdk`** — TypeScript SDK types for sideloaded community apps
@@ -36,7 +35,6 @@ Useful workspace scripts:
 - `pnpm db:migrate`
 - `pnpm db:seed`
 - `pnpm bot:deploy-commands`
-- `pnpm --filter @guildora/cms seed` — seed CMS with community content
 
 ## Documentation
 

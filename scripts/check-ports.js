@@ -1,5 +1,5 @@
 /**
- * Pre-dev port check: 3000 (Web), 3003 (Hub), 3002 (CMS) und 3050 (Bot).
+ * Pre-dev port check: 3000 (Web), 3003 (Hub) und 3050 (Bot).
  * Sind Ports belegt, werden die Prozesse automatisch beendet, danach startet dev.
  */
 const { execSync } = require("node:child_process");
@@ -15,7 +15,6 @@ function run(cmd, opts = {}) {
 const ports = [
   [3000, "Web"],
   [3003, "Hub"],
-  [3002, "CMS"],
   [3050, "Bot"]
 ].map(([port, name]) => ({
   port,

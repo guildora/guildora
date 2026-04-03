@@ -2,14 +2,13 @@
  * Automated tests for the Guildora landing page (localhost:3000).
  * Run with: node --test apps/web/tests/landing.test.mjs
  *
- * Requires both the web app (port 3000) and the CMS (port 3002) to be running.
+ * Requires the web app (port 3000) to be running.
  */
 
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
 const WEB_URL = "http://localhost:3000";
-const CMS_URL = "http://localhost:3002";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -21,107 +20,6 @@ async function fetchHtml(url, options = {}) {
   return { status: res.status, headers: res.headers, body: text };
 }
 
-async function fetchJson(url) {
-  const res = await fetch(url);
-  const json = await res.json();
-  return { status: res.status, json };
-}
-
-// ---------------------------------------------------------------------------
-// CMS API tests
-// ---------------------------------------------------------------------------
-
-describe("CMS API – /api/pages", () => {
-  test("CMS is reachable", async () => {
-    const res = await fetch(`${CMS_URL}/api/pages`);
-    assert.equal(res.status, 200, "CMS /api/pages should respond with 200");
-  });
-
-  test("landing page exists and is published (EN)", async () => {
-    const url = new URL(`${CMS_URL}/api/pages`);
-    url.searchParams.set("where[slug][equals]", "landing");
-    url.searchParams.set("where[status][equals]", "published");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("locale", "en");
-    url.searchParams.set("fallback-locale", "en");
-
-    const { status, json } = await fetchJson(url.toString());
-    assert.equal(status, 200, "CMS should return 200 for landing query");
-    assert.equal(json.totalDocs, 1, "Exactly one published landing page should exist");
-
-    const page = json.docs[0];
-    assert.equal(page.slug, "landing", "Page slug should be 'landing'");
-    assert.equal(page.status, "published", "Page status should be 'published'");
-    assert.ok(page.layout?.length > 0, "Landing page should have at least one block in the layout");
-    assert.ok(page.seo?.title, "Landing page should have an SEO title");
-  });
-
-  test("landing page exists and is published (DE)", async () => {
-    const url = new URL(`${CMS_URL}/api/pages`);
-    url.searchParams.set("where[slug][equals]", "landing");
-    url.searchParams.set("where[status][equals]", "published");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("locale", "de");
-    url.searchParams.set("fallback-locale", "en");
-
-    const { status, json } = await fetchJson(url.toString());
-    assert.equal(status, 200, "CMS should return 200 for DE landing query");
-    assert.equal(json.totalDocs, 1, "Exactly one published landing page (DE) should exist");
-
-    const page = json.docs[0];
-    const heroBlock = page.layout?.find((b) => b.blockType === "hero");
-    assert.ok(heroBlock, "DE layout should contain a hero block");
-    assert.ok(heroBlock.heading, "DE hero block should have a heading");
-  });
-
-  test("landing page layout contains all expected block types", async () => {
-    const url = new URL(`${CMS_URL}/api/pages`);
-    url.searchParams.set("where[slug][equals]", "landing");
-    url.searchParams.set("where[status][equals]", "published");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("locale", "en");
-
-    const { json } = await fetchJson(url.toString());
-    const layout = json.docs[0].layout;
-    const blockTypes = layout.map((b) => b.blockType);
-
-    const expected = ["hero", "features", "how-it-works", "marketplace-teaser", "self-host-cta"];
-    for (const type of expected) {
-      assert.ok(blockTypes.includes(type), `Layout should contain a '${type}' block, got: ${blockTypes.join(", ")}`);
-    }
-  });
-
-  test("hero block has required fields", async () => {
-    const url = new URL(`${CMS_URL}/api/pages`);
-    url.searchParams.set("where[slug][equals]", "landing");
-    url.searchParams.set("where[status][equals]", "published");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("locale", "en");
-
-    const { json } = await fetchJson(url.toString());
-    const hero = json.docs[0].layout.find((b) => b.blockType === "hero");
-
-    assert.ok(hero.heading, "Hero block should have a heading");
-    assert.ok(hero.subheading, "Hero block should have a subheading");
-  });
-
-  test("features block has at least one feature entry", async () => {
-    const url = new URL(`${CMS_URL}/api/pages`);
-    url.searchParams.set("where[slug][equals]", "landing");
-    url.searchParams.set("where[status][equals]", "published");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("locale", "en");
-
-    const { json } = await fetchJson(url.toString());
-    const features = json.docs[0].layout.find((b) => b.blockType === "features");
-
-    assert.ok(features, "Features block should be present");
-    assert.ok(Array.isArray(features.features) && features.features.length > 0, "Features block should have at least one feature");
-    assert.ok(features.features[0].title, "Each feature should have a title");
-    assert.ok(features.features[0].description, "Each feature should have a description");
-  });
-});
-
 // ---------------------------------------------------------------------------
 // Web frontend – HTML output
 // ---------------------------------------------------------------------------
@@ -132,7 +30,7 @@ describe("Landing page – HTML output (SSR)", () => {
     assert.equal(status, 200, "Landing page should respond with 200");
   });
 
-  test("HTML contains SEO title from CMS", async () => {
+  test("HTML contains SEO title", async () => {
     const { body } = await fetchHtml(WEB_URL);
     assert.ok(
       body.includes("Guildora"),
@@ -140,11 +38,11 @@ describe("Landing page – HTML output (SSR)", () => {
     );
   });
 
-  test("HTML does not show fallback text (CMS content loaded)", async () => {
+  test("HTML does not show fallback text (landing content loaded)", async () => {
     const { body } = await fetchHtml(WEB_URL);
     assert.ok(
       !body.includes("Landing page is not published yet."),
-      "Fallback text should NOT appear when CMS content is available"
+      "Fallback text should NOT appear when landing content is available"
     );
   });
 

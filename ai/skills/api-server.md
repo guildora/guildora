@@ -45,7 +45,6 @@ Work correctly within the Nitro API layer and its current auth, validation, and 
 - `docs/workflows/applications.md`
 - `docs/workflows/discord-role-management.md`
 - `docs/workflows/admin-user-mirroring.md`
-- `docs/workflows/cms-sso.md`
 - `docs/workflows/app-lifecycle.md`
 
 ## Common Mistakes To Avoid

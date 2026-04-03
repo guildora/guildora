@@ -29,7 +29,7 @@ Use the shared schema and domain concepts correctly when changing persistence, j
 - `applicationAccessSettings` is a singleton that controls moderator access to the applications section
 - `communityTags` are moderator-managed labels distinct from Discord roles
 - `roleGroups` organize selectable Discord roles; each group can have one `rolePickerEmbed` for Discord reaction-based role selection
-- landing page content is stored in `landingTemplates`, `landingPages`, `landingSections`, and `landingPageVersions` — not in the CMS
+- landing page content is stored in `landingTemplates`, `landingPages`, `landingSections`, and `landingPageVersions`
 - `membershipSettings.cleanupRoleConfigs` is a per-permission-role JSONB config array, replacing the former global cleanup conditions
 
 ## Step-By-Step Orientation
@@ -53,4 +53,3 @@ Use the shared schema and domain concepts correctly when changing persistence, j
 
 - documenting fields that do not exist, such as `profiles.bio`
 - treating `user_discord_roles` as the live source of truth for Discord
-- forgetting the `payload` schema is separate from the main app domain

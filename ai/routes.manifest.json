@@ -17,7 +17,7 @@
     { "app": "hub", "path": "/settings", "purpose": "Settings root redirect to last visited settings subsection", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/community", "purpose": "Community name, locale, display-name template, and Discord invite settings", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/custom-fields", "purpose": "Admin-managed custom profile fields with visibility and edit permissions", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/permissions", "purpose": "Permission role, community role, CMS access, and mirror admin tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
+    { "app": "hub", "path": "/settings/permissions", "purpose": "Permission role, community role, and mirror admin tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/moderation-rights", "purpose": "Granular moderator access flags for settings sections and actions", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/design", "purpose": "Internal theme and logo editor", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/settings/dev-role-switcher", "purpose": "Development role switcher and superadmin self-import tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
@@ -45,7 +45,6 @@
 
     { "app": "hub", "path": "/marketplace", "purpose": "Embedded external marketplace shell", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
     { "app": "hub", "path": "/marketplace/submit", "purpose": "App marketplace submission form", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/marketplace/:appId", "purpose": "Marketplace app detail page", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/cms", "purpose": "Embedded CMS admin session bootstrap", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" }
+    { "app": "hub", "path": "/marketplace/:appId", "purpose": "Marketplace app detail page", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" }
   ]
 }

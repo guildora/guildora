@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Apply the repository's real access model correctly across sessions, page middleware, server handlers, and CMS SSO.
+Apply the repository's real access model correctly across sessions, page middleware, and server handlers.
 
 ## When To Use
 
@@ -16,7 +16,6 @@ Apply the repository's real access model correctly across sessions, page middlew
 - `apps/hub/server/utils/auth.ts`
 - `apps/hub/app/middleware/*` (incl. `mandatory-fields.global.ts` for required custom fields, `settings.ts` for moderation-rights gating)
 - `apps/hub/server/api/*`
-- `apps/hub/server/utils/cms-access.ts`
 - `apps/web/server/api/auth/discord.get.ts`
 
 ## Rules And Constraints
@@ -24,25 +23,20 @@ Apply the repository's real access model correctly across sessions, page middlew
 - canonical session field is `permissionRoles`
 - `roles` is a legacy alias only
 - `requireSession` allows any logged-in role, including `temporaer`
-- `/cms` page access is finalized by the API, not just page middleware
-- CMS roles are separate from app-domain permission roles
 - landing does not own real auth; it can only forward to hub
 
 ## Step-By-Step Orientation
 
 1. Read `docs/permissions-matrix.md`.
 2. Read `docs/api-contracts.md`.
-3. Read `docs/workflows/cms-sso.md` if CMS access is involved.
-4. Inspect the relevant route handler and any shared auth utility.
+3. Inspect the relevant route handler and any shared auth utility.
 
 ## Docs References
 
 - `docs/permissions-matrix.md`
 - `docs/api-contracts.md`
-- `docs/workflows/cms-sso.md`
 
 ## Common Mistakes To Avoid
 
 - assuming `session` means only `user` and above
 - gating a page correctly but leaving the API under-protected
-- conflating app permission roles with Payload CMS roles
