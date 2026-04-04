@@ -71,9 +71,13 @@ const tooltipStyle = computed(() => {
   // Clamp horizontal position to viewport
   left = Math.max(VIEWPORT_PAD, Math.min(left, vw - TOOLTIP_W - VIEWPORT_PAD));
 
-  // Clamp vertical: if tooltip would go below viewport, push up
-  if (!useBottomAnchor && top > vh - VIEWPORT_PAD) {
-    top = vh - VIEWPORT_PAD;
+  // Clamp vertical: if tooltip would go below viewport, flip to top placement
+  const TOOLTIP_ESTIMATED_H = 160; // approximate tooltip height
+  if (!useBottomAnchor && top + TOOLTIP_ESTIMATED_H > vh - VIEWPORT_PAD) {
+    // Flip to above the target
+    useBottomAnchor = true;
+    style.bottom = `${vh - r.top + TOOLTIP_GAP}px`;
+    delete style.transform;
   }
 
   style.left = `${left}px`;

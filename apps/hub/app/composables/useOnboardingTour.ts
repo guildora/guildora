@@ -93,8 +93,21 @@ export function useOnboardingTour(tourId: string, steps: TourStep[], userId?: st
     waitForTarget(steps[index].target, myGeneration).then((el) => {
       if (myGeneration !== pollGeneration) return; // stale
       if (el) {
-        state.value.targetRect = el.getBoundingClientRect();
-        state.value.active = true;
+        // Scroll target into view if not visible
+        const rect = el.getBoundingClientRect();
+        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        if (!isVisible) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Wait for scroll to finish, then update rect
+          setTimeout(() => {
+            if (myGeneration !== pollGeneration) return;
+            state.value.targetRect = el.getBoundingClientRect();
+            state.value.active = true;
+          }, 400);
+        } else {
+          state.value.targetRect = rect;
+          state.value.active = true;
+        }
       } else {
         // Target never appeared — skip to next step
         goToStep(index + 1);
