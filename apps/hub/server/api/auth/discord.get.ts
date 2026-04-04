@@ -79,7 +79,10 @@ function decodeOauthState(value: string): DiscordOauthStatePayload | null {
 function timingSafeEqualString(input: string, expected: string) {
   const inputBuffer = Buffer.from(input, "utf8");
   const expectedBuffer = Buffer.from(expected, "utf8");
-  return inputBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(inputBuffer, expectedBuffer);
+  const maxLen = Math.max(inputBuffer.length, expectedBuffer.length);
+  const paddedInput = Buffer.concat([inputBuffer, Buffer.alloc(maxLen - inputBuffer.length)]);
+  const paddedExpected = Buffer.concat([expectedBuffer, Buffer.alloc(maxLen - expectedBuffer.length)]);
+  return crypto.timingSafeEqual(paddedInput, paddedExpected);
 }
 
 export default defineEventHandler(async (event) => {

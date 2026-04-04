@@ -2,15 +2,9 @@
 const { t } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
-const { loggedIn, user, logout } = useAuth();
+const { loggedIn, user, logout, hasRole } = useAuth();
 
 const mobileMenuOpen = ref(false);
-
-const hasRole = (role: string) => {
-  const currentUser = (user.value as { permissionRoles?: string[]; roles?: string[] } | null) || null;
-  const roles = (currentUser?.permissionRoles ?? currentUser?.roles ?? []) as string[];
-  return roles.includes(role);
-};
 
 const navItems = computed(() => {
   const items = [

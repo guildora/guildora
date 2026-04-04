@@ -4,6 +4,7 @@ import { installedApps } from "@guildora/shared";
 import { requireAdminSession } from "../../../../utils/auth";
 import { getDb } from "../../../../utils/db";
 import { readBodyWithSchema, requireRouterParam } from "../../../../utils/http";
+import { refreshAppRegistry } from "../../../../utils/apps";
 
 const autoUpdateSchema = z.object({
   autoUpdate: z.boolean()
@@ -16,6 +17,8 @@ export default defineEventHandler(async (event) => {
 
   const db = getDb();
   await db.update(installedApps).set({ autoUpdate: parsed.autoUpdate }).where(eq(installedApps.appId, appId));
+
+  await refreshAppRegistry();
 
   return { ok: true };
 });

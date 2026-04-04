@@ -42,6 +42,8 @@ export async function replaceAuthSession(
     sessionData.originalUserId = originalUserId;
   }
 
+  const isDev = import.meta.dev || process.env.NODE_ENV === "development";
+
   await replaceUserSession(
     event,
     sessionData,
@@ -49,7 +51,9 @@ export async function replaceAuthSession(
       maxAge: sessionMaxAgeSeconds,
       cookie: {
         maxAge: sessionMaxAgeSeconds,
-        sameSite: "lax"
+        sameSite: "lax",
+        secure: !isDev,
+        httpOnly: true
       }
     }
   );

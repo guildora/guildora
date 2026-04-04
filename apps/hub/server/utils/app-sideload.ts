@@ -414,6 +414,8 @@ export async function installAppFromUrl(
     verified?: boolean;
     createdBy?: string | null;
     preserveAutoUpdate?: boolean;
+    preserveConfig?: boolean;
+    preserveCodeBundle?: boolean;
   }
 ): Promise<{ appId: string }> {
   const manifestUrls = resolveManifestUrls(githubUrl);
@@ -517,7 +519,8 @@ export async function installAppFromUrl(
         repositoryUrl,
         verified,
         autoUpdate,
-        codeBundle,
+        ...(options.preserveCodeBundle === true ? {} : { codeBundle }),
+        ...(options.preserveConfig === true ? {} : { config: {} }),
         updatedAt: new Date()
       })
       .where(eq(installedApps.appId, manifest.id));
@@ -552,6 +555,7 @@ export async function installAppFromLocalPath(
     activate?: boolean;
     verified?: boolean;
     preserveConfig?: boolean;
+    preserveCodeBundle?: boolean;
   }
 ): Promise<{ appId: string }> {
   const manifestPath = join(localPath, "manifest.json");
@@ -655,7 +659,7 @@ export async function installAppFromLocalPath(
         status,
         repositoryUrl,
         verified,
-        codeBundle,
+        ...(options.preserveCodeBundle === true ? {} : { codeBundle }),
         config,
         updatedAt: new Date()
       })

@@ -1,13 +1,22 @@
+import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { installedApps } from "@guildora/shared";
 import { requireAdminSession } from "../../../../utils/auth";
 import { getDb } from "../../../../utils/db";
-import { requireRouterParam } from "../../../../utils/http";
+import { readBodyWithSchema, requireRouterParam } from "../../../../utils/http";
 import { installAppFromUrl, installAppFromLocalPath } from "../../../../utils/app-sideload";
+
+const updateSchema = z.object({
+  preserveConfig: z.boolean().default(true),
+  preserveCodeBundle: z.boolean().default(true)
+});
 
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const appId = requireRouterParam(event, "appId", "Missing app id.");
+  const { preserveConfig, preserveCodeBundle } = await readBodyWithSchema(event, updateSchema, "Invalid update payload.", {
+    emptyBodyValue: {}
+  });
 
   const db = getDb();
   const rows = await db.select().from(installedApps).where(eq(installedApps.appId, appId)).limit(1);
@@ -25,7 +34,8 @@ export default defineEventHandler(async (event) => {
     const result = await installAppFromLocalPath(localPath, {
       activate: existing.status === "active",
       verified: existing.verified,
-      preserveConfig: true
+      preserveConfig,
+      preserveCodeBundle
     });
     return { ok: true, appId: result.appId };
   }
@@ -33,7 +43,9 @@ export default defineEventHandler(async (event) => {
   const result = await installAppFromUrl(existing.repositoryUrl, {
     activate: existing.status === "active",
     verified: existing.verified,
-    preserveAutoUpdate: true
+    preserveAutoUpdate: true,
+    preserveConfig,
+    preserveCodeBundle
   });
 
   return { ok: true, appId: result.appId };
