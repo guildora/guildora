@@ -1,10 +1,12 @@
+import { z } from "zod";
 import { requireSuperadminSession } from "../../../utils/auth";
 import { getMediaService } from "../../../utils/media";
+import { readBodyWithSchema } from "../../../utils/http";
 
 export default defineEventHandler(async (event) => {
   await requireSuperadminSession(event);
 
-  const body = await readBody(event);
+  const body = await readBodyWithSchema(event, z.object({ confirmation: z.string() }));
   const media = getMediaService();
   const status = media.getBucketStatus();
 
@@ -12,7 +14,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "No bucket configured." });
   }
 
-  if (!body?.confirmation || body.confirmation !== status.bucket) {
+  if (body.confirmation !== status.bucket) {
     throw createError({ statusCode: 400, statusMessage: "Confirmation does not match bucket name." });
   }
 

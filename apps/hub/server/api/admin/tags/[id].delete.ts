@@ -4,6 +4,20 @@ import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
 import { requireRouterParam } from "../../../utils/http";
 
+async function removeTagFromProfiles(db: ReturnType<typeof getDb>, tagName: string) {
+  const tagArrayJson = JSON.stringify([tagName]);
+  await db.execute(
+    sql`UPDATE ${profiles} SET custom_fields = jsonb_set(
+      custom_fields,
+      '{mod_tags}',
+      COALESCE(
+        (SELECT jsonb_agg(elem) FROM jsonb_array_elements(custom_fields->'mod_tags') AS elem WHERE elem #>> '{}' != ${tagName}),
+        '[]'::jsonb
+      )
+    ) WHERE custom_fields ? 'mod_tags' AND custom_fields->'mod_tags' @> ${tagArrayJson}::jsonb`
+  );
+}
+
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const id = requireRouterParam(event, "id", "Missing tag id.");
@@ -20,17 +34,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: "Tag not found." });
   }
 
-  const tagArrayJson = JSON.stringify([tag.name]);
-  await db.execute(
-    sql`UPDATE ${profiles} SET custom_fields = jsonb_set(
-      custom_fields,
-      '{mod_tags}',
-      COALESCE(
-        (SELECT jsonb_agg(elem) FROM jsonb_array_elements(custom_fields->'mod_tags') AS elem WHERE elem #>> '{}' != ${tag.name}),
-        '[]'::jsonb
-      )
-    ) WHERE custom_fields ? 'mod_tags' AND custom_fields->'mod_tags' @> ${tagArrayJson}::jsonb`
-  );
+  await removeTagFromProfiles(db, tag.name);
 
   await db.delete(communityTags).where(eq(communityTags.id, id));
 
