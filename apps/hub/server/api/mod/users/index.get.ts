@@ -1,6 +1,8 @@
-import { parseProfileName, users } from "@guildora/shared";
+import { parseProfileName, users, userCommunityRoles, communityRoles } from "@guildora/shared";
+import { and, asc, count, eq, ilike, or } from "drizzle-orm";
 import { requireModeratorSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
+import { parsePaginationQuery } from "../../../utils/http";
 import { loadUserCommunityRolesMap, loadUserPermissionRolesMap } from "../../../utils/user-directory";
 
 export default defineEventHandler(async (event) => {
@@ -8,8 +10,10 @@ export default defineEventHandler(async (event) => {
   const db = getDb();
 
   const query = getQuery(event);
-  const search = typeof query.search === "string" ? query.search.toLowerCase() : "";
+  const search = typeof query.search === "string" ? query.search.trim() : "";
   const roleFilter = typeof query.communityRole === "string" ? query.communityRole : "";
+  const { page, limit } = parsePaginationQuery(query);
+  const offset = (page - 1) * limit;
 
   const userColumns = {
     id: users.id,
@@ -17,13 +21,56 @@ export default defineEventHandler(async (event) => {
     displayName: users.displayName
   };
 
-  const [userRows, communityMap, permissionMap] = await Promise.all([
-    db.select(userColumns).from(users),
-    loadUserCommunityRolesMap(db),
-    loadUserPermissionRolesMap(db)
+  const searchCondition = search
+    ? or(ilike(users.displayName, `%${search}%`), ilike(users.discordId, `%${search}%`))
+    : undefined;
+
+  let userRows: Array<{ id: string; discordId: string; displayName: string }>;
+  let total: number;
+
+  if (roleFilter) {
+    const whereCondition = and(searchCondition, eq(communityRoles.name, roleFilter));
+    const [rows, countRows] = await Promise.all([
+      db
+        .select(userColumns)
+        .from(users)
+        .innerJoin(userCommunityRoles, eq(userCommunityRoles.userId, users.id))
+        .innerJoin(communityRoles, eq(communityRoles.id, userCommunityRoles.communityRoleId))
+        .where(whereCondition)
+        .orderBy(asc(users.displayName))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ total: count() })
+        .from(users)
+        .innerJoin(userCommunityRoles, eq(userCommunityRoles.userId, users.id))
+        .innerJoin(communityRoles, eq(communityRoles.id, userCommunityRoles.communityRoleId))
+        .where(whereCondition)
+    ]);
+    userRows = rows;
+    total = countRows[0]?.total ?? 0;
+  } else {
+    const [rows, countRows] = await Promise.all([
+      db
+        .select(userColumns)
+        .from(users)
+        .where(searchCondition)
+        .orderBy(asc(users.displayName))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(users).where(searchCondition)
+    ]);
+    userRows = rows;
+    total = countRows[0]?.total ?? 0;
+  }
+
+  const userIds = userRows.map((u) => u.id);
+  const [communityMap, permissionMap] = await Promise.all([
+    loadUserCommunityRolesMap(db, userIds),
+    loadUserPermissionRolesMap(db, userIds)
   ]);
 
-  let items = userRows.map((user) => ({
+  const items = userRows.map((user) => ({
     id: user.id,
     discordId: user.discordId,
     profileName: user.displayName,
@@ -33,17 +80,6 @@ export default defineEventHandler(async (event) => {
     permissionRoles: permissionMap.get(user.id) || []
   }));
 
-  if (search) {
-    items = items.filter((item) => {
-      const value = `${item.profileName} ${item.ingameName} ${item.rufname || ""} ${item.discordId}`.toLowerCase();
-      return value.includes(search);
-    });
-  }
-
-  if (roleFilter) {
-    items = items.filter((item) => item.communityRole === roleFilter);
-  }
-
-  items.sort((a, b) => a.profileName.localeCompare(b.profileName));
-  return { items };
+  const totalPages = Math.ceil(total / limit);
+  return { items, pagination: { page, limit, total, totalPages } };
 });

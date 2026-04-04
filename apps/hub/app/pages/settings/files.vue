@@ -84,23 +84,28 @@ const onMigrate = async () => {
 };
 
 // Delete single file
+const deleteError = ref("");
+
 const onDeleteFile = async (key: string) => {
   const name = key.split("/").pop() || key;
   if (!confirm(t("settingsFiles.confirmDelete", { name }))) return;
+  deleteError.value = "";
   try {
     await $fetch(`/api/settings/files/${key}`, { method: "DELETE" });
     await refresh();
-  } catch {
-    // ignore
+  } catch (error) {
+    deleteError.value = (error as { statusMessage?: string })?.statusMessage || t("common.error");
   }
 };
 
 // Purge bucket
 const purgeConfirmation = ref("");
 const purgePending = ref(false);
+const purgeError = ref("");
 
 const onPurgeBucket = async () => {
   purgePending.value = true;
+  purgeError.value = "";
   try {
     await $fetch("/api/settings/files/bucket", {
       method: "DELETE",
@@ -108,8 +113,8 @@ const onPurgeBucket = async () => {
     });
     purgeConfirmation.value = "";
     await refresh();
-  } catch {
-    // ignore
+  } catch (error) {
+    purgeError.value = (error as { statusMessage?: string })?.statusMessage || t("common.error");
   } finally {
     purgePending.value = false;
   }
@@ -196,6 +201,11 @@ const onPurgeBucket = async () => {
         </ul>
       </div>
 
+      <!-- Delete error -->
+      <div v-if="deleteError" class="alert alert-error">
+        <span>{{ deleteError }}</span>
+      </div>
+
       <!-- File browser (grouped) -->
       <div v-for="group in fileGroups" :key="group" class="space-y-2">
         <template v-if="files?.[group]?.length">
@@ -243,6 +253,9 @@ const onPurgeBucket = async () => {
           >
             {{ $t("settingsFiles.purgeButton") }}
           </UiButton>
+        </div>
+        <div v-if="purgeError" class="alert alert-error mt-3">
+          <span>{{ purgeError }}</span>
         </div>
       </div>
     </template>

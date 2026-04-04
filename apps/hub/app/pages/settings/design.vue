@@ -238,7 +238,7 @@ const saveLogo = async () => {
   saving.value = true;
   try {
     const payload: Record<string, unknown> = {
-      ...buildBasePayload()
+      sidebarLogoSizePx: sidebarLogoSizePx.value
     };
     if (uploadedLogo.value) {
       payload.logoDataUrl = uploadedLogo.value.dataUrl;
@@ -247,7 +247,6 @@ const saveLogo = async () => {
     } else if (removeLogo.value) {
       payload.removeLogo = true;
     }
-    payload.sidebarLogoSizePx = sidebarLogoSizePx.value;
     const data = await $fetch<AdminThemeResponse>("/api/admin/theme", {
       method: "PUT",
       body: payload

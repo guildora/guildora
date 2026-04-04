@@ -76,23 +76,6 @@ export default defineEventHandler(async (event) => {
   const settings = flow.settingsJson as ApplicationFlowSettings;
   const graph = flow.flowJson as ApplicationFlowGraph;
 
-  // Race condition guard for concurrent applications
-  if (!settings.concurrency.allowReapplyToSameFlow) {
-    const [existing] = await db
-      .select({ id: applications.id })
-      .from(applications)
-      .where(and(
-        eq(applications.flowId, flowId),
-        eq(applications.discordId, applicant.discordId),
-        eq(applications.status, "pending")
-      ))
-      .limit(1);
-
-    if (existing) {
-      throw createError({ statusCode: 409, statusMessage: "You already have an open application." });
-    }
-  }
-
   const linearized = linearizeFlowGraph(graph, body.answers);
 
   // Validate required fields
@@ -143,17 +126,37 @@ export default defineEventHandler(async (event) => {
     ])
   ];
 
-  // Insert application
-  const [application] = await db.insert(applications).values({
-    flowId,
-    discordId: applicant.discordId,
-    discordUsername: applicant.discordUsername,
-    discordAvatarUrl: applicant.discordAvatarUrl,
-    answersJson: body.answers,
-    status: "pending",
-    rolesAssigned: [],
-    pendingRoleAssignments: []
-  }).returning();
+  // Insert application inside a transaction to prevent duplicate submissions
+  const application = await db.transaction(async (tx) => {
+    if (!settings.concurrency.allowReapplyToSameFlow) {
+      const [existing] = await tx
+        .select({ id: applications.id })
+        .from(applications)
+        .where(and(
+          eq(applications.flowId, flowId),
+          eq(applications.discordId, applicant.discordId),
+          eq(applications.status, "pending")
+        ))
+        .limit(1);
+
+      if (existing) {
+        throw createError({ statusCode: 409, statusMessage: "You already have an open application." });
+      }
+    }
+
+    const [app] = await tx.insert(applications).values({
+      flowId,
+      discordId: applicant.discordId,
+      discordUsername: applicant.discordUsername,
+      discordAvatarUrl: applicant.discordAvatarUrl,
+      answersJson: body.answers,
+      status: "pending",
+      rolesAssigned: [],
+      pendingRoleAssignments: []
+    }).returning();
+
+    return app;
+  });
 
   // Link file uploads + mark token used in parallel
   const postInsertOps: Promise<unknown>[] = [];

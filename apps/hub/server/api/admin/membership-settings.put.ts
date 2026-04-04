@@ -37,8 +37,9 @@ export default defineEventHandler(async (event) => {
   const session = await requireAdminSession(event);
   const parsed = await readBodyWithSchema(event, schema, "Invalid membership settings payload.");
 
-  // Validate constraint: if applications disabled, default role must be set
-  if (parsed.applicationsRequired === false && parsed.defaultCommunityRoleId === undefined) {
+  // Validate constraint: if applications disabled, default role must be set.
+  // Explicitly nulling the role while disabling applications is always invalid.
+  if (parsed.applicationsRequired === false && parsed.defaultCommunityRoleId === null) {
     throw createError({
       statusCode: 400,
       statusMessage: "A default community role must be configured when applications are disabled."
@@ -52,9 +53,10 @@ export default defineEventHandler(async (event) => {
     .where(eq(membershipSettings.id, MEMBERSHIP_SETTINGS_SINGLETON_ID))
     .limit(1);
 
+  // If no role is provided in the request, the DB must already have one.
   if (
     parsed.applicationsRequired === false &&
-    parsed.defaultCommunityRoleId === null &&
+    parsed.defaultCommunityRoleId === undefined &&
     !existing?.defaultCommunityRoleId
   ) {
     throw createError({

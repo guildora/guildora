@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import {
   parseProfileName,
   parseWithTemplate,
@@ -45,7 +45,12 @@ export default defineEventHandler(async (event) => {
         durationMinutes: voiceSessions.durationMinutes
       })
       .from(voiceSessions)
-      .where(eq(voiceSessions.userId, requestedUserId))
+      .where(
+        and(
+          eq(voiceSessions.userId, requestedUserId),
+          gte(voiceSessions.startedAt, new Date(Date.now() - 28 * 24 * 60 * 60 * 1000))
+        )
+      )
   ]);
 
   const profile = profileMap.get(requestedUserId) || {
