@@ -75,11 +75,15 @@ export default defineNuxtConfig({
   vite: {
     server: {
       allowedHosts: ["guildora-hub.myweby.org"],
-      hmr: {
-        clientPort: 443,
-        protocol: "wss",
-        host: "guildora-hub.myweby.org"
-      }
+      ...(process.env.NUXT_PUBLIC_HUB_URL?.includes("myweby.org")
+        ? {
+            hmr: {
+              clientPort: 443,
+              protocol: "wss",
+              host: "guildora-hub.myweby.org"
+            }
+          }
+        : {})
     }
   }
 });

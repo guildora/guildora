@@ -1,11 +1,15 @@
-const csrfToken = useState<string>("csrf-token", () => "");
+let csrfTokenValue = "";
 
 export async function initCsrfToken(): Promise<string> {
-  if (!csrfToken.value) {
+  if (!csrfTokenValue) {
     const { token } = await $fetch<{ token: string }>("/api/csrf-token");
-    csrfToken.value = token;
+    csrfTokenValue = token;
   }
-  return csrfToken.value;
+  return csrfTokenValue;
+}
+
+export function getCsrfToken(): string {
+  return csrfTokenValue;
 }
 
 export function useApiFetch<T>(
@@ -15,7 +19,7 @@ export function useApiFetch<T>(
   return useFetch<T>(url, {
     ...opts,
     headers: computed(() => ({
-      "x-csrf-token": csrfToken.value,
+      "x-csrf-token": csrfTokenValue,
       ...(opts?.headers as Record<string, string> | undefined),
     })),
   });
