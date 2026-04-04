@@ -17,7 +17,8 @@
     "db:generate": "pnpm --filter @guildora/shared db:generate",
     "db:migrate": "pnpm --filter @guildora/shared db:migrate",
     "db:seed": "pnpm --filter @guildora/shared db:seed",
-    "bot:deploy-commands": "pnpm --filter @guildora/bot deploy:commands"
+    "bot:deploy-commands": "pnpm --filter @guildora/bot deploy:commands",
+    "preview": "turbo run build && turbo run start --parallel --continue"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
