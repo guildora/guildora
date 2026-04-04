@@ -1,3 +1,4 @@
+import { checkRateLimit, getRateLimitKey } from "../../../utils/rate-limit";
 import { z } from "zod";
 import { eq, and, inArray } from "drizzle-orm";
 import {
@@ -28,6 +29,7 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
+  checkRateLimit(getRateLimitKey(event, 'apply'), { windowMs: 60000, max: 5 });
   const flowId = requireRouterParam(event, "flowId", "Missing flow ID.");
   const body = await readBodyWithSchema(event, bodySchema, "Invalid submission payload.");
 

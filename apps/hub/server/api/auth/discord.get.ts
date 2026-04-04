@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { checkRateLimit, getRateLimitKey } from "../../utils/rate-limit";
 import { collectMappedRolesForMember } from "../../utils/admin-mirror";
 import { fetchDiscordGuildMemberFromBot, fetchDiscordGuildRolesFromBot, type DiscordGuildRole } from "../../utils/botSync";
 import { coerceProfileNameFromRaw, users } from "@guildora/shared";
@@ -86,6 +87,7 @@ function timingSafeEqualString(input: string, expected: string) {
 }
 
 export default defineEventHandler(async (event) => {
+  checkRateLimit(getRateLimitKey(event, 'auth'), { windowMs: 60000, max: 10 });
   const config = useRuntimeConfig(event);
   const query = getQuery(event);
   const code = typeof query.code === "string" ? query.code : null;
