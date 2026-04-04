@@ -68,5 +68,18 @@ export default defineNuxtConfig({
       redirectOn: "root"
     }
   },
-  compatibilityDate: "2025-01-01"
+  compatibilityDate: "2025-01-01",
+  devServer: {
+    host: "0.0.0.0"
+  },
+  vite: {
+    server: {
+      allowedHosts: ["guildora-hub.myweby.org"],
+      hmr: {
+        clientPort: 443,
+        protocol: "wss",
+        host: "guildora-hub.myweby.org"
+      }
+    }
+  }
 });

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireAdminSession } from "../../../../utils/auth";
 import { getDb } from "../../../../utils/db";
 import { readBodyWithSchema } from "../../../../utils/http";
+import { sanitizeRecordStrings } from "../../../../utils/sanitize";
 
 const updatePageSchema = z.object({
   slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/).optional(),
@@ -23,8 +24,8 @@ export default defineEventHandler(async (event) => {
 
   const updateData: Record<string, unknown> = { updatedBy: session.user.id };
   if (body.slug !== undefined) updateData.slug = body.slug;
-  if (body.title !== undefined) updateData.title = body.title;
-  if (body.content !== undefined) updateData.content = body.content;
+  if (body.title !== undefined) updateData.title = sanitizeRecordStrings(body.title);
+  if (body.content !== undefined) updateData.content = sanitizeRecordStrings(body.content);
   if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
   if (body.visible !== undefined) updateData.visible = body.visible;
 

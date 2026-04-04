@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getDb } from "../../../../utils/db";
 import { readBodyWithSchema } from "../../../../utils/http";
 import { requireModeratorRight } from "../../../../utils/moderation-rights";
+import { sanitizeContentObject } from "../../../../utils/sanitize";
 
 const updateSectionSchema = z.object({
   blockType: z.string().min(1).optional(),
@@ -27,8 +28,8 @@ export default defineEventHandler(async (event) => {
   if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
   if (body.visible !== undefined) updateData.visible = body.visible;
   if (body.status !== undefined) updateData.status = body.status;
-  if (body.config !== undefined) updateData.config = body.config;
-  if (body.content !== undefined) updateData.content = body.content;
+  if (body.config !== undefined) updateData.config = sanitizeContentObject(body.config);
+  if (body.content !== undefined) updateData.content = sanitizeContentObject(body.content);
 
   // Auto-draft: when content or config changes on a published section, mark as draft
   if ((body.content !== undefined || body.config !== undefined) && body.status === undefined) {

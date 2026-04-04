@@ -166,7 +166,7 @@ const sidebarLogoSizePx = computed(() => {
   return [40, 48, 60, 72].includes(size) ? size : 60;
 });
 const mobileLogoSizePx = computed(() => Math.min(sidebarLogoSizePx.value, 48));
-const cmsBasePath = computed(() => localePath("/cms"));
+const cmsBasePath = computed(() => localePath("/settings/landing"));
 const isFlowBuilderRoute = computed(() => {
   return /^(\/[a-z]{2})?\/applications\/flows\/[^/]+$/.test(route.path);
 });

@@ -7,6 +7,7 @@ import { buildEditableDiscordRolesForUser } from "../../utils/discord-roles";
 import { readBodyWithSchema } from "../../utils/http";
 import { jsonResponse, sanitizeForJson } from "../../utils/jsonResponse";
 import { updateProfileSchema, updateUserDisplayName, updateUserDisplayNameFromTemplate, upsertProfileDetails } from "../../utils/profile-write";
+import { loadActiveCustomFields, filterFieldsForUser, validateAndMergeFieldValues } from "../../utils/custom-fields";
 import {
   normalizeAppearancePreference,
   readAppearancePreferenceFromCustomFields,
@@ -39,7 +40,14 @@ export default defineEventHandler(async (event) => {
   }
   const existingProfileRows = await db.select().from(profiles).where(eq(profiles.userId, session.user.id)).limit(1);
   const existingCustomFields = (existingProfileRows[0]?.customFields || {}) as Record<string, unknown>;
-  const baseCustomFields = parsed.customFields ?? existingCustomFields;
+  let baseCustomFields: Record<string, unknown>;
+  if (parsed.customFields !== undefined) {
+    const allFields = await loadActiveCustomFields(db);
+    const editableFields = filterFieldsForUser(allFields).filter((f) => f.userCanEdit);
+    baseCustomFields = validateAndMergeFieldValues(editableFields, existingCustomFields, parsed.customFields);
+  } else {
+    baseCustomFields = existingCustomFields;
+  }
   // Normalize custom fields to plain JSON-safe data to avoid Nitro serialization errors (e.g. value.toISOString is not a function).
   const normalizedCustomFields = sanitizeForJson(baseCustomFields) as Record<string, unknown>;
   const resolvedAppearancePreference = parsed.appearancePreference

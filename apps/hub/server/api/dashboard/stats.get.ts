@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sum } from "drizzle-orm";
 import {
   communityRoles,
   profileChangeLogs,
@@ -10,7 +10,7 @@ import {
 import { z } from "zod";
 import { requireSession } from "../../utils/auth";
 import { getDb } from "../../utils/db";
-import { calculateVoiceMinutesFromSessions, formatMinutesToHours, getSessionMinutes } from "../../utils/voice";
+import { formatMinutesToHours, getSessionMinutes } from "../../utils/voice";
 
 const querySchema = z.object({
   voiceRangeStart: z.string().optional(),
@@ -39,7 +39,7 @@ export default defineCachedEventHandler(
     const inputStart = parsed.success && parsed.data.voiceRangeStart ? parseDateOnly(parsed.data.voiceRangeStart) : null;
     const inputEnd = parsed.success && parsed.data.voiceRangeEnd ? parseDateOnly(parsed.data.voiceRangeEnd) : null;
     const rangeStart = inputStart ?? defaultStart;
-    const rangeEnd = inputEnd ?? now;
+    const rangeEnd = new Date((inputEnd ?? now).getTime());
     rangeEnd.setUTCHours(23, 59, 59, 999);
 
     const sessions = await db
@@ -81,38 +81,27 @@ export default defineCachedEventHandler(
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
 
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
     const leaderboardScope = await db
       .select({
         userId: users.id,
         discordId: users.discordId,
         discordName: users.displayName,
-        startedAt: voiceSessions.startedAt,
-        endedAt: voiceSessions.endedAt,
-        durationMinutes: voiceSessions.durationMinutes
+        totalMinutes: sum(voiceSessions.durationMinutes)
       })
       .from(voiceSessions)
-      .innerJoin(users, eq(voiceSessions.userId, users.id));
+      .innerJoin(users, eq(voiceSessions.userId, users.id))
+      .where(gte(voiceSessions.startedAt, sevenDaysAgo))
+      .groupBy(users.id, users.discordId, users.displayName);
 
-    const grouped = new Map<string, { discordId: string; discordName: string; minutes: number }>();
-    for (const row of leaderboardScope) {
-      const minutes = calculateVoiceMinutesFromSessions([row], 7);
-      const key = row.userId;
-      const current = grouped.get(key) || {
-        discordId: row.discordId,
-        discordName: row.discordName,
-        minutes: 0
-      };
-      current.minutes += minutes;
-      grouped.set(key, current);
-    }
-
-    const voiceLeaderboardTop25 = Array.from(grouped.values())
-      .sort((a, b) => b.minutes - a.minutes)
+    const voiceLeaderboardTop25 = leaderboardScope
+      .sort((a, b) => (Number(b.totalMinutes) || 0) - (Number(a.totalMinutes) || 0))
       .slice(0, 25)
       .map((item) => ({
         discordId: item.discordId,
         discordName: item.discordName,
-        hours7d: formatMinutesToHours(item.minutes)
+        hours7d: formatMinutesToHours(Number(item.totalMinutes) || 0)
       }));
 
     const profilesWithRole = await db

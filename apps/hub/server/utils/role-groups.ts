@@ -49,18 +49,11 @@ export async function upsertGroupRoles(
 ) {
   const db = getDb();
 
-  // Clear existing group assignments for this group
-  const existing = await db
-    .select({ discordRoleId: selectableDiscordRoles.discordRoleId })
-    .from(selectableDiscordRoles)
+  // Clear all roles currently assigned to this group (scoped by groupId, not discordRoleId)
+  await db
+    .update(selectableDiscordRoles)
+    .set({ groupId: null, emoji: null, sortOrder: 0 })
     .where(eq(selectableDiscordRoles.groupId, groupId));
-
-  for (const row of existing) {
-    await db
-      .update(selectableDiscordRoles)
-      .set({ groupId: null, emoji: null, sortOrder: 0 })
-      .where(eq(selectableDiscordRoles.discordRoleId, row.discordRoleId));
-  }
 
   // Assign roles to this group
   for (const role of roles) {

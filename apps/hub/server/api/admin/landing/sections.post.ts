@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
 import { readBodyWithSchema } from "../../../utils/http";
+import { sanitizeContentObject } from "../../../utils/sanitize";
 
 const createSectionSchema = z.object({
   blockType: z.string().min(1),
@@ -22,8 +23,8 @@ export default defineEventHandler(async (event) => {
     sortOrder: body.sortOrder,
     visible: body.visible,
     status: "draft",
-    config: body.config,
-    content: body.content,
+    config: sanitizeContentObject(body.config),
+    content: sanitizeContentObject(body.content),
     updatedBy: session.user.id
   }).returning();
 

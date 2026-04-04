@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireAdminSession } from "../../../utils/auth";
 import { getDb } from "../../../utils/db";
 import { readBodyWithSchema } from "../../../utils/http";
+import { sanitizeCss } from "../../../utils/sanitize";
 
 const updatePageSchema = z.object({
   customCss: z.string().nullable().optional(),
@@ -20,7 +21,7 @@ export default defineEventHandler(async (event) => {
   const [page] = await db.select().from(landingPages).limit(1);
 
   const updateData: Record<string, unknown> = { updatedBy: session.user.id };
-  if (body.customCss !== undefined) updateData.customCss = body.customCss;
+  if (body.customCss !== undefined) updateData.customCss = body.customCss ? sanitizeCss(body.customCss) : body.customCss;
   if (body.metaTitle !== undefined) updateData.metaTitle = body.metaTitle;
   if (body.metaDescription !== undefined) updateData.metaDescription = body.metaDescription;
   if (body.enabledLocales !== undefined) updateData.enabledLocales = body.enabledLocales;

@@ -11,7 +11,7 @@ async function checkAndRunCleanup() {
     const settings = await loadMembershipSettings(db);
 
     if (!settings.autoCleanupEnabled) return;
-    if (settings.autoCleanupConditions.length === 0) return;
+    if (settings.cleanupRoleConfigs.length === 0) return;
 
     const now = Date.now();
     const intervalMs = settings.autoCleanupIntervalHours * 60 * 60 * 1000;

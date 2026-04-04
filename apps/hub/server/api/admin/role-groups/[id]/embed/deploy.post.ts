@@ -4,7 +4,7 @@ import { roleGroups, selectableDiscordRoles, rolePickerEmbeds } from "@guildora/
 import { requireAdminSession } from "../../../../../utils/auth";
 import { getDb } from "../../../../../utils/db";
 import { readBodyWithSchema } from "../../../../../utils/http";
-import { postRolePickerEmbed, patchRolePickerEmbed } from "../../../../../utils/botSync";
+import { postRolePickerEmbed, patchRolePickerEmbed, deleteRolePickerEmbed } from "../../../../../utils/botSync";
 
 const schema = z.object({
   channelId: z.string().trim().min(1),
@@ -58,17 +58,30 @@ export default defineEventHandler(async (event) => {
     .where(eq(rolePickerEmbeds.groupId, id));
 
   if (existingEmbed?.discordMessageId) {
-    // Update existing embed
-    await patchRolePickerEmbed(existingEmbed.discordChannelId, existingEmbed.discordMessageId, embedPayload);
-
-    // Update channel if changed
     if (existingEmbed.discordChannelId !== parsed.channelId) {
+      // Channel changed: delete old message first, then post to new channel
+      try {
+        await deleteRolePickerEmbed(existingEmbed.discordChannelId, existingEmbed.discordMessageId);
+      } catch {
+        // Message may already be deleted in old channel
+      }
+
+      const result = await postRolePickerEmbed(embedPayload);
+      if (!result) {
+        throw createError({ statusCode: 502, statusMessage: "Failed to post embed to Discord." });
+      }
+
+      // Update DB only after successful Discord post
       await db
         .update(rolePickerEmbeds)
-        .set({ discordChannelId: parsed.channelId })
+        .set({ discordChannelId: parsed.channelId, discordMessageId: result.messageId })
         .where(eq(rolePickerEmbeds.id, existingEmbed.id));
+
+      return { ok: true, messageId: result.messageId, action: "updated" };
     }
 
+    // Same channel: patch existing message in-place
+    await patchRolePickerEmbed(existingEmbed.discordChannelId, existingEmbed.discordMessageId, embedPayload);
     return { ok: true, messageId: existingEmbed.discordMessageId, action: "updated" };
   }
 
