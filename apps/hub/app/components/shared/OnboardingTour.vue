@@ -137,15 +137,15 @@ const resolvedNextLabel = computed(() =>
 .tour-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   pointer-events: auto;
 }
 
 .tour-spotlight {
   position: fixed;
   border-radius: 0.5rem;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 20px 4px rgba(var(--color-accent-rgb, 99, 102, 241), 0.4);
+  background: rgba(255, 255, 255, 0.03);
   z-index: 1;
   pointer-events: none;
   transition: all 0.3s ease;
