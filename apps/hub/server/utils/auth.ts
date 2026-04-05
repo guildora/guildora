@@ -23,6 +23,7 @@ export interface AppSessionUser {
 export interface AppSession {
   user: AppSessionUser;
   originalUserId?: string;
+  csrfToken?: string;
 }
 
 export const adminPermissionRoles = ["admin", "superadmin"] as const;

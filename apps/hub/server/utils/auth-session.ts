@@ -37,9 +37,15 @@ export async function replaceAuthSession(
   sessionUser: AppSessionUser,
   originalUserId?: string | null
 ) {
+  // Preserve CSRF token across session replacement so client-side token stays valid
+  const existingSession = await getUserSession(event);
+
   const sessionData: AppSession = { user: sessionUser };
   if (originalUserId) {
     sessionData.originalUserId = originalUserId;
+  }
+  if (existingSession.csrfToken) {
+    sessionData.csrfToken = existingSession.csrfToken;
   }
 
   const isDev = import.meta.dev || process.env.NODE_ENV === "development";

@@ -1,27 +1,25 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
-import { getCookie, getHeader, createError, type H3Event } from "h3";
+import { getHeader, createError, type H3Event } from "h3";
 
 export const CSRF_HEADER = "x-csrf-token";
-export const CSRF_COOKIE = "csrf_token";
 
 export function generateCsrfToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-export function validateCsrfToken(event: H3Event): void {
-  const cookie = getCookie(event, CSRF_COOKIE);
+export function validateCsrfToken(event: H3Event, sessionToken: string): void {
   const header = getHeader(event, CSRF_HEADER);
 
-  if (!cookie || !header) {
+  if (!header) {
     throw createError({ statusCode: 403, statusMessage: "CSRF token missing" });
   }
 
-  const cookieBuf = Buffer.from(cookie);
+  const sessionBuf = Buffer.from(sessionToken);
   const headerBuf = Buffer.from(header);
 
   if (
-    cookieBuf.length !== headerBuf.length ||
-    !timingSafeEqual(cookieBuf, headerBuf)
+    sessionBuf.length !== headerBuf.length ||
+    !timingSafeEqual(sessionBuf, headerBuf)
   ) {
     throw createError({ statusCode: 403, statusMessage: "CSRF token invalid" });
   }

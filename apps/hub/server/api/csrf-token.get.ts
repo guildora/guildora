@@ -1,16 +1,12 @@
-export default defineEventHandler((event) => {
-  let token = getCookie(event, CSRF_COOKIE);
+export default defineEventHandler(async (event) => {
+  const session = await getUserSession(event);
 
-  if (!token) {
-    token = generateCsrfToken();
+  if (session.csrfToken) {
+    return { token: session.csrfToken };
   }
 
-  setCookie(event, CSRF_COOKIE, token, {
-    sameSite: "strict",
-    secure: !import.meta.dev,
-    httpOnly: false,
-    path: "/",
-  });
+  const token = generateCsrfToken();
+  await setUserSession(event, { csrfToken: token });
 
   return { token };
 });
