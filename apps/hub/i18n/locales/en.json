@@ -502,6 +502,20 @@
       "removeConfirm": "Remove this language? Content in this language will no longer be shown.",
       "defaultNote": "The first language is the default. Visitors see this language unless they select another.",
       "noOtherLanguages": "All available languages have been added."
+    },
+    "colors": {
+      "button": "Colors",
+      "title": "Landing Page Colors",
+      "description": "Override the template color palette. Changes apply to the public landing page.",
+      "background": "Background",
+      "surface": "Surface",
+      "text": "Text",
+      "textMuted": "Muted text",
+      "accent": "Accent",
+      "accentText": "Accent text",
+      "border": "Border",
+      "reset": "Reset to default",
+      "default": "Default"
     }
   },
   "landingFooter": {
@@ -527,7 +541,12 @@
       "addItem": "Add item",
       "removeItem": "Remove",
       "item": "item",
-      "items": "items"
+      "items": "items",
+      "styleVariant": "Style variant",
+      "styleVariantNormal": "Normal",
+      "styleVariantAccent": "Accent",
+      "styleVariantMuted": "Muted",
+      "styleVariantHighlighted": "Highlighted"
     },
     "hero": {
       "heading": "Heading",

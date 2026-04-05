@@ -6,6 +6,16 @@ interface LandingSection {
   content: Record<string, unknown>;
 }
 
+interface LandingColorPalette {
+  background: string;
+  surface: string;
+  text: string;
+  textMuted: string;
+  accent: string;
+  accentText: string;
+  border: string;
+}
+
 interface LandingPageData {
   sections: LandingSection[];
   template: { id: string; name: string } | null;
@@ -14,6 +24,7 @@ interface LandingPageData {
     title?: string;
     description?: string;
   };
+  colors: LandingColorPalette | null;
 }
 
 export function useLanding() {

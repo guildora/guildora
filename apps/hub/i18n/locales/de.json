@@ -502,6 +502,20 @@
       "removeConfirm": "Diese Sprache entfernen? Inhalte in dieser Sprache werden nicht mehr angezeigt.",
       "defaultNote": "Die erste Sprache ist die Standardsprache. Besucher sehen diese, wenn sie keine andere waehlen.",
       "noOtherLanguages": "Alle verfuegbaren Sprachen wurden bereits hinzugefuegt."
+    },
+    "colors": {
+      "button": "Farben",
+      "title": "Landing-Page-Farben",
+      "description": "Ueberschreibe die Farbpalette des Templates. Aenderungen gelten fuer die oeffentliche Landing-Page.",
+      "background": "Hintergrund",
+      "surface": "Oberflaeche",
+      "text": "Text",
+      "textMuted": "Gedaempfter Text",
+      "accent": "Akzent",
+      "accentText": "Akzent-Text",
+      "border": "Rahmen",
+      "reset": "Auf Standard zuruecksetzen",
+      "default": "Standard"
     }
   },
   "landingFooter": {
@@ -527,7 +541,12 @@
       "addItem": "Eintrag hinzufuegen",
       "removeItem": "Entfernen",
       "item": "Eintrag",
-      "items": "Eintraege"
+      "items": "Eintraege",
+      "styleVariant": "Stil-Variante",
+      "styleVariantNormal": "Normal",
+      "styleVariantAccent": "Akzent",
+      "styleVariantMuted": "Gedaempft",
+      "styleVariantHighlighted": "Hervorgehoben"
     },
     "hero": {
       "heading": "Ueberschrift",

@@ -17,8 +17,19 @@ interface PreviewSection {
   content: Record<string, unknown>;
 }
 
+interface LandingColors {
+  background: string;
+  surface: string;
+  text: string;
+  textMuted: string;
+  accent: string;
+  accentText: string;
+  border: string;
+}
+
 const previewSections = ref<PreviewSection[] | null>(null);
 const previewCustomCss = ref<string | null>(null);
+const previewColors = ref<LandingColors | null>(null);
 
 const activeSections = computed(() =>
   previewSections.value ?? landingPage.value?.sections ?? []
@@ -27,6 +38,24 @@ const activeSections = computed(() =>
 const activeCustomCss = computed(() =>
   previewCustomCss.value ?? landingPage.value?.customCss ?? null
 );
+
+const activeColors = computed<LandingColors | null>(() =>
+  previewColors.value ?? landingPage.value?.colors ?? null
+);
+
+const landingColorStyle = computed(() => {
+  const c = activeColors.value;
+  if (!c) return "";
+  return [
+    `--landing-background:${c.background}`,
+    `--landing-surface:${c.surface}`,
+    `--landing-text:${c.text}`,
+    `--landing-text-muted:${c.textMuted}`,
+    `--landing-accent:${c.accent}`,
+    `--landing-accent-text:${c.accentText}`,
+    `--landing-border:${c.border}`,
+  ].join(";");
+});
 
 const hubLoginUrl = computed(() => {
   const rawHubUrl = String(config.public.hubUrl || "").trim() || "http://localhost:3003";
@@ -52,18 +81,19 @@ onMounted(() => {
 
   window.addEventListener("message", (event) => {
     if (!event.data || typeof event.data !== "object") return;
-    const msg = event.data as { type?: string; sections?: PreviewSection[]; customCss?: string | null };
+    const msg = event.data as { type?: string; sections?: PreviewSection[]; customCss?: string | null; colors?: LandingColors | null };
 
     if (msg.type === "landing-preview-update") {
       if (msg.sections) previewSections.value = msg.sections;
       if (msg.customCss !== undefined) previewCustomCss.value = msg.customCss;
+      if (msg.colors !== undefined) previewColors.value = msg.colors;
     }
   });
 });
 </script>
 
 <template>
-  <div :class="['space-y-6', isPreview && 'landing-preview-kiosk']">
+  <div :class="['space-y-6', isPreview && 'landing-preview-kiosk']" :style="landingColorStyle">
     <div v-if="activeSections.length === 0 && !isPreview" class="rounded-lg bg-blue-500/10 border border-blue-500/20 px-4 py-8 text-center">
       <span>{{ $t("landing.fallbackText") }}</span>
       <a :href="hubLoginUrl" class="block mt-3 font-semibold text-[var(--color-accent)]">{{ $t("nav.login") }}</a>

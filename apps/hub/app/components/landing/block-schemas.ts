@@ -9,6 +9,19 @@ export interface BlockField {
   itemFields?: BlockField[];
 }
 
+/** Config-level field definition for styleVariant (shared across all blocks) */
+export const styleVariantConfigField: BlockField = {
+  key: "styleVariant",
+  type: "select",
+  labelKey: "landingBlocks.common.styleVariant",
+  options: [
+    { value: "normal", labelKey: "landingBlocks.common.styleVariantNormal" },
+    { value: "accent", labelKey: "landingBlocks.common.styleVariantAccent" },
+    { value: "muted", labelKey: "landingBlocks.common.styleVariantMuted" },
+    { value: "highlighted", labelKey: "landingBlocks.common.styleVariantHighlighted" },
+  ],
+};
+
 export const blockSchemas: Record<string, BlockField[]> = {
   hero: [
     { key: "heading", type: "text", labelKey: "landingBlocks.hero.heading", required: true },

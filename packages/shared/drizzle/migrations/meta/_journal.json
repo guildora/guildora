@@ -204,6 +204,13 @@
       "when": 1775400000000,
       "tag": "0040_footer_pages",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1775500000000,
+      "tag": "0041_landing_color_overrides",
+      "breakpoints": true
     }
   ]
 }

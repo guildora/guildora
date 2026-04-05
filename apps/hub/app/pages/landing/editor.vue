@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { TourStep } from "~/composables/useOnboardingTour";
+import { TEMPLATE_COLOR_DEFAULTS, LANDING_COLOR_KEYS, resolveLandingColors, isValidHexColor } from "@guildora/shared";
+import type { LandingColorPalette } from "@guildora/shared";
 
 definePageMeta({
   middleware: ["landing"],
@@ -44,10 +46,21 @@ interface LandingTemplate {
   description: string | null;
 }
 
+interface LandingColorOverrides {
+  background?: string;
+  surface?: string;
+  text?: string;
+  textMuted?: string;
+  accent?: string;
+  accentText?: string;
+  border?: string;
+}
+
 interface PageConfig {
   id?: number;
   activeTemplate: string;
   customCss: string | null;
+  colorOverrides: LandingColorOverrides;
   metaTitle: string | null;
   metaDescription: string | null;
   enabledLocales: string[];
@@ -62,7 +75,8 @@ const saveError = ref("");
 const sections = ref<LandingSection[]>([]);
 const blockTypes = ref<BlockType[]>([]);
 const templates = ref<LandingTemplate[]>([]);
-const pageConfig = ref<PageConfig>({ activeTemplate: "default", customCss: null, metaTitle: null, metaDescription: null, enabledLocales: ["en"], publishedAt: null });
+const pageConfig = ref<PageConfig>({ activeTemplate: "default", customCss: null, colorOverrides: {}, metaTitle: null, metaDescription: null, enabledLocales: ["en"], publishedAt: null });
+const showColorEditor = ref(false);
 
 const showBlockCatalog = ref(false);
 const editingSection = ref<LandingSection | null>(null);
@@ -134,13 +148,14 @@ function sendPreviewUpdate() {
   previewIframe.value.contentWindow.postMessage({
     type: "landing-preview-update",
     sections: localizedSections,
-    customCss: pageConfig.value.customCss
+    customCss: pageConfig.value.customCss,
+    colors: resolvedColors.value
   }, "*");
 }
 
-// Live preview: update iframe whenever sections or CSS change
+// Live preview: update iframe whenever sections, CSS, or colors change
 watch(
-  [sections, () => pageConfig.value.customCss, editLocale],
+  [sections, () => pageConfig.value.customCss, () => pageConfig.value.colorOverrides, editLocale],
   () => { sendPreviewUpdate(); },
   { deep: true }
 );
@@ -186,6 +201,7 @@ async function loadData() {
     if (pageData.page) {
       pageConfig.value = {
         ...pageData.page,
+        colorOverrides: (pageData.page as Record<string, unknown>).colorOverrides as LandingColorOverrides ?? {},
         enabledLocales: pageData.page.enabledLocales || ["en"]
       };
     }
@@ -309,11 +325,15 @@ async function saveAll() {
       }).then(({ section: updated }) => { s.status = updated.status; })
     );
 
-    // Save SEO if dirty
-    const seoSave = seoIsDirty.value
+    // Save page-level settings (SEO + colors)
+    const seoSave = seoIsDirty.value || hasUnsavedChanges.value
       ? $fetch("/api/admin/landing/page", {
           method: "PUT",
-          body: { metaTitle: pageConfig.value.metaTitle, metaDescription: pageConfig.value.metaDescription }
+          body: {
+            metaTitle: pageConfig.value.metaTitle,
+            metaDescription: pageConfig.value.metaDescription,
+            colorOverrides: pageConfig.value.colorOverrides
+          }
         })
       : Promise.resolve();
 
@@ -442,6 +462,46 @@ function setConfigValue(section: LandingSection, key: string, value: unknown) {
   markDirty();
 }
 
+// ─── Landing Color Overrides ─────���────────────────────────────────────────
+
+const templateDefaults = computed<LandingColorPalette>(() =>
+  TEMPLATE_COLOR_DEFAULTS[pageConfig.value.activeTemplate] ?? TEMPLATE_COLOR_DEFAULTS.default
+);
+
+const resolvedColors = computed<LandingColorPalette>(() =>
+  resolveLandingColors(pageConfig.value.activeTemplate, pageConfig.value.colorOverrides)
+);
+
+const hexColorRegex = /^#[0-9a-fA-F]{6}$/;
+
+function setColorOverride(key: string, value: string) {
+  if (!hexColorRegex.test(value)) return;
+  pageConfig.value.colorOverrides = { ...pageConfig.value.colorOverrides, [key]: value.toLowerCase() };
+  markDirty();
+}
+
+function clearColorOverride(key: string) {
+  const next = { ...pageConfig.value.colorOverrides };
+  delete next[key as keyof typeof next];
+  pageConfig.value.colorOverrides = next;
+  markDirty();
+}
+
+async function saveColors() {
+  saving.value = true;
+  try {
+    await $fetch("/api/admin/landing/page", {
+      method: "PUT",
+      body: { colorOverrides: pageConfig.value.colorOverrides }
+    });
+    flashSuccess();
+  } catch {
+    saveError.value = "Failed to save colors.";
+  } finally {
+    saving.value = false;
+  }
+}
+
 onMounted(async () => {
   await loadData();
   if (sections.value.length > 0) {
@@ -532,6 +592,9 @@ onMounted(async () => {
       <!-- ─── Action bar ─────────────────────────────────────────────── -->
       <div class="flex flex-wrap gap-2">
         <UiButton class="landing-add-block" variant="primary" size="sm" @click="showBlockCatalog = true">{{ t("landingEditor.addBlock") }}</UiButton>
+        <UiButton variant="outline" size="sm" @click="showColorEditor = !showColorEditor">
+          {{ t("landingEditor.colors.button") }}
+        </UiButton>
         <UiButton variant="outline" size="sm" @click="toggleHistory">
           <Icon name="proicons:clock" class="h-4 w-4 mr-1" />{{ t("landingEditor.history") }}
         </UiButton>
@@ -557,6 +620,50 @@ onMounted(async () => {
           </div>
           <UiButton variant="outline" size="xs" :disabled="saving" @click="restoreVersion(version.id)">
             {{ t("landingEditor.restore") }}
+          </UiButton>
+        </div>
+      </div>
+
+      <!-- ─── Color overrides ─────────────────────────────────────── -->
+      <div v-if="showColorEditor" class="rounded-xl p-5 space-y-4" style="background: var(--color-surface-2)">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold">{{ t("landingEditor.colors.title") }}</h3>
+          <UiButton variant="ghost" size="xs" icon-only @click="showColorEditor = false">
+            <Icon name="proicons:cancel" class="h-4 w-4" />
+          </UiButton>
+        </div>
+        <p class="text-sm opacity-60">{{ t("landingEditor.colors.description") }}</p>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div v-for="colorKey in (['background', 'surface', 'text', 'textMuted', 'accent', 'accentText', 'border'] as const)" :key="colorKey" class="space-y-1">
+            <label class="text-xs font-medium opacity-70">{{ t(`landingEditor.colors.${colorKey}`) }}</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="color"
+                :value="resolvedColors[colorKey]"
+                class="h-8 w-10 rounded border-0 cursor-pointer"
+                style="background: var(--color-surface-3)"
+                @input="(e) => setColorOverride(colorKey, (e.target as HTMLInputElement).value)"
+              />
+              <span class="text-xs font-mono opacity-50">{{ resolvedColors[colorKey] }}</span>
+              <button
+                v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]"
+                class="text-xs opacity-40 hover:opacity-70 transition-opacity"
+                :title="t('landingEditor.colors.reset')"
+                @click="clearColorOverride(colorKey)"
+              >
+                <Icon name="proicons:cancel" class="h-3 w-3" />
+              </button>
+            </div>
+            <span v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]" class="text-[10px] opacity-40">
+              {{ t("landingEditor.colors.default") }}: {{ templateDefaults[colorKey] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <UiButton variant="primary" size="sm" :disabled="saving" @click="saveColors">
+            {{ t("common.save") }}
           </UiButton>
         </div>
       </div>
@@ -645,6 +752,20 @@ onMounted(async () => {
                 :locale="editLocale"
                 @update="(key, value) => setLocaleContent(section, key, value)"
               />
+
+              <!-- Style variant selector (all blocks) -->
+              <div class="pt-3 space-y-1" style="border-top: 1px solid var(--color-line)">
+                <UiSelect
+                  :label="t('landingBlocks.common.styleVariant')"
+                  :model-value="String((section.config as Record<string, unknown>).styleVariant || 'normal')"
+                  @update:model-value="(v: string) => setConfigValue(section, 'styleVariant', v)"
+                >
+                  <option value="normal">{{ t("landingBlocks.common.styleVariantNormal") }}</option>
+                  <option value="accent">{{ t("landingBlocks.common.styleVariantAccent") }}</option>
+                  <option value="muted">{{ t("landingBlocks.common.styleVariantMuted") }}</option>
+                  <option value="highlighted">{{ t("landingBlocks.common.styleVariantHighlighted") }}</option>
+                </UiSelect>
+              </div>
 
               <!-- Applications block config (mode + flow selection) -->
               <template v-if="section.blockType === 'applications'">

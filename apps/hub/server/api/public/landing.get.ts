@@ -1,5 +1,6 @@
 import { and, asc, eq } from "drizzle-orm";
-import { landingPages, landingSections, landingTemplates } from "@guildora/shared";
+import { landingPages, landingSections, landingTemplates, resolveLandingColors } from "@guildora/shared";
+import type { LandingColorOverrides } from "@guildora/shared";
 import { getDb } from "../../utils/db";
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
     .limit(1);
 
   if (!page || !page.publishedAt) {
-    return { sections: [], template: null, customCss: null, meta: {} };
+    return { sections: [], template: null, customCss: null, meta: {}, colors: null };
   }
 
   const [template] = await db
@@ -43,6 +44,11 @@ export default defineEventHandler(async (event) => {
     };
   });
 
+  const resolvedColors = resolveLandingColors(
+    page.activeTemplate,
+    (page.colorOverrides ?? {}) as LandingColorOverrides
+  );
+
   return {
     sections: localizedSections,
     template: template
@@ -52,6 +58,7 @@ export default defineEventHandler(async (event) => {
     meta: {
       title: page.metaTitle,
       description: page.metaDescription
-    }
+    },
+    colors: resolvedColors
   };
 });

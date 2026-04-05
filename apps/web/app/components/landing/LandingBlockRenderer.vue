@@ -14,6 +14,10 @@ const props = defineProps<{
 const componentName = computed(() => resolveBlockComponent(props.section.blockType));
 const resolved = computed(() => resolveComponent(componentName.value));
 const isResolved = computed(() => typeof resolved.value !== "string");
+const styleVariant = computed(() => {
+  const v = props.section.config?.styleVariant;
+  return typeof v === "string" ? v : "normal";
+});
 </script>
 
 <template>
@@ -22,6 +26,7 @@ const isResolved = computed(() => typeof resolved.value !== "string");
     :is="resolved"
     :content="section.content"
     :config="section.config"
+    :data-style-variant="styleVariant"
   />
   <section v-else class="rounded-xl bg-white/5 border border-white/10 p-6 text-center text-sm opacity-60">
     <p>{{ $t("landingBlocks.unsupported", { type: section.blockType }) }}</p>

@@ -8,6 +8,7 @@ export * from "./types/user";
 export * from "./utils/flow-linearize";
 export * from "./utils/flow-simple-convert";
 export * from "./utils/profile-name";
+export * from "./landing-colors";
 
 // Server-only (use subpath imports instead of barrel):
 //   @guildora/shared/db/client   → createDb, GuildoraDatabase
