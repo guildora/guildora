@@ -31,29 +31,29 @@ defineProps<{
     </div>
   </div>
 
-  <!-- Gaming: purple-cyan gradients, glowing borders -->
+  <!-- Cyberpunk: neon cyan/magenta, glowing borders, dark base -->
   <div
-    v-else-if="templateId === 'gaming'"
+    v-else-if="templateId === 'cyberpunk'"
     class="template-preview"
-    style="background: linear-gradient(to bottom right, rgba(147,51,234,0.3), #111827 50%, #111827)"
+    style="background: linear-gradient(to bottom right, rgba(0,240,255,0.12), #0a0a12 40%, rgba(255,0,128,0.06))"
   >
     <!-- Hero -->
     <div class="tp-hero">
-      <div class="tp-badge" style="border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.15); box-shadow: 0 0 6px rgba(168,85,247,0.2)" />
+      <div class="tp-badge" style="border-color: rgba(0,240,255,0.5); background: rgba(0,240,255,0.12); box-shadow: 0 0 8px rgba(0,240,255,0.3)" />
       <div class="tp-heading" />
       <div class="tp-subheading" />
-      <div class="tp-btn" style="background: linear-gradient(to right, #a855f7, #06b6d4)" />
+      <div class="tp-btn" style="background: linear-gradient(to right, #00f0ff, #ff0080)" />
     </div>
     <!-- Features -->
     <div class="tp-cards">
-      <div class="tp-card" style="background: linear-gradient(to bottom right, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(168,85,247,0.25); box-shadow: 0 0 8px rgba(168,85,247,0.08)" />
-      <div class="tp-card" style="background: linear-gradient(to bottom right, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(168,85,247,0.25); box-shadow: 0 0 8px rgba(168,85,247,0.08)" />
-      <div class="tp-card" style="background: linear-gradient(to bottom right, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(168,85,247,0.25); box-shadow: 0 0 8px rgba(168,85,247,0.08)" />
+      <div class="tp-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 8px rgba(0,240,255,0.08)" />
+      <div class="tp-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 8px rgba(0,240,255,0.08)" />
+      <div class="tp-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 8px rgba(0,240,255,0.08)" />
     </div>
     <!-- CTA -->
     <div class="tp-cta">
       <div class="tp-cta-line" />
-      <div class="tp-btn" style="background: linear-gradient(to right, #a855f7, #06b6d4)" />
+      <div class="tp-btn" style="background: linear-gradient(to right, #00f0ff, #ff0080)" />
     </div>
   </div>
 

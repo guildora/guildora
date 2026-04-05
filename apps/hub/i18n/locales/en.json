@@ -545,8 +545,7 @@
       "styleVariant": "Style variant",
       "styleVariantNormal": "Normal",
       "styleVariantAccent": "Accent",
-      "styleVariantMuted": "Muted",
-      "styleVariantHighlighted": "Highlighted"
+      "styleVariantWarning": "Warning"
     },
     "hero": {
       "heading": "Heading",

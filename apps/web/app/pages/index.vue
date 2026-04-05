@@ -30,6 +30,7 @@ interface LandingColors {
 const previewSections = ref<PreviewSection[] | null>(null);
 const previewCustomCss = ref<string | null>(null);
 const previewColors = ref<LandingColors | null>(null);
+const previewTemplateId = ref<string | null>(null);
 
 const activeSections = computed(() =>
   previewSections.value ?? landingPage.value?.sections ?? []
@@ -41,6 +42,10 @@ const activeCustomCss = computed(() =>
 
 const activeColors = computed<LandingColors | null>(() =>
   previewColors.value ?? landingPage.value?.colors ?? null
+);
+
+const activeTemplateId = computed(() =>
+  previewTemplateId.value ?? landingPage.value?.template?.id ?? "default"
 );
 
 const landingColorStyle = computed(() => {
@@ -81,19 +86,20 @@ onMounted(() => {
 
   window.addEventListener("message", (event) => {
     if (!event.data || typeof event.data !== "object") return;
-    const msg = event.data as { type?: string; sections?: PreviewSection[]; customCss?: string | null; colors?: LandingColors | null };
+    const msg = event.data as { type?: string; sections?: PreviewSection[]; customCss?: string | null; colors?: LandingColors | null; templateId?: string | null };
 
     if (msg.type === "landing-preview-update") {
       if (msg.sections) previewSections.value = msg.sections;
       if (msg.customCss !== undefined) previewCustomCss.value = msg.customCss;
       if (msg.colors !== undefined) previewColors.value = msg.colors;
+      if (msg.templateId !== undefined) previewTemplateId.value = msg.templateId;
     }
   });
 });
 </script>
 
 <template>
-  <div :class="['space-y-6', isPreview && 'landing-preview-kiosk']" :style="landingColorStyle">
+  <div :class="['space-y-6', isPreview && 'landing-preview-kiosk']" :style="landingColorStyle" :data-template="activeTemplateId">
     <div v-if="activeSections.length === 0 && !isPreview" class="rounded-lg bg-blue-500/10 border border-blue-500/20 px-4 py-8 text-center">
       <span>{{ $t("landing.fallbackText") }}</span>
       <a :href="hubLoginUrl" class="block mt-3 font-semibold text-[var(--color-accent)]">{{ $t("nav.login") }}</a>

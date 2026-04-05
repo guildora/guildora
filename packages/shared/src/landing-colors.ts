@@ -38,7 +38,7 @@ export const LANDING_COLOR_KEYS: readonly (keyof LandingColorPalette)[] = [
 export type LandingColorOverrides = Partial<LandingColorPalette>;
 
 /** Style variant options for individual landing blocks */
-export const STYLE_VARIANTS = ["normal", "accent", "muted", "highlighted"] as const;
+export const STYLE_VARIANTS = ["normal", "accent", "warning"] as const;
 export type StyleVariant = (typeof STYLE_VARIANTS)[number];
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
@@ -79,14 +79,14 @@ export const TEMPLATE_COLOR_DEFAULTS: Record<string, LandingColorPalette> = {
     accentText: "#ffffff",
     border: "#27272a",
   },
-  gaming: {
-    background: "#0b0c10",
-    surface: "#1a1a2e",
+  cyberpunk: {
+    background: "#0a0a12",
+    surface: "#12122a",
     text: "#e0e0ff",
-    textMuted: "#8888aa",
+    textMuted: "#7a7a9e",
     accent: "#00f0ff",
-    accentText: "#0b0c10",
-    border: "#2a2a4a",
+    accentText: "#0a0a12",
+    border: "#1e1e3a",
   },
 };
 

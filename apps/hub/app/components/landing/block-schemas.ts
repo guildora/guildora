@@ -17,8 +17,7 @@ export const styleVariantConfigField: BlockField = {
   options: [
     { value: "normal", labelKey: "landingBlocks.common.styleVariantNormal" },
     { value: "accent", labelKey: "landingBlocks.common.styleVariantAccent" },
-    { value: "muted", labelKey: "landingBlocks.common.styleVariantMuted" },
-    { value: "highlighted", labelKey: "landingBlocks.common.styleVariantHighlighted" },
+    { value: "warning", labelKey: "landingBlocks.common.styleVariantWarning" },
   ],
 };
 

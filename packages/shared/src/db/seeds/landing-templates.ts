@@ -20,10 +20,10 @@ export const defaultTemplate: TemplateSeed = {
   isBuiltin: true
 };
 
-export const gamingTemplate: TemplateSeed = {
-  id: "gaming",
-  name: "Gaming",
-  description: "Bold and energetic — designed for gaming communities with tournaments and competitive play.",
+export const cyberpunkTemplate: TemplateSeed = {
+  id: "cyberpunk",
+  name: "Cyberpunk",
+  description: "Neon-lit and futuristic — a high-contrast dark theme with glowing accents for gaming communities.",
   isBuiltin: true
 };
 
@@ -34,7 +34,7 @@ export const esportsTemplate: TemplateSeed = {
   isBuiltin: true
 };
 
-export const templates: TemplateSeed[] = [defaultTemplate, gamingTemplate, esportsTemplate];
+export const templates: TemplateSeed[] = [defaultTemplate, cyberpunkTemplate, esportsTemplate];
 
 export const defaultSections: SectionSeed[] = [
   {
@@ -171,12 +171,12 @@ export const defaultSections: SectionSeed[] = [
   }
 ];
 
-export const gamingSections: SectionSeed[] = [
+export const cyberpunkSections: SectionSeed[] = [
   {
     blockType: "hero",
     sortOrder: 0,
     visible: true,
-    config: { layoutVariant: "gaming" },
+    config: { layoutVariant: "cyberpunk" },
     content: {
       en: {
         eyebrowLabel: "Season 4 Now Live",
@@ -200,7 +200,7 @@ export const gamingSections: SectionSeed[] = [
     blockType: "stats",
     sortOrder: 1,
     visible: true,
-    config: { layoutVariant: "gaming" },
+    config: { layoutVariant: "cyberpunk" },
     content: {
       en: {
         sectionTitle: "By the Numbers",
@@ -226,7 +226,7 @@ export const gamingSections: SectionSeed[] = [
     blockType: "features",
     sortOrder: 2,
     visible: true,
-    config: { columns: 3, layoutVariant: "gaming" },
+    config: { columns: 3, layoutVariant: "cyberpunk" },
     content: {
       en: {
         sectionTitle: "Why We're Different",
@@ -256,7 +256,7 @@ export const gamingSections: SectionSeed[] = [
     blockType: "discord-invite",
     sortOrder: 3,
     visible: true,
-    config: { layoutVariant: "gaming" },
+    config: { layoutVariant: "cyberpunk" },
     content: {
       en: { heading: "Join the Server", description: "Our Discord is where everything happens — matchmaking, strategy talks, and epic highlights." },
       de: { heading: "Tritt dem Server bei", description: "Unser Discord ist der Ort, wo alles passiert — Matchmaking, Strategie-Talks und epische Highlights." }
@@ -266,7 +266,7 @@ export const gamingSections: SectionSeed[] = [
     blockType: "cta",
     sortOrder: 4,
     visible: true,
-    config: { variant: "accent", layoutVariant: "gaming" },
+    config: { variant: "accent", layoutVariant: "cyberpunk" },
     content: {
       en: { heading: "Ready to Compete?", description: "Applications are open. Show us what you've got.", buttonText: "Apply Now", buttonLink: "/apply" },
       de: { heading: "Bereit für den Wettkampf?", description: "Bewerbungen sind offen. Zeig uns, was du drauf hast.", buttonText: "Jetzt bewerben", buttonLink: "/apply" }
@@ -397,6 +397,6 @@ export const esportsSections: SectionSeed[] = [
 
 export const templateSections: Record<string, SectionSeed[]> = {
   default: defaultSections,
-  gaming: gamingSections,
+  cyberpunk: cyberpunkSections,
   esports: esportsSections
 };

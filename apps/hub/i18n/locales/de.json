@@ -545,8 +545,7 @@
       "styleVariant": "Stil-Variante",
       "styleVariantNormal": "Normal",
       "styleVariantAccent": "Akzent",
-      "styleVariantMuted": "Gedaempft",
-      "styleVariantHighlighted": "Hervorgehoben"
+      "styleVariantWarning": "Warnung"
     },
     "hero": {
       "heading": "Ueberschrift",

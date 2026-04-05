@@ -762,8 +762,7 @@ onMounted(async () => {
                 >
                   <option value="normal">{{ t("landingBlocks.common.styleVariantNormal") }}</option>
                   <option value="accent">{{ t("landingBlocks.common.styleVariantAccent") }}</option>
-                  <option value="muted">{{ t("landingBlocks.common.styleVariantMuted") }}</option>
-                  <option value="highlighted">{{ t("landingBlocks.common.styleVariantHighlighted") }}</option>
+                  <option value="warning">{{ t("landingBlocks.common.styleVariantWarning") }}</option>
                 </UiSelect>
               </div>
 
