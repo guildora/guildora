@@ -1,8 +1,8 @@
 /*
- * Cyberpunk template base styles.
+ * Cyberpunk template styles.
  *
  * Applied when the landing page uses the "cyberpunk" template.
- * Relies on --landing-* CSS custom-properties set by the color system.
+ * Builds on top of landing.css base styles and --landing-* CSS custom-properties.
  *
  * Convention: all selectors are scoped under [data-template="cyberpunk"]
  * so they never leak into other templates.
@@ -33,10 +33,10 @@
   border-color: var(--cp-border-glow);
 }
 
-/* --- Neon accent border for cards --- */
+/* --- Card override: glass morphism + neon border --- */
 [data-template="cyberpunk"] .landing-card {
   background: var(--cp-surface-glass);
-  border: 1px solid var(--cp-border-glow);
+  border-color: var(--cp-border-glow);
   box-shadow: var(--cp-glow-sm);
   backdrop-filter: blur(8px);
 }
@@ -55,19 +55,19 @@
   letter-spacing: 0.06em;
   border: none;
   box-shadow: var(--cp-glow-accent);
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-[data-template="cyberpunk"] .landing-btn-primary:hover {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.45), 0 0 6px rgba(255, 0, 128, 0.3);
-  transform: translateY(-1px);
+@media (prefers-reduced-motion: no-preference) {
+  [data-template="cyberpunk"] .landing-btn-primary:hover {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.45), 0 0 6px rgba(255, 0, 128, 0.3);
+    transform: translateY(-1px);
+  }
 }
 
 /* --- Outline / ghost button --- */
 [data-template="cyberpunk"] .landing-btn-outline {
-  border: 1px solid var(--cp-neon-cyan);
+  border-color: var(--cp-neon-cyan);
   color: var(--cp-neon-cyan);
-  background: transparent;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -79,7 +79,7 @@
 
 /* --- Eyebrow / badge --- */
 [data-template="cyberpunk"] .landing-eyebrow {
-  border: 1px solid var(--cp-border-glow);
+  border-color: var(--cp-border-glow);
   background: rgba(0, 240, 255, 0.06);
   color: var(--cp-neon-cyan);
   text-transform: uppercase;
@@ -88,9 +88,16 @@
   font-weight: 600;
 }
 
+/* --- Step indicator neon --- */
+[data-template="cyberpunk"] .landing-step-indicator {
+  border-color: var(--cp-border-glow);
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--cp-neon-cyan);
+  box-shadow: var(--cp-glow-sm);
+}
+
 /* --- Section divider glow line --- */
 [data-template="cyberpunk"] .landing-divider {
-  height: 1px;
   background: linear-gradient(
     to right,
     transparent,
@@ -101,20 +108,50 @@
   opacity: 0.4;
 }
 
-/* --- Stat block neon treatment --- */
+/* --- Stat value neon treatment --- */
 [data-template="cyberpunk"] .landing-stat-value {
   color: var(--cp-neon-cyan);
   text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
   font-weight: 800;
 }
 
-/* --- styleVariant overrides for cyberpunk --- */
-[data-template="cyberpunk"] [data-style-variant="accent"] {
-  background: rgba(0, 240, 255, 0.04);
-  border-color: rgba(0, 240, 255, 0.25);
+/* --- Accent background: cyberpunk gradient --- */
+[data-template="cyberpunk"] .landing-accent-bg {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(255, 0, 128, 0.08));
+  border: 1px solid var(--cp-border-glow);
+  color: var(--landing-text);
 }
 
-[data-template="cyberpunk"] [data-style-variant="warning"] {
+/* --- styleVariant overrides for cyberpunk --- */
+[data-template="cyberpunk"] [data-style-variant="accent"] .landing-card {
+  background: rgba(0, 240, 255, 0.04);
+  border-color: rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.12);
+}
+
+[data-template="cyberpunk"] [data-style-variant="warning"] .landing-card {
   background: rgba(255, 0, 128, 0.04);
   border-color: rgba(255, 0, 128, 0.25);
+  box-shadow: 0 0 10px rgba(255, 0, 128, 0.12);
+}
+
+[data-template="cyberpunk"] [data-style-variant="warning"] .landing-stat-value {
+  color: var(--cp-neon-magenta);
+  text-shadow: 0 0 8px rgba(255, 0, 128, 0.4);
+}
+
+[data-template="cyberpunk"] [data-style-variant="warning"] .landing-step-indicator {
+  border-color: rgba(255, 0, 128, 0.25);
+  background: rgba(255, 0, 128, 0.08);
+  color: var(--cp-neon-magenta);
+}
+
+[data-template="cyberpunk"] [data-style-variant="warning"] .landing-eyebrow {
+  border-color: rgba(255, 0, 128, 0.25);
+  background: rgba(255, 0, 128, 0.06);
+  color: var(--cp-neon-magenta);
+}
+
+[data-template="cyberpunk"] [data-style-variant="warning"] .landing-btn-primary {
+  background: linear-gradient(135deg, var(--cp-neon-magenta), var(--cp-neon-purple));
 }

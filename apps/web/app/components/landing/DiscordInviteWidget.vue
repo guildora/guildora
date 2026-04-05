@@ -42,7 +42,7 @@ function formatCount(n: number): string {
 </script>
 
 <template>
-  <section class="overflow-hidden rounded-2xl bg-base-200 shadow-md">
+  <section class="landing-card overflow-hidden rounded-2xl shadow-md">
     <!-- Header row: icon + name + join button -->
     <div class="flex items-center justify-between gap-4 px-6 py-6">
       <div class="flex items-center gap-4">
@@ -64,9 +64,9 @@ function formatCount(n: number): string {
 
         <!-- Name + description -->
         <div>
-          <p class="mb-0.5 text-xs font-semibold uppercase tracking-widest opacity-50">{{ props.communityName || $t("community.fallbackName") }}</p>
-          <h3 class="text-xl font-extrabold leading-tight">{{ serverName }}</h3>
-          <p v-if="serverDescription" class="mt-0.5 max-w-xs text-sm opacity-60">{{ serverDescription }}</p>
+          <p class="landing-text-muted mb-0.5 text-xs font-semibold uppercase tracking-widest">{{ props.communityName || $t("community.fallbackName") }}</p>
+          <h3 class="landing-section-title text-xl font-extrabold leading-tight">{{ serverName }}</h3>
+          <p v-if="serverDescription" class="landing-text-muted mt-0.5 max-w-xs text-sm">{{ serverDescription }}</p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ function formatCount(n: number): string {
         :href="inviteUrl"
         target="_blank"
         rel="noreferrer"
-        class="btn btn-primary shrink-0 gap-2"
+        class="landing-btn-primary shrink-0 gap-2 rounded-lg px-5 py-2.5 text-sm"
       >
         Join Discord
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -85,7 +85,7 @@ function formatCount(n: number): string {
     </div>
 
     <!-- Stats row — only shown if Discord data loaded -->
-    <div v-if="status === 'success' && (onlineCount !== null || memberCount !== null)" class="grid grid-cols-2 divide-x divide-base-300 border-t border-base-300">
+    <div v-if="status === 'success' && (onlineCount !== null || memberCount !== null)" class="grid grid-cols-2 divide-x divide-[var(--landing-border)] border-t border-[var(--landing-border)]">
       <!-- Online -->
       <div class="flex items-center gap-4 px-6 py-5">
         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/15">
@@ -95,35 +95,35 @@ function formatCount(n: number): string {
           </span>
         </div>
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest opacity-50">Online</p>
-          <p class="text-2xl font-extrabold leading-tight">{{ onlineCount !== null ? formatCount(onlineCount) : "—" }}</p>
-          <p class="text-xs opacity-50">currently active</p>
+          <p class="landing-text-muted text-xs font-semibold uppercase tracking-widest">Online</p>
+          <p class="landing-section-title text-2xl font-extrabold leading-tight">{{ onlineCount !== null ? formatCount(onlineCount) : "—" }}</p>
+          <p class="landing-text-muted text-xs">currently active</p>
         </div>
       </div>
 
       <!-- Members -->
       <div class="flex items-center gap-4 px-6 py-5">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="currentColor">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style="background-color: color-mix(in srgb, var(--landing-accent) 15%, transparent)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: var(--landing-accent)" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </div>
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest opacity-50">Members</p>
-          <p class="text-2xl font-extrabold leading-tight">{{ memberCount !== null ? formatCount(memberCount) : "—" }}</p>
-          <p class="text-xs opacity-50">total</p>
+          <p class="landing-text-muted text-xs font-semibold uppercase tracking-widest">Members</p>
+          <p class="landing-section-title text-2xl font-extrabold leading-tight">{{ memberCount !== null ? formatCount(memberCount) : "—" }}</p>
+          <p class="landing-text-muted text-xs">total</p>
         </div>
       </div>
     </div>
 
     <!-- Loading skeleton for stats -->
-    <div v-else-if="status === 'pending'" class="grid grid-cols-2 divide-x divide-base-300 border-t border-base-300">
+    <div v-else-if="status === 'pending'" class="grid grid-cols-2 divide-x divide-[var(--landing-border)] border-t border-[var(--landing-border)]">
       <div v-for="n in 2" :key="n" class="flex items-center gap-4 px-6 py-5">
-        <div class="h-10 w-10 animate-pulse rounded-xl bg-base-300" />
+        <div class="h-10 w-10 animate-pulse rounded-xl" style="background-color: var(--landing-border)" />
         <div class="space-y-2">
-          <div class="h-2 w-12 animate-pulse rounded bg-base-300" />
-          <div class="h-6 w-16 animate-pulse rounded bg-base-300" />
-          <div class="h-2 w-20 animate-pulse rounded bg-base-300" />
+          <div class="h-2 w-12 animate-pulse rounded" style="background-color: var(--landing-border)" />
+          <div class="h-6 w-16 animate-pulse rounded" style="background-color: var(--landing-border)" />
+          <div class="h-2 w-20 animate-pulse rounded" style="background-color: var(--landing-border)" />
         </div>
       </div>
     </div>

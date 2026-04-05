@@ -16,7 +16,7 @@ defineProps<{
       <div
         v-for="(item, i) in (content.images as Array<Record<string, unknown>>)"
         :key="i"
-        class="overflow-hidden rounded-xl shadow-md"
+        class="landing-card overflow-hidden rounded-xl shadow-md"
       >
         <img
           v-if="item.url || item.image"

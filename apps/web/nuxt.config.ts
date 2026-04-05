@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     ]
   },
   devtools: { enabled: false },
-  css: ["~/assets/css/main.css", "~/assets/css/cyberpunk.css"],
+  css: ["~/assets/css/main.css", "~/assets/css/landing.css", "~/assets/css/cyberpunk.css"],
   runtimeConfig: {
     public: {
       appName: "Guildora",

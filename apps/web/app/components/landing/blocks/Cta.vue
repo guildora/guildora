@@ -12,22 +12,27 @@ const variant = computed(() => String(props.config.variant || props.content.vari
     :class="[
       'rounded-2xl px-6 py-14 text-center md:px-8 md:py-20',
       variant === 'accent'
-        ? 'bg-accent text-white'
-        : 'bg-surface-2 shadow-md'
+        ? 'landing-accent-bg'
+        : 'landing-card shadow-md'
     ]"
   >
-    <h2 class="mx-auto max-w-2xl text-3xl font-bold tracking-tight md:text-4xl">{{ content.heading }}</h2>
-    <p :class="['mx-auto mt-4 max-w-xl text-base leading-relaxed', variant === 'accent' ? 'text-white/85' : 'text-[var(--color-text-secondary)]']">
+    <h2
+      :class="[
+        'mx-auto max-w-2xl text-3xl font-bold tracking-tight md:text-4xl',
+        variant !== 'accent' && 'landing-section-title'
+      ]"
+    >{{ content.heading }}</h2>
+    <p :class="['mx-auto mt-4 max-w-xl text-base leading-relaxed', variant === 'accent' ? 'opacity-85' : 'landing-text-muted']">
       {{ content.description }}
     </p>
     <div class="mt-8">
       <a
         :href="String(content.buttonLink)"
         :class="[
-          'inline-flex items-center rounded-lg px-8 py-3.5 text-base font-semibold transition-all duration-200 hover:brightness-110',
+          'inline-flex items-center rounded-lg px-8 py-3.5 text-base font-semibold transition-all duration-200',
           variant === 'accent'
-            ? 'bg-white text-accent hover:bg-white/90'
-            : 'bg-accent text-white'
+            ? 'bg-[var(--landing-accent-text)] text-[var(--landing-accent)] hover:opacity-90'
+            : 'landing-btn-primary'
         ]"
       >
         {{ content.buttonText }}
