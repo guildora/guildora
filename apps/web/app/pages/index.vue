@@ -84,7 +84,10 @@ if (landingPage.value?.meta?.title) {
 onMounted(() => {
   if (!isPreview.value) return;
 
+  const allowedOrigin = String(config.public.hubUrl || "").replace(/\/+$/, "");
+
   window.addEventListener("message", (event) => {
+    if (allowedOrigin && event.origin !== allowedOrigin) return;
     if (!event.data || typeof event.data !== "object") return;
     const msg = event.data as { type?: string; sections?: PreviewSection[]; customCss?: string | null; colors?: LandingColors | null; templateId?: string | null };
 

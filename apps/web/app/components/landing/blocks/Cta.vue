@@ -27,7 +27,7 @@ const variant = computed(() => String(props.config.variant || props.content.vari
     </p>
     <div class="mt-8">
       <a
-        :href="String(content.buttonLink)"
+        :href="safeLandingHref(content.buttonLink)"
         :class="[
           'inline-flex items-center rounded-lg px-8 py-3.5 text-base font-semibold transition-all duration-200',
           variant === 'accent'

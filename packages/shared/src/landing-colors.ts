@@ -88,6 +88,15 @@ export const TEMPLATE_COLOR_DEFAULTS: Record<string, LandingColorPalette> = {
     accentText: "#0a0a12",
     border: "#1e1e3a",
   },
+  esports: {
+    background: "#0b0e14",
+    surface: "#131720",
+    text: "#f0f2f5",
+    textMuted: "#8a92a0",
+    accent: "#e53e3e",
+    accentText: "#ffffff",
+    border: "#1f2533",
+  },
 };
 
 /**

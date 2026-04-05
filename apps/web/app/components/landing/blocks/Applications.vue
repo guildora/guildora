@@ -9,7 +9,7 @@ const hubUrl = computed(() => String(runtimeConfig.public.hubUrl || "http://loca
 
 const applyUrl = computed(() => {
   if (props.config.mode === "link") {
-    return String(props.content.customLink || "#");
+    return safeLandingHref(props.content.customLink);
   }
   const flowId = String(props.config.flowId || "");
   return flowId ? `${hubUrl.value}/apply/${flowId}` : "#";

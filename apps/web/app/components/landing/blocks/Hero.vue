@@ -36,7 +36,7 @@ const variant = computed(() => String(props.config.layoutVariant || "default"));
       <div class="flex flex-wrap items-center justify-center gap-4">
         <a
           v-if="content.ctaLink"
-          :href="String(content.ctaLink)"
+          :href="safeLandingHref(content.ctaLink)"
           class="landing-btn-primary rounded-lg px-7 py-3.5 text-sm font-semibold"
         >
           {{ content.ctaText || $t("landing.cta") }}
