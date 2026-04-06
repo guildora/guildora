@@ -10,6 +10,8 @@ const CSS_DANGEROUS_PATTERNS = [
   /behavior\s*:/gi,
   /<\/?script/gi,
   /url\s*\(\s*["']?\s*data\s*:\s*text\/html/gi,
+  /@import\b/gi,
+  /url\s*\(\s*["']?\s*https?:/gi,
 ];
 
 /**

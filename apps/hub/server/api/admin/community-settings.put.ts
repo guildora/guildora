@@ -9,7 +9,7 @@ import { COMMUNITY_SETTINGS_SINGLETON_ID, invalidateCommunitySettingsCache } fro
 
 const schema = z.object({
   communityName: z.string().trim().max(200).nullable(),
-  discordInviteCode: z.string().trim().max(20).nullable().optional(),
+  discordInviteCode: z.string().trim().max(20).regex(/^[a-zA-Z0-9-]*$/, "Invalid Discord invite code").nullable().optional(),
   defaultLocale: z.enum(localePreferences).optional(),
   displayNameTemplate: displayNameTemplateSchema.optional()
 });

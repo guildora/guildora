@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { landingPages, landingSections, landingPageVersions } from "@guildora/shared";
 import { requireAdminSession } from "../../../../../utils/auth";
 import { getDb } from "../../../../../utils/db";
+import { sanitizeCss, sanitizeContentObject } from "../../../../../utils/sanitize";
 
 export default defineEventHandler(async (event) => {
   const session = await requireAdminSession(event);
@@ -41,8 +42,8 @@ export default defineEventHandler(async (event) => {
       sortOrder: Number(section.sortOrder ?? section.sort_order ?? 0),
       visible: section.visible !== false,
       status: String(section.status ?? "published") as "draft" | "published",
-      config: (section.config ?? {}) as Record<string, unknown>,
-      content: (section.content ?? {}) as Record<string, unknown>,
+      config: sanitizeContentObject((section.config ?? {}) as Record<string, unknown>),
+      content: sanitizeContentObject((section.content ?? {}) as Record<string, unknown>),
       updatedBy: session.user.id
     });
   }
@@ -54,7 +55,7 @@ export default defineEventHandler(async (event) => {
     if (page) {
       await db.update(landingPages).set({
         activeTemplate: String(pc.activeTemplate ?? pc.active_template ?? "default"),
-        customCss: pc.customCss != null ? String(pc.customCss ?? pc.custom_css) : null,
+        customCss: pc.customCss != null ? sanitizeCss(String(pc.customCss ?? pc.custom_css)) : null,
         metaTitle: pc.metaTitle != null ? String(pc.metaTitle ?? pc.meta_title) : null,
         metaDescription: pc.metaDescription != null ? String(pc.metaDescription ?? pc.meta_description) : null,
         updatedBy: session.user.id
