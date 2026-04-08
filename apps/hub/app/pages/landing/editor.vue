@@ -14,7 +14,7 @@ const { t } = useI18n();
 const { user } = useAuth();
 const runtimeConfig = useRuntimeConfig();
 const isDev = runtimeConfig.public.isDev;
-const landingUrl = String(runtimeConfig.public.landingUrl || runtimeConfig.public.appUrl || "http://localhost:3000").replace(/\/+$/, "");
+const landingUrl = String(runtimeConfig.public.landingUrl || runtimeConfig.public.appUrl || "http://localhost:3000").replace(/\/+$/, ""); // kept for "View Live" link
 
 interface LandingSection {
   id: string;
@@ -88,7 +88,6 @@ const applicationFlows = ref<AppFlow[]>([]);
 
 const draggedIndex = ref<number | null>(null);
 const showPreview = ref(false);
-const previewIframe = ref<HTMLIFrameElement | null>(null);
 const landingPreviewOpen = useState<boolean>("landing-preview-open", () => false);
 const previewWidth = ref(400);
 const isResizingPreview = ref(false);
@@ -138,27 +137,6 @@ function markDirty() {
 const enabledLocales = computed(() => pageConfig.value.enabledLocales || ["en"]);
 const isMultiLang = computed(() => enabledLocales.value.length > 1);
 
-function sendPreviewUpdate() {
-  if (!previewIframe.value?.contentWindow) return;
-  const localizedSections = sections.value.map((s) => {
-    const content = s.content as Record<string, unknown>;
-    const loc = (content[editLocale.value] ?? content.en ?? content) as Record<string, unknown>;
-    return { id: s.id, blockType: s.blockType, sortOrder: s.sortOrder, config: s.config, content: loc };
-  });
-  previewIframe.value.contentWindow.postMessage({
-    type: "landing-preview-update",
-    sections: localizedSections,
-    customCss: pageConfig.value.customCss,
-    colors: resolvedColors.value
-  }, "*");
-}
-
-// Live preview: update iframe whenever sections, CSS, or colors change
-watch(
-  [sections, () => pageConfig.value.customCss, () => pageConfig.value.colorOverrides, editLocale],
-  () => { sendPreviewUpdate(); },
-  { deep: true }
-);
 
 // ─── Onboarding Tour ──────────────────────────────────────────────────────
 
@@ -418,7 +396,6 @@ function flashSuccess() {
   saveSuccess.value = t("landingEditor.saved");
   saveError.value = "";
   setTimeout(() => { saveSuccess.value = ""; }, 3000);
-  nextTick(() => sendPreviewUpdate());
 }
 
 function blockName(type: string): string {
@@ -826,19 +803,18 @@ onMounted(async () => {
       <div class="w-1 h-10 rounded-full transition-colors" :style="isResizingPreview ? 'background: var(--color-accent)' : 'background: var(--color-surface-4)'" />
     </div>
 
-    <!-- Preview iframe column -->
+    <!-- Inline preview column -->
     <div v-if="showPreview" class="hidden lg:block sticky top-4 self-start" :style="{ width: previewWidth + 'px', minWidth: previewWidth + 'px' }">
       <div
-        class="rounded-xl overflow-hidden"
-        :style="`background: var(--color-surface-0); box-shadow: var(--shadow-lg); height: calc(100vh - 8rem);${isResizingPreview ? ' pointer-events: none;' : ''}`"
+        class="rounded-xl overflow-hidden overflow-y-auto"
+        :style="`box-shadow: var(--shadow-lg); height: calc(100vh - 8rem);${isResizingPreview ? ' pointer-events: none;' : ''}`"
       >
-        <iframe
-          ref="previewIframe"
-          :src="`${landingUrl}?preview=true`"
-          class="w-full h-full border-0"
-          sandbox="allow-scripts allow-same-origin"
-          title="Landing page preview"
-          @load="sendPreviewUpdate()"
+        <LandingPreview
+          :sections="sections"
+          :locale="editLocale"
+          :template-id="pageConfig.activeTemplate"
+          :colors="resolvedColors"
+          :custom-css="pageConfig.customCss"
         />
       </div>
     </div>

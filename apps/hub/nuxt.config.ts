@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: false },
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "~/assets/css/landing.css", "~/assets/css/cyberpunk.css", "~/assets/css/esports.css"],
   runtimeConfig: {
     discordClientId: process.env.NUXT_OAUTH_DISCORD_CLIENT_ID,
     discordClientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
