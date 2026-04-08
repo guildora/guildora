@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { TEMPLATE_COLOR_DEFAULTS, LANDING_COLOR_KEYS, resolveLandingColors, isValidHexColor } from "@guildora/shared";
+import type { LandingColorPalette } from "@guildora/shared";
+
 definePageMeta({
   middleware: ["landing"],
 });
@@ -19,17 +22,37 @@ interface LandingTemplate {
   previewUrl: string | null;
 }
 
+interface LandingColorOverrides {
+  background?: string;
+  surface?: string;
+  text?: string;
+  textMuted?: string;
+  accent?: string;
+  accentText?: string;
+  border?: string;
+}
+
 interface PageConfig {
   id?: number;
   activeTemplate: string;
   customCss: string | null;
   enabledLocales: string[];
+  colorOverrides: LandingColorOverrides;
 }
 
-const pageConfig = ref<PageConfig>({ activeTemplate: "default", customCss: null, enabledLocales: ["en"] });
+const pageConfig = ref<PageConfig>({ activeTemplate: "default", customCss: null, enabledLocales: ["en"], colorOverrides: {} });
 const templates = ref<LandingTemplate[]>([]);
 const removeLocaleConfirm = ref<{ open: boolean; code: string }>({ open: false, code: "" });
 const showAddLanguage = ref(false);
+
+// Track the persisted template so we know when there are unsaved changes
+const savedTemplate = ref("default");
+const savedColorOverrides = ref<LandingColorOverrides>({});
+
+const hasUnsavedTemplateChanges = computed(() =>
+  pageConfig.value.activeTemplate !== savedTemplate.value ||
+  JSON.stringify(pageConfig.value.colorOverrides) !== JSON.stringify(savedColorOverrides.value)
+);
 
 // All supported languages
 const availableLocales = [
@@ -55,6 +78,33 @@ const addableLocales = computed(() =>
 
 function localeLabel(code: string): string {
   return availableLocales.find((l) => l.code === code)?.label || code.toUpperCase();
+}
+
+// ─── Color overrides ─────────────────────────────────────────────────────
+
+const templateDefaults = computed<LandingColorPalette>(() =>
+  TEMPLATE_COLOR_DEFAULTS[pageConfig.value.activeTemplate] ?? TEMPLATE_COLOR_DEFAULTS.default
+);
+
+const resolvedColors = computed<LandingColorPalette>(() =>
+  resolveLandingColors(pageConfig.value.activeTemplate, pageConfig.value.colorOverrides)
+);
+
+const hexColorRegex = /^#[0-9a-fA-F]{6}$/;
+
+function setColorOverride(key: string, value: string) {
+  if (!hexColorRegex.test(value)) return;
+  pageConfig.value.colorOverrides = { ...pageConfig.value.colorOverrides, [key]: value.toLowerCase() };
+}
+
+function clearColorOverride(key: string) {
+  const next = { ...pageConfig.value.colorOverrides };
+  delete next[key as keyof typeof next];
+  pageConfig.value.colorOverrides = next;
+}
+
+function selectTemplate(templateId: string) {
+  pageConfig.value.activeTemplate = templateId;
 }
 
 // ─── Locale drag & drop ───────────────────────────────────────────────────
@@ -90,8 +140,11 @@ async function loadData() {
     if (page) {
       pageConfig.value = {
         ...page,
-        enabledLocales: page.enabledLocales || ["en"]
+        enabledLocales: page.enabledLocales || ["en"],
+        colorOverrides: (page as Record<string, unknown>).colorOverrides as LandingColorOverrides ?? {}
       };
+      savedTemplate.value = page.activeTemplate;
+      savedColorOverrides.value = { ...((page as Record<string, unknown>).colorOverrides as LandingColorOverrides ?? {}) };
     }
   } catch {
     saveError.value = "Failed to load settings.";
@@ -115,17 +168,21 @@ async function saveCss() {
   }
 }
 
-async function switchTemplate(templateId: string) {
+async function saveTemplateAndColors() {
   saving.value = true;
   try {
-    await $fetch("/api/admin/landing/template", {
+    await $fetch("/api/admin/landing/page", {
       method: "PUT",
-      body: { templateId }
+      body: {
+        activeTemplate: pageConfig.value.activeTemplate,
+        colorOverrides: pageConfig.value.colorOverrides
+      }
     });
-    pageConfig.value.activeTemplate = templateId;
+    savedTemplate.value = pageConfig.value.activeTemplate;
+    savedColorOverrides.value = { ...pageConfig.value.colorOverrides };
     flashSuccess();
   } catch {
-    saveError.value = "Failed to switch template.";
+    saveError.value = "Failed to save template and colors.";
   } finally {
     saving.value = false;
   }
@@ -244,7 +301,7 @@ onMounted(() => loadData());
         <p v-else class="text-sm opacity-50">{{ t("landingEditor.languages.noOtherLanguages") }}</p>
       </div>
 
-      <!-- Template -->
+      <!-- Template + Colors -->
       <div class="rounded-xl p-5 space-y-4" style="background: var(--color-surface-2)">
         <h3 class="text-lg font-semibold">{{ t("landingEditor.templateSwitch") }}</h3>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -255,7 +312,7 @@ onMounted(() => loadData());
             :style="pageConfig.activeTemplate === tmpl.id
               ? 'background: var(--color-surface-3); box-shadow: 0 0 0 2px var(--color-accent)'
               : 'background: var(--color-surface-3)'"
-            @click="switchTemplate(tmpl.id)"
+            @click="selectTemplate(tmpl.id)"
           >
             <!-- Schematic preview thumbnail -->
             <LandingTemplatePreview :template-id="tmpl.id" />
@@ -264,7 +321,7 @@ onMounted(() => loadData());
               <div class="flex items-center gap-2">
                 <h4 class="font-bold text-sm">{{ tmpl.name }}</h4>
                 <span
-                  v-if="pageConfig.activeTemplate === tmpl.id"
+                  v-if="savedTemplate === tmpl.id"
                   class="text-xs px-2 py-0.5 rounded"
                   style="background: var(--color-accent-subtle); color: var(--color-accent-light)"
                 >
@@ -274,6 +331,49 @@ onMounted(() => loadData());
               <p v-if="tmpl.description" class="text-xs opacity-60 mt-1">{{ tmpl.description }}</p>
             </div>
           </button>
+        </div>
+
+        <!-- Color overrides -->
+        <div class="pt-4 space-y-3" style="border-top: 1px solid var(--color-line)">
+          <div>
+            <h4 class="text-base font-semibold">{{ t("landingEditor.colors.title") }}</h4>
+            <p class="text-sm opacity-60 mt-1">{{ t("landingEditor.colors.description") }}</p>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div v-for="colorKey in (['background', 'surface', 'text', 'textMuted', 'accent', 'accentText', 'border'] as const)" :key="colorKey" class="space-y-1">
+              <label class="text-xs font-medium opacity-70">{{ t(`landingEditor.colors.${colorKey}`) }}</label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="color"
+                  :value="resolvedColors[colorKey]"
+                  class="h-8 w-10 rounded border-0 cursor-pointer"
+                  style="background: var(--color-surface-3)"
+                  @input="(e) => setColorOverride(colorKey, (e.target as HTMLInputElement).value)"
+                />
+                <span class="text-xs font-mono opacity-50">{{ resolvedColors[colorKey] }}</span>
+                <button
+                  v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]"
+                  class="text-xs opacity-40 hover:opacity-70 transition-opacity"
+                  :title="t('landingEditor.colors.reset')"
+                  @click="clearColorOverride(colorKey)"
+                >
+                  <Icon name="proicons:cancel" class="h-3 w-3" />
+                </button>
+              </div>
+              <span v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]" class="text-[10px] opacity-40">
+                {{ t("landingEditor.colors.default") }}: {{ templateDefaults[colorKey] }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save button for template + colors -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <span v-if="hasUnsavedTemplateChanges" class="text-xs opacity-50">*</span>
+          <UiButton variant="primary" size="sm" :disabled="saving || !hasUnsavedTemplateChanges" @click="saveTemplateAndColors">
+            {{ saving ? t("landingEditor.saving") : t("common.save") }}
+          </UiButton>
         </div>
       </div>
 

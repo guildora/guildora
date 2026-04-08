@@ -76,7 +76,7 @@ const sections = ref<LandingSection[]>([]);
 const blockTypes = ref<BlockType[]>([]);
 const templates = ref<LandingTemplate[]>([]);
 const pageConfig = ref<PageConfig>({ activeTemplate: "default", customCss: null, colorOverrides: {}, metaTitle: null, metaDescription: null, enabledLocales: ["en"], publishedAt: null });
-const showColorEditor = ref(false);
+// Color editor moved to settings page — color state kept for preview
 
 const showBlockCatalog = ref(false);
 const editingSection = ref<LandingSection | null>(null);
@@ -464,21 +464,6 @@ function clearColorOverride(key: string) {
   markDirty();
 }
 
-async function saveColors() {
-  saving.value = true;
-  try {
-    await $fetch("/api/admin/landing/page", {
-      method: "PUT",
-      body: { colorOverrides: pageConfig.value.colorOverrides }
-    });
-    flashSuccess();
-  } catch {
-    saveError.value = "Failed to save colors.";
-  } finally {
-    saving.value = false;
-  }
-}
-
 onMounted(async () => {
   await loadData();
   if (sections.value.length > 0) {
@@ -569,9 +554,6 @@ onMounted(async () => {
       <!-- ─── Action bar ─────────────────────────────────────────────── -->
       <div class="flex flex-wrap gap-2">
         <UiButton class="landing-add-block" variant="primary" size="sm" @click="showBlockCatalog = true">{{ t("landingEditor.addBlock") }}</UiButton>
-        <UiButton variant="outline" size="sm" @click="showColorEditor = !showColorEditor">
-          {{ t("landingEditor.colors.button") }}
-        </UiButton>
         <UiButton variant="outline" size="sm" @click="toggleHistory">
           <Icon name="proicons:clock" class="h-4 w-4 mr-1" />{{ t("landingEditor.history") }}
         </UiButton>
@@ -597,50 +579,6 @@ onMounted(async () => {
           </div>
           <UiButton variant="outline" size="xs" :disabled="saving" @click="restoreVersion(version.id)">
             {{ t("landingEditor.restore") }}
-          </UiButton>
-        </div>
-      </div>
-
-      <!-- ─── Color overrides ─────────────────────────────────────── -->
-      <div v-if="showColorEditor" class="rounded-xl p-5 space-y-4" style="background: var(--color-surface-2)">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold">{{ t("landingEditor.colors.title") }}</h3>
-          <UiButton variant="ghost" size="xs" icon-only @click="showColorEditor = false">
-            <Icon name="proicons:cancel" class="h-4 w-4" />
-          </UiButton>
-        </div>
-        <p class="text-sm opacity-60">{{ t("landingEditor.colors.description") }}</p>
-
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div v-for="colorKey in (['background', 'surface', 'text', 'textMuted', 'accent', 'accentText', 'border'] as const)" :key="colorKey" class="space-y-1">
-            <label class="text-xs font-medium opacity-70">{{ t(`landingEditor.colors.${colorKey}`) }}</label>
-            <div class="flex items-center gap-2">
-              <input
-                type="color"
-                :value="resolvedColors[colorKey]"
-                class="h-8 w-10 rounded border-0 cursor-pointer"
-                style="background: var(--color-surface-3)"
-                @input="(e) => setColorOverride(colorKey, (e.target as HTMLInputElement).value)"
-              />
-              <span class="text-xs font-mono opacity-50">{{ resolvedColors[colorKey] }}</span>
-              <button
-                v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]"
-                class="text-xs opacity-40 hover:opacity-70 transition-opacity"
-                :title="t('landingEditor.colors.reset')"
-                @click="clearColorOverride(colorKey)"
-              >
-                <Icon name="proicons:cancel" class="h-3 w-3" />
-              </button>
-            </div>
-            <span v-if="(pageConfig.colorOverrides as Record<string, string>)[colorKey]" class="text-[10px] opacity-40">
-              {{ t("landingEditor.colors.default") }}: {{ templateDefaults[colorKey] }}
-            </span>
-          </div>
-        </div>
-
-        <div class="flex gap-2 pt-2">
-          <UiButton variant="primary" size="sm" :disabled="saving" @click="saveColors">
-            {{ t("common.save") }}
           </UiButton>
         </div>
       </div>
