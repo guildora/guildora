@@ -515,7 +515,8 @@
       "accentText": "Accent text",
       "border": "Border",
       "reset": "Reset to default",
-      "default": "Default"
+      "default": "Default",
+      "restoreDefaults": "Restore Defaults"
     }
   },
   "landingFooter": {

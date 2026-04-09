@@ -109,6 +109,23 @@ function clearColorOverride(key: string) {
   pageConfig.value.colorOverrides = next;
 }
 
+/** True when the active template has any color override that differs from its defaults */
+const hasColorOverrides = computed(() => {
+  const overrides = activeTemplateOverrides.value;
+  const defaults = templateDefaults.value;
+  return LANDING_COLOR_KEYS.some((key) => {
+    const override = overrides[key];
+    return override !== undefined && override.toLowerCase() !== defaults[key].toLowerCase();
+  });
+});
+
+function restoreDefaultColors() {
+  const tid = pageConfig.value.activeTemplate;
+  const next = { ...pageConfig.value.colorOverrides };
+  delete next[tid];
+  pageConfig.value.colorOverrides = next;
+}
+
 function selectTemplate(templateId: string) {
   pageConfig.value.activeTemplate = templateId;
 }
@@ -378,6 +395,14 @@ onMounted(() => loadData());
 
         <!-- Save button for template + colors -->
         <div class="flex items-center justify-end gap-3 pt-2">
+          <UiButton
+            v-if="hasColorOverrides"
+            variant="outline"
+            size="sm"
+            @click="restoreDefaultColors"
+          >
+            {{ t("landingEditor.colors.restoreDefaults") }}
+          </UiButton>
           <span v-if="hasUnsavedTemplateChanges" class="text-xs opacity-50">*</span>
           <UiButton variant="primary" size="sm" :disabled="saving || !hasUnsavedTemplateChanges" @click="saveTemplateAndColors">
             {{ saving ? t("landingEditor.saving") : t("common.save") }}

@@ -515,7 +515,8 @@
       "accentText": "Akzent-Text",
       "border": "Rahmen",
       "reset": "Auf Standard zuruecksetzen",
-      "default": "Standard"
+      "default": "Standard",
+      "restoreDefaults": "Standardfarben wiederherstellen"
     }
   },
   "landingFooter": {
