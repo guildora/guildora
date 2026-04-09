@@ -1,8 +1,9 @@
-export default defineNuxtRouteMiddleware(async () => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const { user, hasRole } = useAuth();
 
   if (!user.value) {
-    return navigateTo("/login");
+    const returnTo = encodeURIComponent(to.fullPath || "/dashboard");
+    return navigateTo(`/login?returnTo=${returnTo}`);
   }
 
   if (hasRole("admin")) {
