@@ -424,8 +424,17 @@ export async function runMigrations(connectionString: string, migrationsFolder: 
     `);
     await db.execute(sql`
       INSERT INTO "landing_templates" ("id", "name", "description", "is_builtin")
-      VALUES ('gaming', 'Gaming', 'Bold and energetic — designed for gaming communities.', true)
+      VALUES ('cyberpunk', 'Gaming', 'Retro futurism — neon glow, scanlines, angular geometry, and synthwave accents for gaming communities.', true)
       ON CONFLICT ("id") DO NOTHING
+    `);
+    // Clean up stale "gaming" template that was inserted by an earlier migration.
+    // Migrate any landing pages referencing it to "cyberpunk" first.
+    await db.execute(sql`
+      UPDATE "landing_pages" SET "active_template" = 'cyberpunk'
+      WHERE "active_template" = 'gaming'
+    `);
+    await db.execute(sql`
+      DELETE FROM "landing_templates" WHERE "id" = 'gaming'
     `);
     await db.execute(sql`
       INSERT INTO "landing_templates" ("id", "name", "description", "is_builtin")

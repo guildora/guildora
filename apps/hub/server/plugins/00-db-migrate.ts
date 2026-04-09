@@ -74,15 +74,34 @@ export default defineNitroPlugin(async () => {
     const pending = await hasPendingMigrations(connectionString, migrationsFolder);
     if (!pending) {
       console.log("[db-migrate] Database is up to date – skipping migrations.");
-      return;
+    } else {
+      console.log("[db-migrate] Pending migrations detected – running...");
+      await runMigrations(connectionString, migrationsFolder);
+      console.log("[db-migrate] Migrations applied successfully.");
     }
-
-    console.log("[db-migrate] Pending migrations detected – running...");
-    await runMigrations(connectionString, migrationsFolder);
-    console.log("[db-migrate] Migrations applied successfully.");
   } catch (error) {
     // Log the error but don't crash the server — the idempotent fixups in
     // runMigrations() cover most schema changes, so the app may still work.
     console.error("[db-migrate] Migration failed (server will continue starting):", error);
+  }
+
+  // ── Lightweight idempotent fixups (always run) ──────────────────────
+  // These run on every startup and must be safe to repeat.
+  const ssl = process.env.DATABASE_SSL === "false" ? false : ("require" as const);
+  const fixupClient = postgres(connectionString, { max: 1, ssl });
+  try {
+    // Remove stale "gaming" template that was inserted by an old migration.
+    // The real Gaming template uses id "cyberpunk".
+    await fixupClient`
+      UPDATE "landing_pages" SET "active_template" = 'cyberpunk'
+      WHERE "active_template" = 'gaming'
+    `;
+    await fixupClient`
+      DELETE FROM "landing_templates" WHERE "id" = 'gaming'
+    `;
+  } catch (error) {
+    console.warn("[db-migrate] Post-migration fixup failed (non-fatal):", error);
+  } finally {
+    await fixupClient.end({ timeout: 5 });
   }
 });

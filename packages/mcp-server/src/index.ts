@@ -175,7 +175,7 @@ server.registerTool(
   {
     description: "Switch the active landing page template. Content is preserved — only layout/styling changes.",
     inputSchema: z.object({
-      templateId: z.string().describe("Template ID to switch to, e.g. 'default', 'gaming', 'esports'")
+      templateId: z.string().describe("Template ID to switch to, e.g. 'default', 'cyberpunk', 'esports'")
     })
   },
   async ({ templateId }) => {
