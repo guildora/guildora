@@ -16,6 +16,16 @@
   "landingBlocks": {
     "unsupported": "Dieser Block-Typ wird aktuell nicht unterstützt: {type}."
   },
+  "auth": {
+    "loginTitle": "Willkommen zurück",
+    "loginDescription": "Melde dich mit deinem Discord-Account an, um auf das Dashboard zuzugreifen.",
+    "continueWithDiscord": "Mit Discord fortfahren",
+    "backToHome": "Zurück zur Startseite",
+    "errors": {
+      "not_guild_member": "Du musst Mitglied des Discord-Servers sein, um dich anzumelden.",
+      "unknown": "Beim Anmelden ist ein Fehler aufgetreten. Bitte versuche es erneut."
+    }
+  },
   "footer": {
     "tagline": "Community-Plattform",
     "rights": "Alle Rechte vorbehalten.",

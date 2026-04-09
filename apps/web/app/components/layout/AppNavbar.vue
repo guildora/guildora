@@ -1,19 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{ communityName?: string; discordInviteCode?: string }>();
-const config = useRuntimeConfig();
 const { t } = useI18n();
-
-const hubLoginUrl = computed(() => {
-  const rawHubUrl = String(config.public.hubUrl || "").trim() || "http://localhost:3003";
-
-  try {
-    const endpoint = new URL("/login", rawHubUrl);
-    endpoint.searchParams.set("returnTo", "/dashboard");
-    return endpoint.toString();
-  } catch {
-    return "http://localhost:3003/login?returnTo=%2Fdashboard";
-  }
-});
+const localePath = useLocalePath();
 
 const discordInviteUrl = computed(() =>
   props.discordInviteCode ? `https://discord.gg/${props.discordInviteCode}` : null
@@ -39,8 +27,8 @@ const discordInviteUrl = computed(() =>
           </svg>
           {{ t("nav.joinDiscord") }}
         </a>
-        <a
-          :href="hubLoginUrl"
+        <NuxtLink
+          :to="localePath('/login')"
           class="flex items-center opacity-60 hover:opacity-100 transition-opacity"
           :title="t('nav.login')"
           :aria-label="t('nav.login')"
@@ -50,7 +38,7 @@ const discordInviteUrl = computed(() =>
             <polyline points="10 17 15 12 10 7"/>
             <line x1="15" y1="12" x2="3" y2="12"/>
           </svg>
-        </a>
+        </NuxtLink>
       </div>
     </div>
   </div>
