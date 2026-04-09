@@ -39,8 +39,13 @@ packages/shared/dist/
 # Runtime media and uploads
 apps/hub/public/uploads/
 
+# Agent workspace — local reports, plans, audits, screenshots (never committed)
+.alice/
+screenshots/
+
 # Secrets and local scripts
 .script/
+scripts/
 .env.local
 .env.tunnel
 .pw-browsers/
