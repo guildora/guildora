@@ -17,11 +17,16 @@
     "db:migrate": "pnpm --filter @guildora/shared db:migrate",
     "db:seed": "pnpm --filter @guildora/shared db:seed",
     "bot:deploy-commands": "pnpm --filter @guildora/bot deploy:commands",
+    "test": "turbo run test",
+    "test:watch": "vitest --workspace vitest.workspace.ts",
+    "test:integration": "turbo run test:integration",
+    "test:coverage": "vitest run --workspace vitest.workspace.ts --coverage",
     "preview": "turbo run build && turbo run start --parallel --continue"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.0"
   },
   "pnpm": {
     "overrides": {

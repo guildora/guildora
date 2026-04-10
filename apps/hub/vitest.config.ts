@@ -4,6 +4,6 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.spec.ts", "**/*.test.ts"],
-    exclude: ["**/node_modules/**", "**/.nuxt/**", "**/.output/**", "**/dist/**"]
+    exclude: ["**/node_modules/**", "**/.nuxt/**", "**/.output/**", "**/dist/**", "tests/**"]
   }
 });

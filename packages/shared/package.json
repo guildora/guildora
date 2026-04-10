@@ -42,6 +42,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "echo \"No lint configured for @guildora/shared\"",
     "format": "echo \"No format script configured for @guildora/shared\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "db:generate": "node scripts/run-drizzle-generate.mjs",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts"
@@ -56,6 +58,7 @@
     "@types/node": "^22.13.10",
     "drizzle-kit": "^0.31.4",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.0"
   }
 }

@@ -22,6 +22,7 @@ cache/
 .env
 .env.*
 !.env.example
+!.env.test
 
 # OS and editor files
 .DS_Store
