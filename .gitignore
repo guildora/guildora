@@ -47,6 +47,7 @@ screenshots/
 # Secrets and local scripts
 .script/
 scripts/
+!apps/*/scripts/
 .env.local
 .env.tunnel
 .pw-browsers/
