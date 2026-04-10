@@ -251,6 +251,43 @@ export function buildFlowGraphWithRoleAssignment(): ApplicationFlowGraph {
   };
 }
 
+// ─── Session User Factory ───────────────────────────────────────────────────
+
+export type PermissionRole = "temporaer" | "user" | "moderator" | "admin" | "superadmin";
+
+export interface SessionUserFactoryInput {
+  id?: string;
+  discordId?: string;
+  profileName?: string;
+  avatarUrl?: string | null;
+  permissionRoles?: PermissionRole[];
+  communityRole?: string | null;
+}
+
+export function buildSessionUser(
+  role: PermissionRole | PermissionRole[],
+  overrides?: SessionUserFactoryInput
+) {
+  const roles = Array.isArray(role) ? role : [role];
+  const id = overrides?.id ?? nextId("session-user");
+  return {
+    id,
+    discordId: overrides?.discordId ?? nextId("discord"),
+    profileName: overrides?.profileName ?? `TestUser_${id}`,
+    avatarUrl: overrides?.avatarUrl ?? null,
+    permissionRoles: roles,
+    communityRole: overrides?.communityRole ?? null,
+    moderationRights: {
+      modDeleteUsers: false,
+      modManageApplications: false,
+      modAccessCommunitySettings: false,
+      modAccessDesign: false,
+      modAccessApps: false,
+      modAccessDiscordRoles: false,
+    },
+  };
+}
+
 // ─── Simple Form Section Factory ─────────────────────────────────────────────
 
 export function buildSimpleFormSection(
