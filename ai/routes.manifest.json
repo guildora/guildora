@@ -1,50 +1,433 @@
 {
-  "version": "2.3",
+  "version": "3.0",
   "description": "Frontend route manifest split by public landing ownership in web and internal ownership in hub.",
   "apiBase": "/api",
   "pages": [
-    { "app": "web", "path": "/", "purpose": "DB-backed public landing page (Hub API content) with login CTA fallback", "auth": false, "layout": "default", "docsRef": "../docs/routing-and-navigation.md" },
-
-    { "app": "hub", "path": "/", "purpose": "Hub root redirect to /dashboard", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default", "redirectsTo": "/dashboard" },
-    { "app": "hub", "path": "/login", "purpose": "Discord login entry page", "auth": false, "layout": "auth", "docsRef": "../docs/routing-and-navigation.md" },
-    { "app": "hub", "path": "/dashboard", "purpose": "Internal dashboard with voice and profile activity stats", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/members", "purpose": "Member directory with search, role filter, and sorting", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/members/:id", "purpose": "Member profile detail view", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/profile", "purpose": "Profile root redirect to /profile/customize", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default", "redirectsTo": "/profile/customize" },
-    { "app": "hub", "path": "/profile/customize", "purpose": "Profile editor with name, appearance, locale, Discord roles, and custom fields", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/profile/:id", "purpose": "Legacy alias redirect to /members/:id", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default", "redirectsTo": "/members/:id" },
-
-    { "app": "hub", "path": "/settings", "purpose": "Settings root redirect to last visited settings subsection", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/community", "purpose": "Community name, locale, display-name template, and Discord invite settings", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/custom-fields", "purpose": "Admin-managed custom profile fields with visibility and edit permissions", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/permissions", "purpose": "Permission role, community role, and mirror admin tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/moderation-rights", "purpose": "Granular moderator access flags for settings sections and actions", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/design", "purpose": "Internal theme and logo editor", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/dev-role-switcher", "purpose": "Development role switcher and superadmin self-import tools", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/apps", "purpose": "Installed app management and sideloading", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/apps/review", "purpose": "App review interface", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/settings/landing", "purpose": "Landing page editor (sections, templates, publish/version history)", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-
-    { "app": "hub", "path": "/applications", "purpose": "Application flow management root", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/flows", "purpose": "Application flow listing", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/flows/new", "purpose": "Create new application flow", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/flows/:flowId", "purpose": "Visual node-based application flow builder", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/flows/:flowId/settings", "purpose": "Application flow settings (tokens, embeds, notifications)", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/open", "purpose": "Open application review queue", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/open/:applicationId", "purpose": "Open application detail and review", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/archive", "purpose": "Archived/completed applications", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/archive/:applicationId", "purpose": "Archived application detail view", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/applications/config", "purpose": "Application system settings (moderator access)", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/apply/:flowId/:token", "purpose": "Public application form for applicants", "auth": false, "layout": "apply" },
-
-    { "app": "hub", "path": "/apps", "purpose": "Apps section root", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/apps/overview", "purpose": "Installed apps overview dashboard", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/apps/sideload", "purpose": "App sideloading interface", "requiredRoles": ["admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/apps/explore", "purpose": "App marketplace discovery", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/apps/:appId/:slug*", "purpose": "Dynamic app pages with catch-all routing", "requiredRoles": ["moderator", "admin", "superadmin"], "layout": "default" },
-
-    { "app": "hub", "path": "/marketplace", "purpose": "Embedded external marketplace shell", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/marketplace/submit", "purpose": "App marketplace submission form", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" },
-    { "app": "hub", "path": "/marketplace/:appId", "purpose": "Marketplace app detail page", "requiredRoles": ["temporaer", "user", "moderator", "admin", "superadmin"], "layout": "default" }
+    {
+      "app": "web",
+      "path": "/",
+      "purpose": "DB-backed public landing page (Hub API content) with login CTA fallback",
+      "auth": false,
+      "layout": "default",
+      "docsRef": "../docs/routing-and-navigation.md"
+    },
+    {
+      "app": "hub",
+      "path": "/",
+      "purpose": "Hub root redirect to /dashboard",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default",
+      "redirectsTo": "/dashboard"
+    },
+    {
+      "app": "hub",
+      "path": "/login",
+      "purpose": "Discord login entry page",
+      "auth": false,
+      "layout": "auth",
+      "docsRef": "../docs/routing-and-navigation.md"
+    },
+    {
+      "app": "hub",
+      "path": "/dashboard",
+      "purpose": "Internal dashboard with voice and profile activity stats",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/members",
+      "purpose": "Member directory with search, role filter, and sorting",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/members/:id",
+      "purpose": "Member profile detail view",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/profile",
+      "purpose": "Profile root redirect to /profile/customize",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default",
+      "redirectsTo": "/profile/customize"
+    },
+    {
+      "app": "hub",
+      "path": "/profile/customize",
+      "purpose": "Profile editor with name, appearance, locale, Discord roles, and custom fields",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/profile/:id",
+      "purpose": "Legacy alias redirect to /members/:id",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default",
+      "redirectsTo": "/members/:id"
+    },
+    {
+      "app": "hub",
+      "path": "/settings",
+      "purpose": "Settings root redirect to last visited settings subsection",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/community",
+      "purpose": "Community name, locale, display-name template, and Discord invite settings",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/custom-fields",
+      "purpose": "Admin-managed custom profile fields with visibility and edit permissions",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/permissions",
+      "purpose": "Permission role, community role, and mirror admin tools",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/moderation-rights",
+      "purpose": "Granular moderator access flags for settings sections and actions",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/design",
+      "purpose": "Internal theme and logo editor",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/dev-role-switcher",
+      "purpose": "Development role switcher and superadmin self-import tools",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/apps",
+      "purpose": "Installed app management and sideloading",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/apps/review",
+      "purpose": "App review interface",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/settings/landing",
+      "purpose": "Landing page editor (sections, templates, publish/version history)",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications",
+      "purpose": "Application flow management root",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/flows",
+      "purpose": "Application flow listing",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/flows/new",
+      "purpose": "Create new application flow",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/flows/:flowId",
+      "purpose": "Visual node-based application flow builder",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/flows/:flowId/settings",
+      "purpose": "Application flow settings (tokens, embeds, notifications)",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/open",
+      "purpose": "Open application review queue",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/open/:applicationId",
+      "purpose": "Open application detail and review",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/archive",
+      "purpose": "Archived/completed applications",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/archive/:applicationId",
+      "purpose": "Archived application detail view",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/applications/config",
+      "purpose": "Application system settings (moderator access)",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/apply/:flowId/:token",
+      "purpose": "Public application form for applicants",
+      "auth": false,
+      "layout": "apply"
+    },
+    {
+      "app": "hub",
+      "path": "/apps",
+      "purpose": "Apps section root",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/apps/overview",
+      "purpose": "Installed apps overview dashboard",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/apps/sideload",
+      "purpose": "App sideloading interface",
+      "requiredRoles": [
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/apps/explore",
+      "purpose": "App marketplace discovery",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/apps/:appId/:slug*",
+      "purpose": "Dynamic app pages with catch-all routing",
+      "requiredRoles": [
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/marketplace",
+      "purpose": "Embedded external marketplace shell",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/marketplace/submit",
+      "purpose": "App marketplace submission form",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "app": "hub",
+      "path": "/marketplace/:appId",
+      "purpose": "Marketplace app detail page",
+      "requiredRoles": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ],
+      "layout": "default"
+    },
+    {
+      "path": "/settings/platforms",
+      "component": "apps/hub/app/pages/settings/platforms.vue",
+      "auth": "admin",
+      "description": "Platform connection management (Discord, Matrix)"
+    }
   ]
 }

@@ -1,244 +1,761 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "2.2",
+  "version": "3.0",
   "description": "Summary of the shared application-domain schema from packages/shared/src/db/schema.ts. The public schema is used by hub and bot.",
   "entities": [
     {
       "id": "users",
       "table": "users",
-      "fields": ["id", "discordId", "email", "displayName", "avatarUrl", "avatarSource", "primaryDiscordRoleName", "lastLoginAt", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "discordId",
+        "email",
+        "displayName",
+        "avatarUrl",
+        "avatarSource",
+        "primaryDiscordRoleName",
+        "primaryPlatform",
+        "lastLoginAt",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["displayName is the serialized profile name string", "avatarSource tracks where the avatar was set from", "primaryDiscordRoleName is a snapshot of the user's primary Discord role"],
-      "relations": ["profile", "permissionRoles", "communityRole", "discordRoles", "voiceSessions", "profileChangeLogs", "createdApps", "submittedAppSubmissions", "reviewedAppSubmissions", "createdApplicationFlows", "reviewedApplications", "applicationModeratorNotifications", "createdCommunityTags"]
+      "notes": [
+        "displayName is the serialized profile name string",
+        "avatarSource tracks where the avatar was set from",
+        "primaryDiscordRoleName is a snapshot of the user's primary Discord role",
+        "discordId is nullable (Matrix-only users have no Discord ID)",
+        "primaryPlatform indicates preferred display platform (discord or matrix)"
+      ],
+      "relations": [
+        "profile",
+        "permissionRoles",
+        "communityRole",
+        "discordRoles",
+        "voiceSessions",
+        "profileChangeLogs",
+        "createdApps",
+        "submittedAppSubmissions",
+        "reviewedAppSubmissions",
+        "createdApplicationFlows",
+        "reviewedApplications",
+        "applicationModeratorNotifications",
+        "createdCommunityTags",
+        "platformAccounts"
+      ]
     },
     {
       "id": "profiles",
       "table": "profiles",
-      "fields": ["id", "userId", "absenceStatus", "absenceMessage", "absenceUntil", "customFields", "localePreference", "updatedAt"],
+      "fields": [
+        "id",
+        "userId",
+        "absenceStatus",
+        "absenceMessage",
+        "absenceUntil",
+        "customFields",
+        "localePreference",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "enums": { "absenceStatus": ["away", "maintenance"] },
-      "notes": ["No bio field exists in the current schema", "customFields stores appearance and application metadata"],
-      "customFieldsKnown": ["applicationStatus", "applicationReviewedAt", "applicationReviewedBy", "appearancePreference", "localePreference (legacy fallback)"]
+      "enums": {
+        "absenceStatus": [
+          "away",
+          "maintenance"
+        ]
+      },
+      "notes": [
+        "No bio field exists in the current schema",
+        "customFields stores appearance and application metadata"
+      ],
+      "customFieldsKnown": [
+        "applicationStatus",
+        "applicationReviewedAt",
+        "applicationReviewedBy",
+        "appearancePreference",
+        "localePreference (legacy fallback)"
+      ]
     },
     {
       "id": "permission_roles",
       "table": "permission_roles",
-      "fields": ["id", "name", "description", "level"],
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "level"
+      ],
       "primaryKey": "id",
-      "names": ["temporaer", "user", "moderator", "admin", "superadmin"]
+      "names": [
+        "temporaer",
+        "user",
+        "moderator",
+        "admin",
+        "superadmin"
+      ]
     },
     {
       "id": "community_roles",
       "table": "community_roles",
-      "fields": ["id", "name", "description", "discordRoleId", "permissionRoleId", "sortOrder", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "discordRoleId",
+        "permissionRoleId",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Maps one community role to one permission role", "discordRoleId is optional but unique when set"]
+      "notes": [
+        "Maps one community role to one permission role",
+        "discordRoleId is optional but unique when set"
+      ]
     },
     {
       "id": "user_permission_roles",
       "table": "user_permission_roles",
-      "fields": ["userId", "permissionRoleId", "assignedAt"],
-      "primaryKey": ["userId", "permissionRoleId"]
+      "fields": [
+        "userId",
+        "permissionRoleId",
+        "assignedAt"
+      ],
+      "primaryKey": [
+        "userId",
+        "permissionRoleId"
+      ]
     },
     {
       "id": "user_community_roles",
       "table": "user_community_roles",
-      "fields": ["userId", "communityRoleId", "assignedAt"],
+      "fields": [
+        "userId",
+        "communityRoleId",
+        "assignedAt"
+      ],
       "primaryKey": "userId",
-      "notes": ["At most one community role per user"]
+      "notes": [
+        "At most one community role per user"
+      ]
     },
     {
       "id": "role_groups",
       "table": "role_groups",
-      "fields": ["id", "name", "description", "sortOrder", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Named groups for organizing selectable Discord roles"]
+      "notes": [
+        "Named groups for organizing selectable Discord roles"
+      ]
     },
     {
       "id": "selectable_discord_roles",
       "table": "selectable_discord_roles",
-      "fields": ["discordRoleId", "roleNameSnapshot", "groupId", "emoji", "sortOrder", "createdAt", "updatedAt"],
+      "fields": [
+        "discordRoleId",
+        "roleNameSnapshot",
+        "groupId",
+        "emoji",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "discordRoleId",
-      "notes": ["Admin-managed allowlist for self-service Discord roles, optionally grouped via role_groups"]
+      "notes": [
+        "Admin-managed allowlist for self-service Discord roles, optionally grouped via role_groups"
+      ]
     },
     {
       "id": "role_picker_embeds",
       "table": "role_picker_embeds",
-      "fields": ["id", "groupId", "discordChannelId", "discordMessageId", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "groupId",
+        "discordChannelId",
+        "discordMessageId",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Discord message embeds for reaction-based role selection, one per role group"]
+      "notes": [
+        "Discord message embeds for reaction-based role selection, one per role group"
+      ]
     },
     {
       "id": "user_discord_roles",
       "table": "user_discord_roles",
-      "fields": ["userId", "discordRoleId", "roleNameSnapshot", "syncedAt"],
-      "primaryKey": ["userId", "discordRoleId"],
-      "notes": ["Snapshot table, not the live source of truth for Discord guild state"]
+      "fields": [
+        "userId",
+        "discordRoleId",
+        "roleNameSnapshot",
+        "syncedAt"
+      ],
+      "primaryKey": [
+        "userId",
+        "discordRoleId"
+      ],
+      "notes": [
+        "Snapshot table, not the live source of truth for Discord guild state"
+      ]
     },
     {
       "id": "voice_sessions",
       "table": "voice_sessions",
-      "fields": ["id", "userId", "channelId", "startedAt", "endedAt", "durationMinutes", "createdAt"],
+      "fields": [
+        "id",
+        "userId",
+        "channelId",
+        "platform",
+        "startedAt",
+        "endedAt",
+        "durationMinutes",
+        "createdAt"
+      ],
       "primaryKey": "id",
-      "notes": ["One open session per user is enforced by a partial unique index"]
+      "notes": [
+        "One open session per user is enforced by a partial unique index",
+        "platform field distinguishes Discord voice vs Matrix voice sessions"
+      ]
     },
     {
       "id": "profile_change_log",
       "table": "profile_change_log",
-      "fields": ["id", "profileId", "changeType", "previousValue", "newValue", "isGrowth", "isDeparture", "changedBy", "createdAt"],
+      "fields": [
+        "id",
+        "profileId",
+        "changeType",
+        "previousValue",
+        "newValue",
+        "isGrowth",
+        "isDeparture",
+        "changedBy",
+        "createdAt"
+      ],
       "primaryKey": "id"
     },
     {
       "id": "installed_apps",
       "table": "installed_apps",
-      "fields": ["id", "appId", "name", "version", "status", "source", "verified", "autoUpdate", "repositoryUrl", "manifest", "config", "codeBundle", "createdBy", "installedAt", "updatedAt"],
+      "fields": [
+        "id",
+        "appId",
+        "name",
+        "version",
+        "status",
+        "source",
+        "verified",
+        "autoUpdate",
+        "repositoryUrl",
+        "manifest",
+        "config",
+        "codeBundle",
+        "createdBy",
+        "installedAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "enums": { "status": ["active", "inactive", "error"], "source": ["marketplace", "sideloaded"] },
-      "notes": ["codeBundle stores transpiled CJS code bundles as filePath to CJS source string mapping"]
+      "enums": {
+        "status": [
+          "active",
+          "inactive",
+          "error"
+        ],
+        "source": [
+          "marketplace",
+          "sideloaded"
+        ]
+      },
+      "notes": [
+        "codeBundle stores transpiled CJS code bundles as filePath to CJS source string mapping"
+      ]
     },
     {
       "id": "app_kv",
       "table": "app_kv",
-      "fields": ["appId", "key", "value"],
-      "primaryKey": ["appId", "key"],
-      "notes": ["Key-value store scoped per installed app"]
+      "fields": [
+        "appId",
+        "key",
+        "value"
+      ],
+      "primaryKey": [
+        "appId",
+        "key"
+      ],
+      "notes": [
+        "Key-value store scoped per installed app"
+      ]
     },
     {
       "id": "app_marketplace_submissions",
       "table": "app_marketplace_submissions",
-      "fields": ["id", "appId", "name", "version", "sourceUrl", "manifest", "status", "automatedChecks", "reviewNotes", "submittedByUserId", "reviewedByUserId", "reviewedAt", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "appId",
+        "name",
+        "version",
+        "sourceUrl",
+        "manifest",
+        "status",
+        "automatedChecks",
+        "reviewNotes",
+        "submittedByUserId",
+        "reviewedByUserId",
+        "reviewedAt",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "enums": { "status": ["pending", "approved", "rejected"] },
-      "notes": ["Retained schema for marketplace submissions; active local product flow is limited"]
+      "enums": {
+        "status": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "notes": [
+        "Retained schema for marketplace submissions; active local product flow is limited"
+      ]
     },
     {
       "id": "theme_settings",
       "table": "theme_settings",
-      "fields": ["id", "colorDominant", "colorSecondary", "colorAccent", "colorAccentContentTone", "colorInfo", "colorInfoContentTone", "colorSuccess", "colorSuccessContentTone", "colorWarning", "colorWarningContentTone", "colorError", "colorErrorContentTone", "logoDataUrl", "logoMimeType", "logoFileName", "sidebarLogoSizePx", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "colorDominant",
+        "colorSecondary",
+        "colorAccent",
+        "colorAccentContentTone",
+        "colorInfo",
+        "colorInfoContentTone",
+        "colorSuccess",
+        "colorSuccessContentTone",
+        "colorWarning",
+        "colorWarningContentTone",
+        "colorError",
+        "colorErrorContentTone",
+        "logoDataUrl",
+        "logoMimeType",
+        "logoFileName",
+        "sidebarLogoSizePx",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Used as a singleton-like settings table by the hub app"]
+      "notes": [
+        "Used as a singleton-like settings table by the hub app"
+      ]
     },
     {
       "id": "moderation_settings",
       "table": "moderation_settings",
-      "fields": ["id", "allowModeratorAccess", "allowModeratorAppsAccess", "modDeleteUsers", "modManageApplications", "modAccessCommunitySettings", "modAccessDesign", "modAccessApps", "modAccessDiscordRoles", "modAccessCustomFields", "modAccessPermissions", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "allowModeratorAccess",
+        "allowModeratorAppsAccess",
+        "modDeleteUsers",
+        "modManageApplications",
+        "modAccessCommunitySettings",
+        "modAccessDesign",
+        "modAccessApps",
+        "modAccessDiscordRoles",
+        "modAccessCustomFields",
+        "modAccessPermissions",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Controls granular moderator permissions for settings sections"]
+      "notes": [
+        "Controls granular moderator permissions for settings sections"
+      ]
     },
     {
       "id": "community_settings",
       "table": "community_settings",
-      "fields": ["id", "communityName", "discordInviteCode", "defaultLocale", "displayNameTemplate", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "communityName",
+        "discordInviteCode",
+        "defaultLocale",
+        "displayNameTemplate",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Current code treats id=1 as the singleton row", "displayNameTemplate is jsonb array of DisplayNameField objects defining community-wide name structure"]
+      "notes": [
+        "Current code treats id=1 as the singleton row",
+        "displayNameTemplate is jsonb array of DisplayNameField objects defining community-wide name structure"
+      ]
     },
     {
       "id": "application_flows",
       "table": "application_flows",
-      "fields": ["id", "name", "status", "editorMode", "flowJson", "draftFlowJson", "settingsJson", "createdBy", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "name",
+        "status",
+        "editorMode",
+        "flowJson",
+        "draftFlowJson",
+        "settingsJson",
+        "createdBy",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "enums": { "status": ["draft", "active", "inactive"] },
-      "notes": ["Visual node-based application flow definitions", "flowJson stores the ApplicationFlowGraph with nodes and edges", "settingsJson stores ApplicationFlowSettings"]
+      "enums": {
+        "status": [
+          "draft",
+          "active",
+          "inactive"
+        ]
+      },
+      "notes": [
+        "Visual node-based application flow definitions",
+        "flowJson stores the ApplicationFlowGraph with nodes and edges",
+        "settingsJson stores ApplicationFlowSettings"
+      ]
     },
     {
       "id": "application_flow_embeds",
       "table": "application_flow_embeds",
-      "fields": ["id", "flowId", "discordChannelId", "discordMessageId", "active", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "flowId",
+        "discordChannelId",
+        "discordMessageId",
+        "active",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Discord channel embeds that link to application flows"]
+      "notes": [
+        "Discord channel embeds that link to application flows"
+      ]
     },
     {
       "id": "application_tokens",
       "table": "application_tokens",
-      "fields": ["id", "flowId", "discordId", "discordUsername", "discordAvatarUrl", "token", "expiresAt", "usedAt", "createdAt"],
+      "fields": [
+        "id",
+        "flowId",
+        "discordId",
+        "discordUsername",
+        "discordAvatarUrl",
+        "token",
+        "expiresAt",
+        "usedAt",
+        "createdAt"
+      ],
       "primaryKey": "id",
-      "notes": ["One-time-use tokens granting access to public application forms", "token is unique and has an expiry"]
+      "notes": [
+        "One-time-use tokens granting access to public application forms",
+        "token is unique and has an expiry"
+      ]
     },
     {
       "id": "applications",
       "table": "applications",
-      "fields": ["id", "flowId", "discordId", "discordUsername", "discordAvatarUrl", "answersJson", "status", "rolesAssigned", "pendingRoleAssignments", "displayNameComposed", "ticketChannelId", "reviewedBy", "reviewedAt", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "flowId",
+        "discordId",
+        "discordUsername",
+        "discordAvatarUrl",
+        "answersJson",
+        "status",
+        "rolesAssigned",
+        "pendingRoleAssignments",
+        "displayNameComposed",
+        "ticketChannelId",
+        "reviewedBy",
+        "reviewedAt",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "enums": { "status": ["pending", "approved", "rejected"] },
-      "notes": ["Submitted applications linked to a flow", "answersJson stores the applicant's responses", "rolesAssigned and pendingRoleAssignments track Discord role assignment state"]
+      "enums": {
+        "status": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "notes": [
+        "Submitted applications linked to a flow",
+        "answersJson stores the applicant's responses",
+        "rolesAssigned and pendingRoleAssignments track Discord role assignment state"
+      ]
     },
     {
       "id": "application_file_uploads",
       "table": "application_file_uploads",
-      "fields": ["id", "applicationId", "discordId", "flowId", "originalFilename", "mimeType", "storagePath", "fileSize", "createdAt"],
+      "fields": [
+        "id",
+        "applicationId",
+        "discordId",
+        "flowId",
+        "originalFilename",
+        "mimeType",
+        "storagePath",
+        "fileSize",
+        "createdAt"
+      ],
       "primaryKey": "id",
-      "notes": ["File attachments uploaded during the application process"]
+      "notes": [
+        "File attachments uploaded during the application process"
+      ]
     },
     {
       "id": "application_moderator_notifications",
       "table": "application_moderator_notifications",
-      "fields": ["flowId", "userId", "enabled"],
-      "primaryKey": ["flowId", "userId"],
-      "notes": ["Per-flow notification preferences for moderators"]
+      "fields": [
+        "flowId",
+        "userId",
+        "enabled"
+      ],
+      "primaryKey": [
+        "flowId",
+        "userId"
+      ],
+      "notes": [
+        "Per-flow notification preferences for moderators"
+      ]
     },
     {
       "id": "community_custom_fields",
       "table": "community_custom_fields",
-      "fields": ["id", "key", "label", "description", "inputType", "options", "sliderMin", "sliderMax", "sliderStep", "required", "active", "isDefault", "userCanView", "userCanEdit", "modCanView", "modCanEdit", "sortOrder", "createdAt", "updatedAt"],
+      "fields": [
+        "id",
+        "key",
+        "label",
+        "description",
+        "inputType",
+        "options",
+        "sliderMin",
+        "sliderMax",
+        "sliderStep",
+        "required",
+        "active",
+        "isDefault",
+        "userCanView",
+        "userCanEdit",
+        "modCanView",
+        "modCanEdit",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Admin-managed custom profile fields distinct from profiles.customFields", "Supports input types with configurable visibility and edit permissions per role level", "options is a jsonb array for select/multi-select types", "sliderMin/sliderMax/sliderStep for slider input type"]
+      "notes": [
+        "Admin-managed custom profile fields distinct from profiles.customFields",
+        "Supports input types with configurable visibility and edit permissions per role level",
+        "options is a jsonb array for select/multi-select types",
+        "sliderMin/sliderMax/sliderStep for slider input type"
+      ]
     },
     {
       "id": "community_tags",
       "table": "community_tags",
-      "fields": ["id", "name", "createdAt", "createdBy"],
+      "fields": [
+        "id",
+        "name",
+        "createdAt",
+        "createdBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Moderator-managed tags for categorizing or labeling users"]
+      "notes": [
+        "Moderator-managed tags for categorizing or labeling users"
+      ]
     },
     {
       "id": "application_access_settings",
       "table": "application_access_settings",
-      "fields": ["id", "allowModeratorAccess", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "allowModeratorAccess",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Singleton controlling whether moderators can access the application management section"]
+      "notes": [
+        "Singleton controlling whether moderators can access the application management section"
+      ]
     },
     {
       "id": "membership_settings",
       "table": "membership_settings",
-      "fields": ["id", "applicationsRequired", "defaultCommunityRoleId", "requiredLoginRoleId", "autoSyncEnabled", "autoSyncIntervalHours", "autoSyncLastRun", "autoCleanupEnabled", "autoCleanupIntervalHours", "autoCleanupLastRun", "cleanupRoleConfigs", "cleanupRoleWhitelist", "cleanupProtectModerators", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "applicationsRequired",
+        "defaultCommunityRoleId",
+        "requiredLoginRoleId",
+        "autoSyncEnabled",
+        "autoSyncIntervalHours",
+        "autoSyncLastRun",
+        "autoCleanupEnabled",
+        "autoCleanupIntervalHours",
+        "autoCleanupLastRun",
+        "cleanupRoleConfigs",
+        "cleanupRoleWhitelist",
+        "cleanupProtectModerators",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Singleton controlling membership, auto-login, auto-sync, and auto-cleanup", "cleanupRoleConfigs is a per-permission-role JSONB config array (RoleCleanupConfig[])"]
+      "notes": [
+        "Singleton controlling membership, auto-login, auto-sync, and auto-cleanup",
+        "cleanupRoleConfigs is a per-permission-role JSONB config array (RoleCleanupConfig[])"
+      ]
     },
     {
       "id": "cleanup_log",
       "table": "cleanup_log",
-      "fields": ["id", "userId", "discordId", "discordUsername", "reason", "conditionsMatched", "rolesRemoved", "createdAt"],
+      "fields": [
+        "id",
+        "userId",
+        "discordId",
+        "discordUsername",
+        "reason",
+        "conditionsMatched",
+        "rolesRemoved",
+        "createdAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Audit log for auto-cleanup actions"]
+      "notes": [
+        "Audit log for auto-cleanup actions"
+      ]
     },
     {
       "id": "landing_templates",
       "table": "landing_templates",
-      "fields": ["id", "name", "description", "previewUrl", "isBuiltin", "createdAt"],
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "previewUrl",
+        "isBuiltin",
+        "createdAt"
+      ],
       "primaryKey": "id",
-      "notes": ["Built-in and custom landing page templates"]
+      "notes": [
+        "Built-in and custom landing page templates"
+      ]
     },
     {
       "id": "landing_pages",
       "table": "landing_pages",
-      "fields": ["id", "activeTemplate", "customCss", "locale", "metaTitle", "metaDescription", "publishedAt", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "activeTemplate",
+        "customCss",
+        "locale",
+        "metaTitle",
+        "metaDescription",
+        "publishedAt",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Landing page configuration, one row per locale"]
+      "notes": [
+        "Landing page configuration, one row per locale"
+      ]
     },
     {
       "id": "landing_sections",
       "table": "landing_sections",
-      "fields": ["id", "blockType", "sortOrder", "visible", "status", "config", "content", "updatedAt", "updatedBy"],
+      "fields": [
+        "id",
+        "blockType",
+        "sortOrder",
+        "visible",
+        "status",
+        "config",
+        "content",
+        "updatedAt",
+        "updatedBy"
+      ],
       "primaryKey": "id",
-      "enums": { "status": ["draft", "published"] },
-      "notes": ["Individual content sections on the landing page"]
+      "enums": {
+        "status": [
+          "draft",
+          "published"
+        ]
+      },
+      "notes": [
+        "Individual content sections on the landing page"
+      ]
     },
     {
       "id": "landing_page_versions",
       "table": "landing_page_versions",
-      "fields": ["id", "snapshot", "label", "createdAt", "createdBy"],
+      "fields": [
+        "id",
+        "snapshot",
+        "label",
+        "createdAt",
+        "createdBy"
+      ],
       "primaryKey": "id",
-      "notes": ["Version snapshots for landing page rollback"]
+      "notes": [
+        "Version snapshots for landing page rollback"
+      ]
+    },
+    {
+      "id": "user_platform_accounts",
+      "table": "user_platform_accounts",
+      "fields": [
+        "id",
+        "userId",
+        "platform",
+        "platformUserId",
+        "platformUsername",
+        "platformAvatarUrl",
+        "isPrimary",
+        "linkedAt"
+      ],
+      "primaryKey": "id",
+      "uniqueConstraints": [
+        "(platform, platformUserId)"
+      ],
+      "notes": [
+        "Links Guildora users to external platform identities",
+        "A user can have multiple linked accounts (Discord + Matrix)",
+        "platformUserId is a Discord snowflake or Matrix MXID"
+      ]
+    },
+    {
+      "id": "platform_connections",
+      "table": "platform_connections",
+      "fields": [
+        "id",
+        "platform",
+        "enabled",
+        "credentials",
+        "botInternalUrl",
+        "botInternalToken",
+        "status",
+        "statusMessage",
+        "lastHealthCheck",
+        "createdAt",
+        "updatedAt"
+      ],
+      "primaryKey": "id",
+      "uniqueConstraints": [
+        "platform"
+      ],
+      "notes": [
+        "Community-level platform configuration",
+        "Replaces .env variables for platform setup",
+        "credentials is JSONB: Discord={botToken,clientId,clientSecret,guildId}, Matrix={homeserverUrl,accessToken,spaceId}",
+        "Managed via Settings > Platforms admin UI"
+      ]
     }
   ]
 }
