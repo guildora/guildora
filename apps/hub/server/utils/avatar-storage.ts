@@ -1,6 +1,5 @@
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const avatarMimeToExtension: Record<string, string> = {
   "image/png": "png",
@@ -10,8 +9,16 @@ const avatarMimeToExtension: Record<string, string> = {
 };
 
 function getAvatarDirectoryPath() {
-  const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  return path.resolve(currentDir, "../../public/uploads/avatars");
+  // MEDIA_STORAGE_PATH allows explicit override (e.g. a mounted volume)
+  if (process.env.MEDIA_STORAGE_PATH) {
+    return path.resolve(process.env.MEDIA_STORAGE_PATH, "uploads/avatars");
+  }
+  // Production builds: Nitro serves static files from .output/public/
+  // Development: Nuxt serves from public/
+  const publicDir = process.env.NODE_ENV === "production"
+    ? path.resolve(process.cwd(), ".output/public")
+    : path.resolve(process.cwd(), "public");
+  return path.join(publicDir, "uploads/avatars");
 }
 
 function normalizeContentType(value: string | null) {
