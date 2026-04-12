@@ -61,6 +61,7 @@ export async function replaceAuthSession(
         sameSite: "lax",
         secure: secureCookie,
         httpOnly: true,
+        path: "/",
         domain: cookieDomain
       }
     }
