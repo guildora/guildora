@@ -94,7 +94,9 @@ export default defineEventHandler(async (event) => {
   const code = typeof query.code === "string" ? query.code : null;
   const state = typeof query.state === "string" ? query.state : null;
   const isDev = import.meta.dev || process.env.NODE_ENV === "development";
-  const secureCookie = process.env.NUXT_SESSION_COOKIE_SECURE !== "false";
+  const secureCookie = process.env.NUXT_SESSION_COOKIE_SECURE
+    ? process.env.NUXT_SESSION_COOKIE_SECURE !== "false"
+    : (process.env.NUXT_PUBLIC_HUB_URL || "").startsWith("https://");
   const devBypassEnabled = isDev && config.authDevBypass === true;
   const superadminDiscordId = typeof config.superadminDiscordId === "string" ? config.superadminDiscordId : "";
 
@@ -324,6 +326,13 @@ export default defineEventHandler(async (event) => {
     // instead of redirecting to /login (which causes an infinite loop in dev mode).
     if (isError(error)) throw error;
     console.error("Discord OAuth failed:", error);
+    if (error instanceof Error && error.name === "BotBridgeError") {
+      throw createError({
+        statusCode: 503,
+        statusMessage: "Bot service unavailable",
+        message: "The Discord bot is not reachable. Please try again later or contact an admin."
+      });
+    }
     const msg = error instanceof Error ? error.message : String(error);
     const isDbError =
       msg.includes("Failed query") ||

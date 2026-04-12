@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev -p 3003 --dotenv ../../.env.local",
-    "build": "nuxt build",
-    "start": "node .output/server/index.mjs",
+    "build": "nuxt build --dotenv ../../.env",
+    "start": "node --env-file=../../.env .output/server/index.mjs",
     "prelint": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",

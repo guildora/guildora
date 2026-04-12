@@ -48,7 +48,9 @@ export async function replaceAuthSession(
     sessionData.csrfToken = existingSession.csrfToken;
   }
 
-  const secureCookie = process.env.NUXT_SESSION_COOKIE_SECURE !== "false";
+  const secureCookie = process.env.NUXT_SESSION_COOKIE_SECURE
+    ? process.env.NUXT_SESSION_COOKIE_SECURE !== "false"
+    : (process.env.NUXT_PUBLIC_HUB_URL || "").startsWith("https://");
   const cookieDomain = process.env.NUXT_SESSION_COOKIE_DOMAIN || undefined;
 
   await replaceUserSession(

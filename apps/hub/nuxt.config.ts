@@ -20,14 +20,21 @@ export default defineNuxtConfig({
     classPrefix: "",
     classSuffix: "-mode"
   },
-  auth: {
-    session: {
-      maxAge: 60 * 60 * 24 * 7
-    }
-  },
+  auth: {},
   devtools: { enabled: false },
   css: ["~/assets/css/main.css", "~/assets/css/landing.css", "~/assets/css/cyberpunk.css", "~/assets/css/esports.css"],
   runtimeConfig: {
+    session: {
+      maxAge: 60 * 60 * 24 * 7,
+      cookie: {
+        path: "/",
+        sameSite: "lax" as const,
+        httpOnly: true,
+        secure: process.env.NUXT_SESSION_COOKIE_SECURE
+          ? process.env.NUXT_SESSION_COOKIE_SECURE !== "false"
+          : (process.env.NUXT_PUBLIC_HUB_URL || "").startsWith("https://"),
+      },
+    },
     discordClientId: process.env.NUXT_OAUTH_DISCORD_CLIENT_ID,
     discordClientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
     discordRedirectUri: process.env.NUXT_OAUTH_DISCORD_REDIRECT_URI,

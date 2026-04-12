@@ -3,8 +3,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { eq, sql } from "drizzle-orm";
 import { createDb } from "./client";
-import { communityCustomFields, communityRoles, permissionRoles, landingTemplates, landingPages, landingSections } from "./schema";
+import { communityCustomFields, communityRoles, permissionRoles, landingTemplates, landingPages, landingSections, footerPages } from "./schema";
 import { templates, defaultSections } from "./seeds/landing-templates";
+import { footerPageTemplates } from "./seeds/footer-templates";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
@@ -153,6 +154,17 @@ async function run() {
     console.log(`Inserted ${defaultSections.length} default landing sections.`);
   } else {
     console.log("Landing page already exists, skipping section seed.");
+  }
+
+  // ─── Footer Page Templates ─────────────────────────────────────────────
+  const existingFooter = await db.select().from(footerPages).limit(1);
+  if (existingFooter.length === 0) {
+    for (const page of footerPageTemplates) {
+      await db.insert(footerPages).values(page);
+      console.log(`Inserted footer page template: ${page.slug}`);
+    }
+  } else {
+    console.log("Footer pages already exist, skipping template seed.");
   }
 }
 

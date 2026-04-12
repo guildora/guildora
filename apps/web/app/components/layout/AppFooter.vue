@@ -34,7 +34,8 @@ const { data: footerPages } = await useAsyncData("footer-pages", () =>
         </nav>
       </div>
       <div class="mt-8 border-t border-[var(--color-line)] pt-6 text-center text-xs text-[var(--color-text-secondary)]">
-        &copy; {{ new Date().getFullYear() }} Guildora. {{ $t("footer.rights") }}
+        <p>&copy; {{ new Date().getFullYear() }} Guildora. {{ $t("footer.rights") }}</p>
+        <p class="mt-1" style="opacity: 0.5;">{{ $t("footer.aiDisclosure") }}</p>
       </div>
     </div>
   </footer>

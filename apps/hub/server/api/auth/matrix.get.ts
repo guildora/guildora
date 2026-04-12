@@ -14,6 +14,7 @@
 
 import { ensurePlatformUser } from "../../utils/platformUser";
 import { getMatrixCredentials } from "../../utils/platformConfig";
+import { replaceAuthSessionForUserId } from "../../utils/auth-session";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -98,32 +99,8 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Create session
-    // We need to load the user's permission roles from DB
-    const { getDb } = await import("../../utils/db");
-    const { eq } = await import("drizzle-orm");
-    const { users, userPermissionRoles, permissionRoles } = await import("@guildora/shared");
-
-    const db = getDb();
-    const roleRows = await db
-      .select({ roleName: permissionRoles.name })
-      .from(userPermissionRoles)
-      .innerJoin(permissionRoles, eq(userPermissionRoles.permissionRoleId, permissionRoles.id))
-      .where(eq(userPermissionRoles.userId, userId));
-
-    const permRoles = roleRows.map((r) => r.roleName);
-
-    await replaceUserSession(event, {
-      user: {
-        id: userId,
-        profileName: displayName,
-        avatarUrl,
-        permissionRoles: permRoles,
-        platform: "matrix",
-        platformUserId: mxid,
-      },
-      csrfToken: crypto.randomUUID(),
-    });
+    // Create session (uses shared helper for correct cookie options)
+    await replaceAuthSessionForUserId(event, userId);
 
     // Logout the temporary Matrix access token (we don't need it)
     try {

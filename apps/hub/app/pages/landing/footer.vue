@@ -28,10 +28,34 @@ const showDeleteConfirm = ref<{ open: boolean; page: FooterPage | null }>({ open
 
 // ─── Suggested pages ─────────────────────────────────────────────────────
 
+const TEMPLATE_DISCLAIMER_EN = `<div style="background: rgba(255, 180, 0, 0.08); border: 1px solid rgba(255, 180, 0, 0.25); border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem; font-size: 0.875rem; line-height: 1.6;"><strong>⚠ Template Notice</strong><br>This is a non-binding template provided as a starting point. It does not constitute legal advice. You are solely responsible for ensuring your legal pages comply with all applicable laws. Consult a qualified attorney before publishing.</div>`;
+const TEMPLATE_DISCLAIMER_DE = `<div style="background: rgba(255, 180, 0, 0.08); border: 1px solid rgba(255, 180, 0, 0.25); border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem; font-size: 0.875rem; line-height: 1.6;"><strong>⚠ Vorlage — Hinweis</strong><br>Dies ist eine unverbindliche Vorlage als Ausgangspunkt. Sie stellt keine Rechtsberatung dar. Sie sind allein dafür verantwortlich, dass Ihre Rechtstexte den geltenden Gesetzen entsprechen. Lassen Sie die Texte vor Veröffentlichung von einem Rechtsanwalt prüfen.</div>`;
+
 const suggestedPages = [
-  { slug: "privacy", title: { en: "Privacy Policy", de: "Datenschutzerklärung" } },
-  { slug: "terms", title: { en: "Terms of Service", de: "Nutzungsbedingungen" } },
-  { slug: "imprint", title: { en: "Imprint", de: "Impressum" } }
+  {
+    slug: "privacy",
+    title: { en: "Privacy Policy", de: "Datenschutzerklärung" },
+    content: {
+      en: `${TEMPLATE_DISCLAIMER_EN}\n<h2>1. Data Controller</h2>\n<p>[Your Name]<br>[Your Address]<br>[Your Email]</p>\n\n<h2>2. What Data We Collect</h2>\n<p>When you use this community platform, the following data may be processed:</p>\n<ul>\n<li><strong>Discord account data</strong> — Discord user ID, username, avatar, and email (via Discord OAuth)</li>\n<li><strong>Member profiles</strong> — Display name, roles, custom fields as configured by administrators</li>\n<li><strong>Application data</strong> — Responses to application forms, uploaded files</li>\n<li><strong>Session data</strong> — Login timestamps, session cookies</li>\n</ul>\n\n<h2>3. Legal Basis</h2>\n<p>Art. 6(1)(b) GDPR — Performance of a contract<br>Art. 6(1)(a) GDPR — Your consent (where applicable)<br>Art. 6(1)(f) GDPR — Legitimate interest (security)</p>\n\n<h2>4. Your Rights</h2>\n<p>Under the GDPR you have the right to access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), portability (Art. 20), and objection (Art. 21). Contact the data controller above.</p>`,
+      de: `${TEMPLATE_DISCLAIMER_DE}\n<h2>1. Verantwortlicher</h2>\n<p>[Ihr Name]<br>[Ihre Adresse]<br>[Ihre E-Mail]</p>\n\n<h2>2. Welche Daten wir erheben</h2>\n<p>Bei der Nutzung dieser Community-Plattform können folgende Daten verarbeitet werden:</p>\n<ul>\n<li><strong>Discord-Kontodaten</strong> — Benutzer-ID, Benutzername, Avatar und E-Mail (über Discord OAuth)</li>\n<li><strong>Mitgliederprofile</strong> — Anzeigename, Rollen, benutzerdefinierte Felder</li>\n<li><strong>Bewerbungsdaten</strong> — Antworten auf Formulare, hochgeladene Dateien</li>\n<li><strong>Sitzungsdaten</strong> — Anmeldezeitpunkte, Session-Cookies</li>\n</ul>\n\n<h2>3. Rechtsgrundlage</h2>\n<p>Art. 6 Abs. 1 lit. b DSGVO — Vertragserfüllung<br>Art. 6 Abs. 1 lit. a DSGVO — Einwilligung<br>Art. 6 Abs. 1 lit. f DSGVO — Berechtigtes Interesse (Sicherheit)</p>\n\n<h2>4. Ihre Rechte</h2>\n<p>Nach der DSGVO haben Sie das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21).</p>`,
+    },
+  },
+  {
+    slug: "terms",
+    title: { en: "Terms of Service", de: "Nutzungsbedingungen" },
+    content: {
+      en: `${TEMPLATE_DISCLAIMER_EN}\n<h2>1. Scope</h2>\n<p>These Terms govern your use of this community platform.</p>\n\n<h2>2. Acceptable Use</h2>\n<p>You agree not to violate applicable laws, harass others, share malicious content, or attempt unauthorized access.</p>\n\n<h2>3. Liability</h2>\n<p>This platform is provided "as is" without warranties. The operator is not liable for damages except in cases of intent or gross negligence.</p>\n\n<h2>4. Changes</h2>\n<p>We may update these Terms at any time. Continued use constitutes acceptance.</p>`,
+      de: `${TEMPLATE_DISCLAIMER_DE}\n<h2>1. Geltungsbereich</h2>\n<p>Diese Bedingungen regeln die Nutzung dieser Community-Plattform.</p>\n\n<h2>2. Zulässige Nutzung</h2>\n<p>Sie verpflichten sich, keine Gesetze zu verletzen, andere nicht zu belästigen, keine Schadsoftware zu verbreiten und keinen unbefugten Zugriff zu versuchen.</p>\n\n<h2>3. Haftung</h2>\n<p>Die Plattform wird ohne Garantien bereitgestellt. Der Betreiber haftet nicht für Schäden, es sei denn bei Vorsatz oder grober Fahrlässigkeit.</p>\n\n<h2>4. Änderungen</h2>\n<p>Wir können diese Bedingungen jederzeit aktualisieren. Die fortgesetzte Nutzung gilt als Zustimmung.</p>`,
+    },
+  },
+  {
+    slug: "imprint",
+    title: { en: "Imprint", de: "Impressum" },
+    content: {
+      en: `${TEMPLATE_DISCLAIMER_EN}\n<h2>Responsible Person</h2>\n<p>[Your Full Name]<br>[Your Address]<br>[Postal Code, City]<br>[Country]</p>\n\n<h2>Contact</h2>\n<p>Email: [your@email.com]</p>\n\n<h2>EU Online Dispute Resolution</h2>\n<p>The European Commission provides a platform for online dispute resolution: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr/</a></p>`,
+      de: `${TEMPLATE_DISCLAIMER_DE}\n<h2>Verantwortliche Person</h2>\n<p>[Ihr vollständiger Name]<br>[Ihre Adresse]<br>[PLZ, Stadt]<br>[Land]</p>\n\n<h2>Kontakt</h2>\n<p>E-Mail: [ihre@email.de]</p>\n\n<h2>EU-Streitschlichtung</h2>\n<p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr/</a></p>`,
+    },
+  },
 ];
 
 const availableSuggestions = computed(() =>
@@ -75,13 +99,13 @@ async function loadPages() {
   }
 }
 
-async function createPage(slug: string, title: Record<string, string>) {
+async function createPage(slug: string, title: Record<string, string>, content?: Record<string, string>) {
   saving.value = true;
   try {
     const nextOrder = pages.value.length;
     const data = await $fetch<{ page: FooterPage }>("/api/admin/landing/footer-pages", {
       method: "POST",
-      body: { slug, title, content: { en: "", de: "" }, sortOrder: nextOrder }
+      body: { slug, title, content: content || { en: "", de: "" }, sortOrder: nextOrder }
     });
     pages.value.push(data.page);
     editingPage.value = data.page;
@@ -200,7 +224,7 @@ onMounted(() => loadPages());
             :key="suggestion.slug"
             variant="outline"
             size="sm"
-            @click="createPage(suggestion.slug, suggestion.title)"
+            @click="createPage(suggestion.slug, suggestion.title, suggestion.content)"
           >
             <Icon name="proicons:add" class="h-4 w-4 mr-1" />
             {{ suggestion.title[editLocale] || suggestion.title.en }}
