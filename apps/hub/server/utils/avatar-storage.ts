@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const avatarMimeToExtension: Record<string, string> = {
@@ -64,4 +64,59 @@ export async function persistDiscordAvatarLocally(discordId: string, avatarHash:
   await removeOlderAvatars(avatarDirectory, discordId, fileName);
 
   return `/uploads/avatars/${fileName}`;
+}
+
+function discordCdnUrl(discordId: string, avatarHash: string): string {
+  return `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.png?size=256`;
+}
+
+/**
+ * Ensures the avatar file exists locally. If the file is missing (e.g. after
+ * container restart without a persistent volume), it re-downloads from Discord.
+ * Returns the resolved URL (local path or Discord CDN fallback) and whether
+ * the source changed so the caller can update the DB.
+ */
+export async function resolveAvatarUrl(
+  avatarUrl: string | null,
+  discordId: string
+): Promise<{ url: string | null; sourceChanged: boolean }> {
+  if (!avatarUrl) {
+    return { url: null, sourceChanged: false };
+  }
+
+  // Only handle locally persisted avatars
+  if (!avatarUrl.startsWith("/uploads/avatars/")) {
+    return { url: avatarUrl, sourceChanged: false };
+  }
+
+  // Check if the local file still exists
+  const avatarDirectory = getAvatarDirectoryPath();
+  const fileName = path.basename(avatarUrl);
+  const absolutePath = path.join(avatarDirectory, fileName);
+
+  try {
+    await access(absolutePath);
+    return { url: avatarUrl, sourceChanged: false };
+  } catch {
+    // File missing — try to re-persist
+  }
+
+  // Extract discordId and hash from filename: {discordId}-{hash}.{ext}
+  const match = fileName.match(/^([^-]+)-([^.]+)\./);
+  if (!match) {
+    return { url: null, sourceChanged: true };
+  }
+  const [, fileDiscordId, avatarHash] = match;
+  const effectiveDiscordId = fileDiscordId || discordId;
+
+  try {
+    const localUrl = await persistDiscordAvatarLocally(effectiveDiscordId, avatarHash);
+    if (localUrl) {
+      return { url: localUrl, sourceChanged: false };
+    }
+  } catch {
+    // Re-persist failed — fall back to CDN
+  }
+
+  return { url: discordCdnUrl(effectiveDiscordId, avatarHash), sourceChanged: true };
 }
